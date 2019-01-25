@@ -1,7 +1,21 @@
 classdef ConeResponse < handle
     %CONERESPONSE Compute cone responses from RGB image.
     %   This class computes the mean cone excitations and the optical image
-    %   for a given mosaic and RGB image. 
+    %   for a given retinal mosaic and RGB image.
+    %
+    % ConeResponse Properties:
+    %   Display        - Display used for the image (isetbio/displayCreate)
+    %   FovealDegree   - Degree of visual field we are modeling 
+    %   PSF            - Point spread function of the eye (isetbio/oiCreate)
+    %   Mosaic         - Photoreceptor mosaic (isetbio/coneMosaicHex)
+    %   LastResponse   - Mosaic excitation computed 
+    %   LastOI         - Optical image computed     
+    %
+    % ConeResponse Methods:
+    %   compute              - Compute mosaic excitation given a RGB image
+    %   visualizeCone        - Visualize the cone mosaic being simulated    
+    %   visualizeExcitation  - Visualize the mosaic excitation pattern
+    %   visualizeOI          - Visualize the optical image
     
     properties (Access = public)
         Display;
@@ -20,7 +34,7 @@ classdef ConeResponse < handle
         
     methods (Access = public)
         
-        % fovdeg, density, quantal, 
+        % fovdeg, density, quantal
         function obj = ConeResponse(varargin)
             if nargin ~= 0
                 obj.FovealDegree    = varargin{1};
@@ -98,8 +112,7 @@ classdef ConeResponse < handle
                          
     end    
     
-    methods (Access = private)
-        
+    methods (Access = private)        
         function response = getConetypeResponse(obj, type)
             sizeExci = size(obj.LastResponse);
             excitation = reshape(obj.LastResponse(1, :, :), [sizeExci(2), sizeExci(3)]);
