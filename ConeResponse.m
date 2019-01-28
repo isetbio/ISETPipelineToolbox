@@ -72,7 +72,9 @@ classdef ConeResponse < handle
         end
         
         function [excitation, theOI, L, M, S] = compute(obj, image)
-            % load image
+            % COMPUTE   Compute optical image and cone mosaic excitation.
+            %   Compute OI and cone excitation given RGB image input, and
+            %   also return L, M, S cone responses separately.
             meanLuminanceCdPerM2 = 100;           
             realizedStimulusScene = sceneFromFile(image, 'rgb', ...
             meanLuminanceCdPerM2, obj.Display);
