@@ -12,6 +12,7 @@ classdef ConeResponse < handle
     %   LastOI         - Optical image computed     
     %
     % ConeResponse Methods:
+    %   ConeResponse         - Constructor for ConeResponse Object
     %   compute              - Compute mosaic excitation given a RGB image
     %   visualizeCone        - Visualize the cone mosaic being simulated    
     %   visualizeExcitation  - Visualize the mosaic excitation pattern
@@ -33,9 +34,11 @@ classdef ConeResponse < handle
     end
         
     methods (Access = public)
-        
-        % fovdeg, density, quantal
+                
         function obj = ConeResponse(varargin)
+        % CONERESPONSE  Construct ConeResponse object.
+        %   Construct ConeResponse object with optional argument:
+        %   FovealDegree, eccBasedConeDensity, eccBasedConeQuantal.
             if nargin ~= 0
                 obj.FovealDegree    = varargin{1};
                 eccBasedConeDensity = varargin{2};
