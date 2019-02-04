@@ -50,6 +50,7 @@ classdef ConeResponse < handle
             end
             
             % Create cone moasic
+            % TODO: Create mosaic with parallel pool
             fprintf('Create cone moasic object: \n');
             
             theMosaic = coneMosaicHex(5, ...                               % hex lattice sampling factor
@@ -74,7 +75,7 @@ classdef ConeResponse < handle
             'ticksInVisualDegs', true);
         end
         
-        function [excitation, theOI, L, M, S] = compute(obj, image)
+        function [excitation, theOI, allCone, L, M, S] = compute(obj, image)
             % COMPUTE   Compute optical image and cone mosaic excitation.
             %   Compute OI and cone excitation given RGB image input, and
             %   also return L, M, S cone responses separately.
@@ -104,6 +105,8 @@ classdef ConeResponse < handle
             L = obj.getConetypeResponse(obj.L_Cone_Idx);
             M = obj.getConetypeResponse(obj.M_Cone_Idx);
             S = obj.getConetypeResponse(obj.S_Cone_Idx);
+            
+            allCone = [L; M; S];
                         
         end
         
