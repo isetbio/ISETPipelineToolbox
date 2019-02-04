@@ -110,13 +110,17 @@ classdef ConeResponse < handle
                         
         end
         
+        function mosaic = getMosaic(obj)
+            mosaic = obj.Mosaic;
+        end
+        
         function visualizeExcitation(obj)
             visualizeConeMosaicResponses(obj.Mosaic, obj.LastResponse, 'R*/cone/tau');
         end
         
         function visualizeOI(obj)
             visualizeOpticalImage(obj.LastOI, 'displayRetinalContrastProfiles', true);
-        end
+        end                
                          
     end    
     
