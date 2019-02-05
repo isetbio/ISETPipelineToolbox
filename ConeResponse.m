@@ -39,6 +39,8 @@ classdef ConeResponse < handle
 %   'eccBasedConeQuantal' - Boolean. Vary cone quantal efficiency based
 %                           on eccentricity or not. 
 %                           Default is False.
+%   'viewDistance'        - Double. View distance from the screen.
+%                         - Default is 0.57.
     
     properties (Access = public)
         Display;
@@ -65,6 +67,7 @@ classdef ConeResponse < handle
             p.addParameter('fovealDegree', 1.0, @(x)(isnumeric(x) && numel(x) == 1));
             p.addParameter('eccBasedConeDensity', false, @islogical);
             p.addParameter('eccBasedConeQuantal', false, @islogical);
+            p.addParameter('viewDistance', 0.57, @(x) (isnumeric(x) && numel(x) == 1));
             
             parse(p, varargin{:});  
             obj.FovealDegree    = p.Results.fovealDegree;
@@ -86,7 +89,8 @@ classdef ConeResponse < handle
             obj.Mosaic = theMosaic;
 
             % Display & Point spread function of human eye
-            obj.Display = displayCreate('LCD-Apple', 'viewing distance', 0.57);                       
+            obj.Display = displayCreate('LCD-Apple', ...
+                'viewing distance', p.Results.viewDistance);                       
             obj.PSF = oiCreate('wvf human');            
         end
         
