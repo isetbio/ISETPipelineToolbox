@@ -1,22 +1,44 @@
 classdef ConeResponse < handle
-    %CONERESPONSE Compute cone responses from RGB image.
-    %   This class computes the mean cone excitations and the optical image
-    %   for a given retinal mosaic and RGB image.
-    %
-    % ConeResponse Properties:
-    %   Display        - Display used for the image (isetbio/displayCreate)
-    %   FovealDegree   - Degree of visual field we are modeling 
-    %   PSF            - Point spread function of the eye (isetbio/oiCreate)
-    %   Mosaic         - Photoreceptor mosaic (isetbio/coneMosaicHex)
-    %   LastResponse   - Mosaic excitation computed 
-    %   LastOI         - Optical image computed     
-    %
-    % ConeResponse Methods:
-    %   ConeResponse         - Constructor for ConeResponse Object
-    %   compute              - Compute mosaic excitation given a RGB image
-    %   visualizeCone        - Visualize the cone mosaic being simulated    
-    %   visualizeExcitation  - Visualize the mosaic excitation pattern
-    %   visualizeOI          - Visualize the optical image
+%CONERESPONSE Class that computes cone responses from RGB image.
+%
+% Syntax: retina = ConeResponse([varargin]);
+%
+% Description: 
+%   This wrapper class can compute the mean cone excitations and the 
+%   optical image for a given retinal mosaic and RGB image, use
+%   function provided by isetbio.    
+%
+% ConeResponse Properties:
+%   Display        - Display used for the image (isetbio/displayCreate)
+%   FovealDegree   - Degree of visual field we are modeling 
+%   PSF            - Point spread function of the eye (isetbio/oiCreate)
+%   Mosaic         - Photoreceptor mosaic (isetbio/coneMosaicHex)
+%   LastResponse   - Recent mosaic excitation computed 
+%   LastOI         - Recent optical image computed     
+%
+% ConeResponse Methods:
+%   ConeResponse         - Constructor for ConeResponse Object
+%   compute              - Compute mosaic excitation given a RGB image
+%   visualizeCone        - Visualize the cone mosaic being simulated    
+%   visualizeExcitation  - Visualize the mosaic excitation pattern
+%   visualizeOI          - Visualize the optical image
+%
+% Inputs:
+%   None.
+%
+% Outputs:
+%   ConeResponse Object. 
+%
+% Optional key/value pairs:
+%   'fovealDegree'        - Double. The degree of visual angle we are using
+%                           for our cone mosaic. 
+%                           Default is 1.0 (degree).
+%   'eccBasedConeDensity' - Boolean. Vary cone density based on
+%                           eccentricity or not.
+%                           Default is False.
+%   'eccBasedConeQuantal' - Boolean. Vary cone quantal efficiency based
+%                           on eccentricity or not. 
+%                           Default is False.
     
     properties (Access = public)
         Display;
@@ -39,18 +61,17 @@ classdef ConeResponse < handle
         % CONERESPONSE  Construct ConeResponse object.
         %   Construct ConeResponse object with optional argument:
         %   FovealDegree, eccBasedConeDensity, eccBasedConeQuantal.
-            if nargin ~= 0
-                obj.FovealDegree    = varargin{1};
-                eccBasedConeDensity = varargin{2};
-                eccBasedConeQuantal = varargin{3};
-            else
-                obj.FovealDegree    = 1;
-                eccBasedConeDensity = false;
-                eccBasedConeQuantal = false;
-            end
+            p = inputParser;
+            p.addParameter('fovealDegree', 1.0, @(x)(isnumeric(x) && numel(x) == 1));
+            p.addParameter('eccBasedConeDensity', False, @islogical);
+            p.addParameter('eccBasedConeQuantal', False, @islogical);
             
-            % Create cone moasic
-            % TODO: Create mosaic with parallel pool
+            parse(p, varargin);            
+            obj.FovealDegree    = p.Results.fovealDegree;
+            eccBasedConeDensity = p.Results.eccBasedConeDensity;
+            eccBasedConeQuantal = p.Results.eccBasedConeQuantal;                        
+            
+            % Create cone moasic            
             fprintf('Create cone moasic object: \n');
             
             theMosaic = coneMosaicHex(5, ...                               % hex lattice sampling factor
@@ -76,9 +97,30 @@ classdef ConeResponse < handle
         end
         
         function [excitation, theOI, allCone, L, M, S] = compute(obj, image)
-            % COMPUTE   Compute optical image and cone mosaic excitation.
-            %   Compute OI and cone excitation given RGB image input, and
-            %   also return L, M, S cone responses separately.
+            % COMPUTE   Compute optical image and cone mosaic excitation.                           
+            %
+            % Syntax: 
+            %   [excitation, OI, allCone, L, M, S] = obj.compute(image)
+            %
+            % Description: 
+            %   Compute OI and cone excitation array of provided RGB image 
+            %   input, can also return L, M, S cone responses separately. 
+            %
+            % Inputs
+            %   image        - Input RGB image 
+            %
+            % Outputs:
+            %   excitation   - N by N array representing the mean excitation 
+            %                  of cone mosaic
+            %   theOI        - Struct of the optical image on the retina
+            %   allCone      - Vector representing the excitation of all cones            
+            %   L            - Vector of L cone excitation 
+            %   M            - Vector of M cone excitation
+            %   S            - Vector of S cone excitation 
+            %
+            % Optional key/value pairs:
+            %   None.            
+            
             meanLuminanceCdPerM2 = 100;           
             realizedStimulusScene = sceneFromFile(image, 'rgb', ...
             meanLuminanceCdPerM2, obj.Display);
@@ -114,7 +156,7 @@ classdef ConeResponse < handle
             mosaic = obj.Mosaic;
         end
         
-        function visualizeExcitation(obj)
+        function visualizeExcitation(obj)        
             visualizeConeMosaicResponses(obj.Mosaic, obj.LastResponse, 'R*/cone/tau');
         end
         
