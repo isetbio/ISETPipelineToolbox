@@ -66,7 +66,7 @@ classdef ConeResponse < handle
             p.addParameter('eccBasedConeDensity', false, @islogical);
             p.addParameter('eccBasedConeQuantal', false, @islogical);
             
-            parse(p, varargin);            
+            parse(p, varargin{:});  
             obj.FovealDegree    = p.Results.fovealDegree;
             eccBasedConeDensity = p.Results.eccBasedConeDensity;
             eccBasedConeQuantal = p.Results.eccBasedConeQuantal;                        
