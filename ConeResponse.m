@@ -107,7 +107,7 @@ classdef ConeResponse < handle
             %   input, can also return L, M, S cone responses separately. 
             %
             % Inputs
-            %   image        - Input RGB image 
+            %   image        - Input RGB image
             %
             % Outputs:
             %   excitation   - N by N array representing the mean excitation 
@@ -119,7 +119,7 @@ classdef ConeResponse < handle
             %   S            - Vector of S cone excitation 
             %
             % Optional key/value pairs:
-            %   None.            
+            %   None.
             
             meanLuminanceCdPerM2 = 100;           
             realizedStimulusScene = sceneFromFile(image, 'rgb', ...
@@ -153,14 +153,17 @@ classdef ConeResponse < handle
         end
         
         function mosaic = getMosaic(obj)
+        % Return the cone mosaic object
             mosaic = obj.Mosaic;
         end
         
-        function visualizeExcitation(obj)        
+        function visualizeExcitation(obj)
+        % Visualize cone mosaic excitation
             visualizeConeMosaicResponses(obj.Mosaic, obj.LastResponse, 'R*/cone/tau');
         end
         
         function visualizeOI(obj)
+        % Visualize optical image
             visualizeOpticalImage(obj.LastOI, 'displayRetinalContrastProfiles', true);
         end                
                          
