@@ -4,8 +4,8 @@ classdef RegressionEstimator < Estimator
     properties       
         W; % Weight matrix for regression
         X; % Training input cone excitations
-        Y; % Training input ground truth images
-                
+        Y; % Training input ground truth images        
+
         U;
         D;
         V;
@@ -16,7 +16,20 @@ classdef RegressionEstimator < Estimator
         function obj = RegressionEstimator(X, Y, varargin)
             obj.X = X;
             obj.Y = Y;
+            maxDiag = min(size(X));
             
+            p = inputParser;
+            p.addParameter('nDiag', maxDiag, @(x)(isnumeric(x) && numel(x) == 1));
+            p.addParameter('paraList', [], @(x) isnumeric);
+            
+            parse(p, varargin{:});
+            obj.regParaList = p.Results.paraList;
+            
+            obj.estimateW(p.Results.nDiag);
+        end
+        
+        function reconImage = estimate(obj, input)
+            reconImage = input * obj.W;
         end
         
         function estimateW(obj, regPara)
