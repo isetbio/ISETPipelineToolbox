@@ -19,7 +19,7 @@ classdef ConeResponse < handle
 % ConeResponse Methods:
 %   ConeResponse         - Constructor for ConeResponse Object
 %   compute              - Compute mosaic excitation given a RGB image
-%   visualizeCone        - Visualize the cone mosaic being simulated    
+%   visualizeMosaic      - Visualize the cone mosaic being simulated    
 %   visualizeExcitation  - Visualize the mosaic excitation pattern
 %   visualizeOI          - Visualize the optical image
 %
@@ -94,7 +94,7 @@ classdef ConeResponse < handle
             obj.PSF = oiCreate('wvf human');            
         end
         
-        function visualizeCone(obj)
+        function visualizeMosaic(obj)
             obj.Mosaic.visualizeGrid(...
             'backgroundColor', [1 1 1], ...
             'ticksInVisualDegs', true);
