@@ -33,6 +33,7 @@ classdef RegressionEstimator < Estimator
         end
         
         function estimateW(obj, regPara)
+            fprintf('Compute SVD of the input ... \n');
             [obj.U, obj.D, obj.V] = svd(obj.X, 'econ');
             obj.setRegPara(regPara);                        
         end
@@ -42,6 +43,7 @@ classdef RegressionEstimator < Estimator
             diagVec(regPara + 1 : end) = 0;
             Dk = diag(diagVec);
             
+            fprintf('Estimate weight matrix ... \n');
             obj.W = obj.V * Dk * obj.U' * obj.Y;
         end
         
