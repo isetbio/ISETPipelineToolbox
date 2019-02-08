@@ -9,6 +9,8 @@ classdef RegressionEstimator < Estimator
         U;
         D;
         V;
+        
+        zeroThreshold = 1e-4;
     end
     
     methods
@@ -38,7 +40,17 @@ classdef RegressionEstimator < Estimator
             obj.setRegPara(regPara);                        
         end
         
-        function setRegPara(obj, regPara)            
+        function setRegPara(obj, regPara)
+            diagVec = diag(obj.D);
+            nCount  = sum(diagVec <= obj.zeroThreshold);
+            
+            msg = sprintf('%d out of the %d diag component is too small, \n', nCount, length(diagVec));
+            msg = strcat(msg, 'Consider drop them for regularization purpose.');
+            
+            if(nCount > 1)
+                warning(msg);
+            end
+            
             diagVec = diag(inv(obj.D));
             diagVec(regPara + 1 : end) = 0;
             Dk = diag(diagVec);
