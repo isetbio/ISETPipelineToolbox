@@ -2,8 +2,7 @@ classdef (Abstract) Estimator < handle
     %ESTIMATOR Estimate image from cone reseponse.
     
     properties        
-        regParaList;
-        lastRecon;        
+        regParaList;            
     end
     
     methods
@@ -11,12 +10,7 @@ classdef (Abstract) Estimator < handle
         function paraList = cvIterList(obj)
             paraList = obj.regParaList;
         end
-        
-        function visualizeRecon(obj)
-            figure;
-            reconImage = reshape(obj.lastRecon, [32, 32, 3]);
-            imshow(reconImage, 'InitialMagnification', 300);
-        end
+                
     end
     
     methods (Abstract)
