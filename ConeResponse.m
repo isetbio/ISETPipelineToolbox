@@ -6,7 +6,18 @@ classdef ConeResponse < handle
 % Description: 
 %   This wrapper class can compute the mean cone excitations and the 
 %   optical image for a given retinal mosaic and RGB image, use
-%   function provided by isetbio.    
+%   function provided by isetbio.  
+%
+%   Although these could be varied in the future with key/value pairs,
+%   this object uses:
+%     'whichDisplay'      - 'Apple-LCD' This is the isetbio display on
+%                            which the images are assumed to be shown.
+%     'whichOptics'       - 'wvfHuman'  Wavefront based human eye and optics.
+%                            Inherits isebio default wavefront optics and
+%                            pupil size.
+%     'whichMosaic'       - 'coneMosaicHex' Mosaic based on isetbio
+%                            coneMosaicHex method, as specified in detail
+%                            by additional key value pairs.
 %
 % ConeResponse Properties:
 %   Display        - Display used for the image (isetbio/displayCreate)
