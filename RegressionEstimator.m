@@ -10,7 +10,7 @@ classdef RegressionEstimator < Estimator
         D;
         V;
         
-        zeroThreshold = 1e-4;
+        zeroThreshold = 1e-6;
     end
     
     methods
@@ -37,20 +37,21 @@ classdef RegressionEstimator < Estimator
         function estimateW(obj, regPara)
             fprintf('Compute SVD of the input ... \n');
             [obj.U, obj.D, obj.V] = svd(obj.X, 'econ');
-            obj.setRegPara(regPara);                        
-        end
-        
-        function setRegPara(obj, regPara)
+            
             diagVec = diag(obj.D);
             nCount  = sum(diagVec <= obj.zeroThreshold);
             
-            msg = sprintf('%d out of the %d diagonal component is too small, \n', nCount, length(diagVec));
+            msg = sprintf(' At least %d out of the %d diagonal component is too small, \n', nCount, length(diagVec));
             msg = strcat(msg, ' consider drop them for regularization purpose.');
             
             if(nCount > 0)
                 warning(msg);
             end
             
+            obj.setRegPara(regPara);
+        end
+        
+        function setRegPara(obj, regPara)                        
             diagVec = diag(inv(obj.D));
             diagVec(regPara + 1 : end) = 0;
             Dk = diag(diagVec);
