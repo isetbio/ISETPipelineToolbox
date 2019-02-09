@@ -11,9 +11,9 @@ classdef CrossValidation < handle
     
     methods
         
-        function obj = CrossValidation(testImage, testConeVec, nTest)
-            obj.testImage   = testImage;
+        function obj = CrossValidation(testConeVec, testImage, nTest)
             obj.testConeVec = testConeVec;
+            obj.testImage   = testImage;            
             obj.nTest = nTest;
         end
         
@@ -29,6 +29,14 @@ classdef CrossValidation < handle
             imshow(reshape(recon, obj.imageDim), 'InitialMagnification', 300);
             end            
             
+        end
+        
+        function [recon, mse] = sampleTest(obj, estimator)
+            testIdx = randi(obj.nTest, 1, 1);
+            coneVec = obj.testConeVec(testIdx, :);
+            testImg = obj.testImage(testIdx, :);
+            
+            [recon, mse] = obj.eval(estimator, coneVec, testImg, true);
         end
         
         function [totalMSE, listMSE] = evalTest(obj, estimator)
