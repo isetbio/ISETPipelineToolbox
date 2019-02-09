@@ -1,5 +1,5 @@
 classdef RegressionEstimator < Estimator
-    %REGRESSIONESTIMATOR Simple regression method for reconstruction    
+    %REGRESSIONESTIMATOR Simple regression method for reconstruction.
     
     properties       
         W; % Weight matrix for regression

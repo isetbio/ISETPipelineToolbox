@@ -1,5 +1,5 @@
 classdef CrossValidation < handle
-    %CROSSVALIDATION Evaluation of the estimator
+    %CROSSVALIDATION Some useful tool for evaluation of an estimator.
     
     properties
         testImage;
