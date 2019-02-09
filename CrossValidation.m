@@ -31,12 +31,12 @@ classdef CrossValidation < handle
             
         end
         
-        function [recon, mse] = sampleTest(obj, estimator)
+        function [recon, mse] = sampleTest(obj, estimator, visualization)
             testIdx = randi(obj.nTest, 1, 1);
             coneVec = obj.testConeVec(testIdx, :);
             testImg = obj.testImage(testIdx, :);
             
-            [recon, mse] = obj.eval(estimator, coneVec, testImg, true);
+            [recon, mse] = obj.eval(estimator, coneVec, testImg, visualization);
         end
         
         function [totalMSE, listMSE] = evalTest(obj, estimator)
