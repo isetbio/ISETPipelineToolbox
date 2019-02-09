@@ -35,8 +35,9 @@ classdef RegressionEstimator < Estimator
         end
         
         function estimateW(obj, regPara)
-            fprintf('Compute SVD of the input ... \n');
+            fprintf('Compute SVD of the input ... ');
             [obj.U, obj.D, obj.V] = svd(obj.X, 'econ');
+            fprintf('Done! \n');
             
             diagVec = diag(obj.D);
             nCount  = sum(diagVec <= obj.zeroThreshold);
@@ -56,8 +57,9 @@ classdef RegressionEstimator < Estimator
             diagVec(regPara + 1 : end) = 0;
             Dk = diag(diagVec);
             
-            fprintf('Estimate weight matrix ... \n');
+            fprintf('Estimate weight matrix ... ');
             obj.W = obj.V * Dk * obj.U' * obj.Y;
+            fprintf('Done! \n');
         end
         
     end
