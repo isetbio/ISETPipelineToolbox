@@ -50,7 +50,7 @@ classdef RegressionEstimator < Estimator
                 warning(msg);
             end
             
-            obj.invD = inv(obj.D);
+            obj.invD = inv(D);
             obj.setRegPara(regPara);
         end
         
