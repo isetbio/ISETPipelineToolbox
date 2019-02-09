@@ -58,11 +58,11 @@ classdef CrossValidation < handle
                 mse(idx) = obj.evalTest(estimator);
             end
             
-            figure;
-            plot(paraList, mse, 'LineWidth', 2);
+            figure; grid on;
+            plot(paraList, mse, '-o', 'LineWidth', 2);
             title('Cross Validation');
             xlabel('Hyperparameter Value');
-            ylabel('Total Mean Squared Error')
+            ylabel('Total Mean Squared Error')            
         end
         
     end
