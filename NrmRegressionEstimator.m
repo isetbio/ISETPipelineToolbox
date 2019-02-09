@@ -15,7 +15,7 @@ classdef NrmRegressionEstimator < RegressionEstimator
             [X_zscored, X_mu, X_sigma] = zscore(X);
             [Y_zscored, Y_mu, Y_sigma] = zscore(Y);
             
-            obj@RegressionEstimator(X_zscored, Y_zscored, varargin);
+            obj@RegressionEstimator(X_zscored, Y_zscored, varargin{:});
             
             obj.X_mu = X_mu; obj.X_sigma = X_sigma;
             obj.Y_mu = Y_mu; obj.Y_sigma = Y_sigma;
