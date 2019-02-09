@@ -6,8 +6,8 @@ classdef RegressionEstimator < Estimator
         X; % Training input cone excitations
         Y; % Training input ground truth images        
 
-        U;
-        D;
+        U;        
+        invD;
         V;
         
         zeroThreshold = 1e-6;
@@ -36,24 +36,26 @@ classdef RegressionEstimator < Estimator
         
         function estimateW(obj, regPara)
             fprintf('Compute SVD of the input ... ');
-            [obj.U, obj.D, obj.V] = svd(obj.X, 'econ');
+            [obj.U, D, obj.V] = svd(obj.X, 'econ');
             fprintf('Done! \n');
             
-            diagVec = diag(obj.D);
+            diagVec = diag(D);
             nCount  = sum(diagVec <= obj.zeroThreshold);
             
-            msg = sprintf('At least %d out of the %d diagonal component is too small, \n', nCount, length(diagVec));
+            msg = sprintf('At least %d out of the %d diagonal components are close to zero, \n', ...
+                nCount, length(diagVec));
             msg = strcat(msg, ' consider drop them for regularization purpose.');
             
             if(nCount > 0)
                 warning(msg);
             end
             
+            obj.invD = inv(obj.D);
             obj.setRegPara(regPara);
         end
         
         function setRegPara(obj, regPara)                        
-            diagVec = diag(inv(obj.D));
+            diagVec = diag(obj.invD);
             diagVec(regPara + 1 : end) = 0;
             Dk = diag(diagVec);
             
