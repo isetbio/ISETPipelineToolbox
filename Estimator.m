@@ -10,6 +10,10 @@ classdef (Abstract) Estimator < handle
         function paraList = cvIterList(obj)
             paraList = obj.regParaList;
         end
+        
+        function setParaList(obj, paraList)
+            obj.regParaList = paraList;
+        end
                 
     end
     
