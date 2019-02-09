@@ -41,7 +41,7 @@ classdef RegressionEstimator < Estimator
             diagVec = diag(obj.D);
             nCount  = sum(diagVec <= obj.zeroThreshold);
             
-            msg = sprintf(' At least %d out of the %d diagonal component is too small, \n', nCount, length(diagVec));
+            msg = sprintf('At least %d out of the %d diagonal component is too small, \n', nCount, length(diagVec));
             msg = strcat(msg, ' consider drop them for regularization purpose.');
             
             if(nCount > 0)
