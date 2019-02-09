@@ -4,7 +4,8 @@ classdef NrmRegressionEstimator < RegressionEstimator
     
     properties
         X_mu;
-        X_sigma;        
+        X_sigma;
+        
         Y_mu;
         Y_sigma;
     end
