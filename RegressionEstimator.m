@@ -1,12 +1,37 @@
 classdef RegressionEstimator < Estimator
-    %REGRESSIONESTIMATOR Simple regression method for reconstruction.
+%REGRESSIONESTIMATOR Simple regression method for reconstruction.
+%
+% Syntax: estimator = RegressionEstimator(input, output, [varargin]);
+%
+% This class implements the linear regression estimator described in Golden
+% et al., 2019, with # of diagonal element in SVD as regularization.
+%
+% RegressionEstimator Methods:
+%  estimate   - Compute the linear estimate (e.g., image) based on input
+%               (e.g., cone response).
+%  setRegPara - Set the regularization parameter.
+%
+% Inputs:
+%   X         - Input (e.g., cone response vector) of the training set
+%   Y         - Output (e.g., RGB image) of the training set
+%
+% Outputs:
+%   RegressionEstimator object
+%
+% Optional key/value pairs:
+%   nDiag     - Int. Number of diagonal element used in estimating the weight
+%               matrix from SVD.
+%               Default is min(szie(X)).
+%   paraList  - List of hyperparameter (i.e., number of diagonal elements)
+%               we want to test with cross validation.
+%               Default is [].   
     
     properties       
         W; % Weight matrix for regression
         X; % Training input cone excitations
         Y; % Training input ground truth images        
 
-        U;        
+        U; 
         invD;
         V;
         
