@@ -1,5 +1,28 @@
 classdef CrossValidation < handle
-    %CROSSVALIDATION Some useful tool for evaluation of an estimator.
+%CROSSVALIDATION Generic tool for evaluation of an estimator.
+%
+% Syntax: cv = CrossValidation(testInput, testOutput, nTest)
+%
+% Description:
+%   This class implements some generic function for evaluation and cross
+%   validation of estimator.
+%
+% CrossValidation Methods:
+%   eval          - Compute the reconstruction and compute MSE for a given
+%                   estimator, and a pair of input - groundtruth.
+%   sampleTest    - Run obj.eval on a random sample from test set.
+%   evalTest      - Run obj.eval on the entire test set, compute total MSE
+%                   and the distribution (i.e. a list) of MSE.
+%   crossValidate - Run obj.evalTest with different hyperparameters
+%                   registered in Estimator.regParaList
+%
+% Inputs:
+%   testConeVec   - Input test set.
+%   testImage     - Output test set.
+%   nTest         - Number of test samples we are interested in running
+%
+% Outputs:
+%   CrossValidation object.
     
     properties
         testImage;
