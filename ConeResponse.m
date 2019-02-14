@@ -137,9 +137,30 @@ classdef ConeResponse < handle
             %   None.
             
             meanLuminanceCdPerM2 = 100;           
-            realizedStimulusScene = sceneFromFile(image, 'rgb', ...
-            meanLuminanceCdPerM2, obj.Display);
+            [realizedStimulusScene, ~, linearizedImage] = sceneFromFile(image, 'rgb', ...
+                meanLuminanceCdPerM2, obj.Display);
             
+            % show how to put the linearized image back into RGB form.
+            % we use PTB methods, somewhat indirect.  Construct PTB
+            % cal structure, then use that to go from linear (primary)
+            % representation to settings (RGB) representation.
+            gammaTable = displayGet(obj.Display, 'gamma table');
+            nInputLevels = size(gammaTable,1);
+            gammaInput   = linspace(0,1,nInputLevels);
+
+            PTBcal = ptb.GeneratePsychToolboxCalStruct(...
+                'name', displayGet(obj.Display, 'name'), ...
+                'gammaInput', gammaInput, ...
+                'gammaTable', gammaTable, ...
+                'wave', displayGet(obj.Display, 'wave'), ...
+                'spd', displayGet(obj.Display, 'spd'), ...
+                'ambientSpd', zeros(length(displayGet(obj.Display, 'wave')),1) ...
+             );
+            gammaMethod = 1;
+            PTBcal = SetGammaMethod(PTBcal, gammaMethod, nInputLevels);
+            [linearizedCalFormat,m,n] = ImageToCalFormat(linearizedImage);
+            imageCheck = CalFormatToImage(PrimaryToSettings(PTBcal,linearizedCalFormat),m,n);
+    
             % set the angular scene width
             realizedStimulusScene = sceneSet(realizedStimulusScene, 'fov', obj.FovealDegree);
             
