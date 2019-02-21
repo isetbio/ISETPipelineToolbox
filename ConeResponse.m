@@ -10,8 +10,6 @@ classdef ConeResponse < handle
 %
 %   Although these could be varied in the future with key/value pairs,
 %   this object uses:
-%     'whichDisplay'      - 'Apple-LCD' This is the isetbio display on
-%                            which the images are assumed to be shown.
 %     'whichOptics'       - 'wvfHuman'  Wavefront based human eye and optics.
 %                            Inherits isebio default wavefront optics and
 %                            pupil size.
@@ -50,6 +48,8 @@ classdef ConeResponse < handle
 %   'eccBasedConeQuantal' - Boolean. Vary cone quantal efficiency based
 %                           on eccentricity or not. 
 %                           Default is False.
+%   'display'             - Display object used in isetbio routine.
+%                           Default is 'LCD-Apple'.                           
 %   'viewDistance'        - Double. View distance from the screen.
 %                         - Default is 0.57.
     
@@ -74,10 +74,13 @@ classdef ConeResponse < handle
         % CONERESPONSE  Construct ConeResponse object.
         %   Construct ConeResponse object with optional argument:
         %   FovealDegree, eccBasedConeDensity, eccBasedConeQuantal.
+            display = displayCreate('LCD-Apple'); 
+        
             p = inputParser;
             p.addParameter('fovealDegree', 1.0, @(x)(isnumeric(x) && numel(x) == 1));
             p.addParameter('eccBasedConeDensity', false, @islogical);
             p.addParameter('eccBasedConeQuantal', false, @islogical);
+            p.addParameter('display', display);
             p.addParameter('viewDistance', 0.57, @(x) (isnumeric(x) && numel(x) == 1));
             
             parse(p, varargin{:});  
@@ -99,9 +102,11 @@ classdef ConeResponse < handle
             theMosaic.noiseFlag = 'none';
             obj.Mosaic = theMosaic;
 
-            % Display & Point spread function of human eye
-            obj.Display = displayCreate('LCD-Apple', ...
-                'viewing distance', p.Results.viewDistance);                       
+            % Display
+            obj.Display = p.Results.display;
+            obj.Display.dist = p.Results.viewDistance;
+            
+            % Point spread function of human eye                                  
             obj.PSF = oiCreate('wvf human');            
         end
         
@@ -111,7 +116,7 @@ classdef ConeResponse < handle
             'ticksInVisualDegs', true);
         end
         
-        function [excitation, theOI, allCone, L, M, S] = compute(obj, image)
+        function [excitation, theOI, linearizedImage, allCone, L, M, S] = compute(obj, image)
             % COMPUTE   Compute optical image and cone mosaic excitation.                           
             %
             % Syntax: 
@@ -140,27 +145,6 @@ classdef ConeResponse < handle
             [realizedStimulusScene, ~, linearizedImage] = sceneFromFile(image, 'rgb', ...
                 meanLuminanceCdPerM2, obj.Display);
             
-            % show how to put the linearized image back into RGB form.
-            % we use PTB methods, somewhat indirect.  Construct PTB
-            % cal structure, then use that to go from linear (primary)
-            % representation to settings (RGB) representation.
-            gammaTable = displayGet(obj.Display, 'gamma table');
-            nInputLevels = size(gammaTable,1);
-            gammaInput   = linspace(0,1,nInputLevels);
-
-            PTBcal = ptb.GeneratePsychToolboxCalStruct(...
-                'name', displayGet(obj.Display, 'name'), ...
-                'gammaInput', gammaInput, ...
-                'gammaTable', gammaTable, ...
-                'wave', displayGet(obj.Display, 'wave'), ...
-                'spd', displayGet(obj.Display, 'spd'), ...
-                'ambientSpd', zeros(length(displayGet(obj.Display, 'wave')),1) ...
-             );
-            gammaMethod = 1;
-            PTBcal = SetGammaMethod(PTBcal, gammaMethod, nInputLevels);
-            [linearizedCalFormat,m,n] = ImageToCalFormat(linearizedImage);
-            imageCheck = CalFormatToImage(PrimaryToSettings(PTBcal,linearizedCalFormat),m,n);
-    
             % set the angular scene width
             realizedStimulusScene = sceneSet(realizedStimulusScene, 'fov', obj.FovealDegree);
             
