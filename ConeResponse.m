@@ -95,7 +95,7 @@ classdef ConeResponse < handle
                 'fovDegs', obj.FovealDegree, ...                           % match mosaic width to stimulus size
                 'eccBasedConeDensity', eccBasedConeDensity, ...            % cone density varies with eccentricity
                 'eccBasedConeQuantalEfficiency', eccBasedConeQuantal, ...  % cone quantal efficiency varies with eccentricity
-                'integrationTime', 0.1, ...                                % 0.1s integration time
+                'integrationTime', 0.2, ...                                % 0.1s integration time
                 'maxGridAdjustmentIterations', 50);                        % terminate iterative lattice adjustment after 50 iterations            
 
             % Poisson noise model, mean response
@@ -141,12 +141,12 @@ classdef ConeResponse < handle
             % Optional key/value pairs:
             %   None.
             
-            meanLuminanceCdPerM2 = 100;           
+            meanLuminanceCdPerM2 = [];           
             [realizedStimulusScene, ~, linearizedImage] = sceneFromFile(image, 'rgb', ...
                 meanLuminanceCdPerM2, obj.Display);
             
             % set the angular scene width
-            realizedStimulusScene = sceneSet(realizedStimulusScene, 'fov', obj.FovealDegree);
+            realizedStimulusScene = sceneSet(realizedStimulusScene, 'fov', obj.FovealDegree);                        
             
             % optics
             theOI = oiCompute(obj.PSF, realizedStimulusScene);
