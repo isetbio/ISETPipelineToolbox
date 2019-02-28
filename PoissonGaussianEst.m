@@ -24,10 +24,7 @@ classdef PoissonGaussianEst < Estimator
         end
         
         % Poisson log likelihood
-        function logll = logll(~, excitation, lambda)
-            zeroBnd = 1e-5;
-            lambda(lambda < zeroBnd) = zeroBnd;
-            
+        function logll = logll(~, excitation, lambda)                     
             idpdLl = -lambda + excitation' .* log(lambda);            
             logll = sum(idpdLl);
         end
@@ -41,14 +38,16 @@ classdef PoissonGaussianEst < Estimator
         
         function reconImage = estimate(obj, input)
             loss = @(x) obj.negll(input, x);
-            
-            init = normrnd(0, 1, [obj.nDim, 1]);
+                                                
             % Optimization
-            options = optimoptions('fminunc');
-            options.MaxFunctionEvaluations = 1e6;
-            options.Display = 'iter';            
-            coff = fminunc(loss, init, options);
+            problem = createOptimProblem('fmincon');
+            problem.objective = loss;
+            problem.x0 = zeros([obj.nDim, 1]);
+            problem.A = [obj.Basis(:, 1:obj.nDim), -obj.Basis(:, 1:obj.nDim)];
+            problem.b = [1 - obj.Mu; obj.Mu];
+            problem.Display = 'iter';            
             
+            coff = fmincon(problem);            
             reconImage = obj.combinedRender * coff + obj.combinedBias;
         end
         
