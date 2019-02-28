@@ -41,16 +41,15 @@ classdef PoissonGaussianEst < Estimator
         
         function reconImage = estimate(obj, input)
             loss = @(x) obj.negll(input, x);
-                        
+            
             init = normrnd(0, 1, [obj.nDim, 1]);
-
             % Optimization
             options = optimoptions('fminunc');
             options.MaxFunctionEvaluations = 1e6;
             options.Display = 'iter';            
             coff = fminunc(loss, init, options);
             
-            reconImage = obj.Basis(:, 1:obj.nDim) * coff + obj.Mu;
+            reconImage = obj.combinedRender * coff + obj.combinedBias;
         end
         
         function setRegPara(obj, para)
