@@ -29,15 +29,14 @@ classdef PoissonGaussianEst < Estimator
         % Posterior likelihood
         function negll = negll(obj, input, x)
             priorLoss = - sum(log(normpdf(x, 0, 1)));
-            logllLoss = - obj.logll(input, obj.Basis * x + obj.Mu);
+            logllLoss = - obj.logll(input, obj.Basis(:, 1:obj.nDim) * x + obj.Mu);
             negll = priorLoss + logllLoss;
         end
         
         function reconImage = estimate(obj, input)
             loss = @(x) obj.negll(input, x);
-            
-            [~, dim] = size(pcaBasis);
-            init = normrnd(0, 1, [dim, 1]);
+                        
+            init = normrnd(0, 1, [obj.nDim, 1]);
 
             % Optimization
             options = optimoptions('fminunc');
@@ -46,7 +45,7 @@ classdef PoissonGaussianEst < Estimator
             options.UseParallel = true;
             coff = fminunc(loss, init, options);
             
-            reconImage = obj.Basis * coff + obj.Mu;
+            reconImage = obj.Basis(:, 1:obj.nDim) * coff + obj.Mu;
         end
         
         function setRegPara(obj, para)
