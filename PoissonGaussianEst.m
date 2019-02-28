@@ -24,8 +24,11 @@ classdef PoissonGaussianEst < Estimator
         end
         
         % Poisson log likelihood
-        function logll = logll(~, excitation, lambda)            
-            idpdLl = -lambda + excitation .* log(lambda);            
+        function logll = logll(~, excitation, lambda)
+            zeroBnd = 1e-5;
+            lambda(lambda < zeroBnd) = zeroBnd;
+            
+            idpdLl = -lambda + excitation' .* log(lambda);            
             logll = sum(idpdLl);
         end
         
