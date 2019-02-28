@@ -7,6 +7,8 @@ classdef PoissonGaussianEst < Estimator
         Mu;         % PCA mu vector
         
         nDim;
+        combinedRender;
+        combinedBias;
     end
     
     methods
@@ -16,20 +18,21 @@ classdef PoissonGaussianEst < Estimator
             obj.Basis  = basis;
             obj.Mu     = mu;
             obj.nDim   = size(basis, 1);
+            
+            obj.combinedRender = obj.Render * obj.Basis;
+            obj.combinedBias   = obj.Render * obj.Mu;
         end
         
         % Poisson log likelihood
-        function logll = logll(obj, excitation, image)
-            lambda = obj.Render * image;
-            idpdLl = -lambda + excitation .* log(lambda);
-            
+        function logll = logll(~, excitation, lambda)            
+            idpdLl = -lambda + excitation .* log(lambda);            
             logll = sum(idpdLl);
         end
         
         % Posterior likelihood
         function negll = negll(obj, input, x)
             priorLoss = - sum(log(normpdf(x, 0, 1)));
-            logllLoss = - obj.logll(input, obj.Basis(:, 1:obj.nDim) * x + obj.Mu);
+            logllLoss = - obj.logll(input, obj.combinedRender * x + obj.combinedBias);
             negll = priorLoss + logllLoss;
         end
         
@@ -41,8 +44,7 @@ classdef PoissonGaussianEst < Estimator
             % Optimization
             options = optimoptions('fminunc');
             options.MaxFunctionEvaluations = 1e6;
-            options.Display = 'iter';
-            options.UseParallel = true;
+            options.Display = 'iter';            
             coff = fminunc(loss, init, options);
             
             reconImage = obj.Basis(:, 1:obj.nDim) * coff + obj.Mu;
@@ -50,6 +52,7 @@ classdef PoissonGaussianEst < Estimator
         
         function setRegPara(obj, para)
             obj.nDim = para;
+            obj.combinedRender = obj.Render * obj.Basis(:, 1:obj.nDim);
         end
         
     end
