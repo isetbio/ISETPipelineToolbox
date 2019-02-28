@@ -29,6 +29,19 @@ classdef PoissonGaussianEst < Estimator
             logll = sum(idpdLl);
         end
         
+        % Gradient of likelihood
+        function gradll = gradll(obj, excitation, x)
+            lambda = obj.combinedRender * x + obj.combinedBias;
+            dldx1  = obj.combinedRender;
+            dldx2  = (-excitation') .* obj.combinedRender ./ lambda;
+            
+            gradll = sum(dldx1 + dldx2, 1);
+        end
+        
+        % Gradient of prior
+        function gradprior = gradprior(~, x)            
+        end
+        
         % Posterior likelihood
         function negll = negll(obj, input, x)
             priorLoss = - sum(log(normpdf(x, 0, 1)));
