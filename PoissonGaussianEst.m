@@ -59,7 +59,8 @@ classdef PoissonGaussianEst < Estimator
             problem.Aineq = [obj.Basis(:, 1:obj.nDim), -obj.Basis(:, 1:obj.nDim)];
             problem.bineq = [1 - obj.Mu; obj.Mu];                         
             problem.options = ...
-                optimoptions('fmincon', 'Display', 'iter', 'SpecifyObjectiveGradient', true);            
+                optimoptions('fmincon', 'Display', 'iter', 'MaxFunctionEvaluations', 1e6, ...
+                'SpecifyObjectiveGradient', true, 'CheckGradients',true);            
             
             coff = fmincon(problem);            
             reconImage = obj.Basis(:, 1:obj.nDim) * coff + obj.Mu;
