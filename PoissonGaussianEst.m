@@ -57,7 +57,7 @@ classdef PoissonGaussianEst < Estimator
             problem.objective = loss;
             problem.x0 = zeros([obj.nDim, 1]);
             problem.Aineq = [obj.Basis(:, 1:obj.nDim), -obj.Basis(:, 1:obj.nDim)];
-            problem.bineq = [1 - obj.Mu; obj.Mu];                        
+            problem.bineq = [1 - obj.Mu; obj.Mu];                         
             problem.options = ...
                 optimoptions('fmincon', 'Display', 'iter', 'SpecifyObjectiveGradient', true);            
             
