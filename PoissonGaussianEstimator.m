@@ -5,6 +5,7 @@ classdef PoissonGaussianEstimator < Estimator
         Render;     % Render matrix estimated from isetbio rountine
         Basis;      % PCA basis
         Mu;         % PCA mu vector
+        Disp;
         
         nDim;
         combinedRender;
@@ -18,6 +19,7 @@ classdef PoissonGaussianEstimator < Estimator
             obj.Basis  = basis;
             obj.Mu     = mu;
             obj.nDim   = size(basis, 1);
+            obj.Disp   = 'iter';
             
             obj.combinedRender = obj.Render * obj.Basis;
             obj.combinedBias   = obj.Render * obj.Mu;
@@ -56,7 +58,7 @@ classdef PoissonGaussianEstimator < Estimator
             problem.objective = loss;
             problem.x0 = zeros([obj.nDim, 1]);                        
             problem.options = ...
-                optimoptions('fminunc', 'Display', 'iter', 'SpecifyObjectiveGradient', true, ...
+                optimoptions('fminunc', 'Display', obj.Disp, 'SpecifyObjectiveGradient', true, ...
                  'MaxFunctionEvaluations', 1e4, 'MaxIterations', 1e3);
             
             coff = fminunc(problem);
