@@ -1,4 +1,4 @@
-classdef PoissonGaussianEstimator < Estimator
+classdef PoissonGaussianEstimator < BayesianEstimator
     %POISSONGAUSSIANEST
     
     properties        
@@ -15,14 +15,8 @@ classdef PoissonGaussianEstimator < Estimator
     methods
         
         function obj = PoissonGaussianEstimator(render, basis, mu)
-            obj.Render = render;
-            obj.Basis  = basis;
-            obj.Mu     = mu;
-            obj.nDim   = size(basis, 1);
+            obj@BayesianEstimator(render, basis, mu);
             obj.Disp   = 'iter';
-            
-            obj.combinedRender = obj.Render * obj.Basis;
-            obj.combinedBias   = obj.Render * obj.Mu;
         end
         
         % Poisson log likelihood
