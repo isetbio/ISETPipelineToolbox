@@ -26,7 +26,7 @@ classdef PoissonGaussianEstimator < BayesianEstimator
             gradll = sum(dldx1 + dldx2, 1);
         end                
         
-        % Posterior likelihood and gradient of posterir likelihood
+        % Posterior likelihood and gradient of posterior likelihood
         function [negll, grad] = negll(obj, input, x)
             priorLoss = - sum(log(normpdf(x, 0, 1)));
             
@@ -50,12 +50,7 @@ classdef PoissonGaussianEstimator < BayesianEstimator
             
             coff = fminunc(problem);
             reconImage = (obj.Basis(:, 1:obj.nDim) * coff + obj.Mu)';
-        end
-        
-        function setRegPara(obj, para)
-            obj.nDim = para;
-            obj.combinedRender = obj.Render * obj.Basis(:, 1:obj.nDim);
-        end
+        end                
         
         function dispOn(obj)
             obj.Disp = 'iter';

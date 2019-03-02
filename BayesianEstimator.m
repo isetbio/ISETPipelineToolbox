@@ -21,6 +21,11 @@ classdef BayesianEstimator < Estimator
             obj.combinedRender = obj.Render * obj.Basis;
             obj.combinedBias   = obj.Render * obj.Mu;            
         end
+                
+        function setRegPara(obj, para)
+            obj.nDim = para;
+            obj.combinedRender = obj.Render * obj.Basis(:, 1:obj.nDim);
+        end
         
     end
 end
