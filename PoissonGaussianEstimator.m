@@ -57,6 +57,14 @@ classdef PoissonGaussianEstimator < BayesianEstimator
             obj.combinedRender = obj.Render * obj.Basis(:, 1:obj.nDim);
         end
         
+        function dispOn(obj)
+            obj.Disp = 'iter';
+        end
+        
+        function dispOff(obj)
+            obj.Disp = 'final';
+        end
+        
     end
     
 end
