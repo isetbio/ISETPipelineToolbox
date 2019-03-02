@@ -1,4 +1,4 @@
-classdef PoissonGaussianEst < Estimator
+classdef PoissonGaussianEstimator < Estimator
     %POISSONGAUSSIANEST
     
     properties        
