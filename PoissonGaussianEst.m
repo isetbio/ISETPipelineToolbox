@@ -25,7 +25,6 @@ classdef PoissonGaussianEst < Estimator
         
         % Poisson log likelihood
         function logll = logll(~, excitation, lambda)
-            assert(sum(lambda <= 0) == 0, 'lambda <= 0');
             idpdLl = -lambda + excitation' .* log(lambda);
             logll = sum(idpdLl);
         end
@@ -44,26 +43,24 @@ classdef PoissonGaussianEst < Estimator
             
             lambda = obj.combinedRender * x + obj.combinedBias;
             logllLoss = - obj.logll(input, lambda);
-            negll = priorLoss + logllLoss;
             
-            grad = obj.gradll(input, lambda) + x;
+            negll = priorLoss + logllLoss;            
+            grad = obj.gradll(input, lambda)' + x;            
         end
         
         function reconImage = estimate(obj, input)
             loss = @(x) obj.negll(input, x);
                                                 
             % Optimization
-            problem = createOptimProblem('fmincon');
+            problem = createOptimProblem('fminunc');
             problem.objective = loss;
-            problem.x0 = zeros([obj.nDim, 1]);
-            problem.Aineq = [obj.Basis(:, 1:obj.nDim), -obj.Basis(:, 1:obj.nDim)];
-            problem.bineq = [1 - obj.Mu; obj.Mu];                         
+            problem.x0 = zeros([obj.nDim, 1]);                        
             problem.options = ...
-                optimoptions('fmincon', 'Display', 'iter', 'MaxFunctionEvaluations', 1e6, ...
-                'SpecifyObjectiveGradient', true, 'CheckGradients',true);            
+                optimoptions('fminunc', 'Display', 'iter', 'SpecifyObjectiveGradient', true, ...
+                 'MaxFunctionEvaluations', 1e4, 'MaxIterations', 1e3);
             
-            coff = fmincon(problem);            
-            reconImage = obj.Basis(:, 1:obj.nDim) * coff + obj.Mu;
+            coff = fminunc(problem);
+            reconImage = (obj.Basis(:, 1:obj.nDim) * coff + obj.Mu)';
         end
         
         function setRegPara(obj, para)
