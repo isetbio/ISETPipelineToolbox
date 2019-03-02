@@ -13,7 +13,7 @@ classdef PoissonGaussianEstimator < Estimator
     
     methods
         
-        function obj = PoissonGaussianEst(render, basis, mu)
+        function obj = PoissonGaussianEstimator(render, basis, mu)
             obj.Render = render;
             obj.Basis  = basis;
             obj.Mu     = mu;
