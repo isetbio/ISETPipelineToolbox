@@ -1,8 +1,8 @@
 classdef BayesianEstimator < Estimator
     
     properties
-        Render;
-        Basis;
+        Render;  % Render matrix estimated from isetbio rountine
+        Basis;   % Image Basis (i.e., PCA or ICA basis)
         Mu;
         
         nDim;

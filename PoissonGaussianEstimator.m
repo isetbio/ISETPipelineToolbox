@@ -1,15 +1,8 @@
 classdef PoissonGaussianEstimator < BayesianEstimator
     %POISSONGAUSSIANEST
     
-    properties        
-        Render;     % Render matrix estimated from isetbio rountine
-        Basis;      % PCA basis
-        Mu;         % PCA mu vector
-        Disp;       % Display option for optimization
-        
-        nDim;
-        combinedRender;
-        combinedBias;
+    properties
+        Disp;       % Display option for optimization                
     end
     
     methods
