@@ -5,7 +5,7 @@ classdef PoissonGaussianEstimator < Estimator
         Render;     % Render matrix estimated from isetbio rountine
         Basis;      % PCA basis
         Mu;         % PCA mu vector
-        Disp;
+        Disp;       % Display option for optimization
         
         nDim;
         combinedRender;
