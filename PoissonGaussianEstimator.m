@@ -56,8 +56,12 @@ classdef PoissonGaussianEstimator < BayesianEstimator
             obj.Disp = 'iter';
         end
         
-        function dispOff(obj)
+        function dispFinal(obj)
             obj.Disp = 'final';
+        end
+        
+        function dispOff(obj)
+            obj.Disp = 'off';
         end
         
     end
