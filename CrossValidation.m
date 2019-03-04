@@ -77,7 +77,7 @@ classdef CrossValidation < handle
             
             mse = zeros(1, nPara);
             for idx = 1:nPara
-                fprintf('Cross Validate, Iteration %d / %d', idx, nPara);
+                fprintf('Cross Validate, Iteration %d / %d \n', idx, nPara);
                 estimator.setRegPara(paraList(idx));
                 mse(idx) = obj.evalTest(estimator);
             end
