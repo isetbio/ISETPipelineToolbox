@@ -68,13 +68,12 @@ classdef CrossValidation < handle
                 try
                     [~, mses(idx)] = obj.eval(estimator, obj.testConeVec(idx, :), obj.testImage(idx, :), false);                
                 catch E
-                    fprintf('Error in Reconstruction: %s for input %d', E.identifier, idx);
+                    fprintf('Error in Reconstruction: %s for input %d \n', E.identifier, idx);
                     mses(idx) = NaN;
-                end
-                
+                end                
             end
             listMSE  = mses;
-            totalMSE = sum(mses);            
+            totalMSE = sum(mses);          
         end
         
         function [paraList, mse] = crossValidate(obj, estimator)
