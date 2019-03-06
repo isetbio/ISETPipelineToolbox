@@ -73,7 +73,7 @@ classdef CrossValidation < handle
                 end                
             end
             listMSE  = mses;
-            totalMSE = sum(mses);          
+            totalMSE = sum(mses, 'omitnan');        
         end
         
         function [paraList, mse] = crossValidate(obj, estimator)

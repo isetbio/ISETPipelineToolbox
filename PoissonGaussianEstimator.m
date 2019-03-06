@@ -46,7 +46,7 @@ classdef PoissonGaussianEstimator < BayesianEstimator
             problem.x0 = zeros([obj.nDim, 1]);                        
             problem.options = ...
                 optimoptions('fminunc', 'Display', obj.Disp, 'SpecifyObjectiveGradient', true, ...
-                 'MaxFunctionEvaluations', 1e4, 'MaxIterations', 1e3);
+                 'MaxFunctionEvaluations', 1e4, 'MaxIterations', 5e2);
             
             coff = fminunc(problem);
             reconImage = (obj.Basis(:, 1:obj.nDim) * coff + obj.Mu)';
