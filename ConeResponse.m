@@ -83,7 +83,7 @@ classdef ConeResponse < handle
             p.addParameter('display', display);
             p.addParameter('viewDistance', 0.57, @(x) (isnumeric(x) && numel(x) == 1));
             
-            parse(p, varargin{:});  
+            parse(p, varargin{:});
             obj.FovealDegree    = p.Results.fovealDegree;
             eccBasedConeDensity = p.Results.eccBasedConeDensity;
             eccBasedConeQuantal = p.Results.eccBasedConeQuantal;                        
