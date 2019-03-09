@@ -64,8 +64,8 @@ classdef CrossValidation < handle
         
         function [totalMSE, listMSE] = evalTest(obj, estimator)
             mses = zeros(1, obj.nTest);
-            parfor idx = 1:obj.nTest
-                try
+            parfor idx = 1:obj.nTest                
+                try                    
                     [~, mses(idx)] = obj.eval(estimator, obj.testConeVec(idx, :), obj.testImage(idx, :), false);                
                 catch E
                     fprintf('Error in Reconstruction: %s for input %d \n', E.identifier, idx);
