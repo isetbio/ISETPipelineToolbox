@@ -16,7 +16,7 @@ classdef BayesianEstimator < Estimator
             obj.Render = render;
             obj.Basis  = basis;
             obj.Mu     = mu;
-            obj.nDim   = size(basis, 1);            
+            obj.nDim   = size(basis, 2);            
             
             obj.combinedRender = obj.Render * obj.Basis;
             obj.combinedBias   = obj.Render * obj.Mu;            
