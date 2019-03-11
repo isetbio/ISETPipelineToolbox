@@ -1,5 +1,8 @@
 function [regBasis, mu] = computeBasisPCA(imageSet, imageDim, vis)
 %COMPUTEBASISPCA
+if ~exist('vis', 'var')
+    vis = false;
+end
 
 [pcaBasis, ~, pcaVar, ~, ~, mu] = pca(imageSet);
 
