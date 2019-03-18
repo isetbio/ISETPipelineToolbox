@@ -2,16 +2,18 @@ classdef LassoGaussianEstimator < BayesianEstimator
     %LASSOGAUSSIANESTIMATOR
     properties
         Verbose;
+        Lambda;
     end
         
     methods
         function this = LassoGaussianEstimator(render, basis, mu)
-            this@BayesianEstimator(render, basis, mu);            
+            this@BayesianEstimator(render, basis, mu);
+            this.Lambda = 1;
         end
         
         function reconImage = estimate(this, input, varargin)
             p = inputParser;
-            p.addParameter('regularization', 1.0, @(x)(isnumeric(x) && numel(x) == 1));
+            p.addParameter('regularization', this.Lambda, @(x)(isnumeric(x) && numel(x) == 1));
             parse(p, varargin{:});
             
             lambda = p.Results.regularization / length(input);
@@ -29,6 +31,10 @@ classdef LassoGaussianEstimator < BayesianEstimator
         
         function dispOff(this)
             this.Verbose = 0;
+        end
+        
+        function setLambda(this, lambda)
+            this.Lambda = lambda;
         end
     end
 end
