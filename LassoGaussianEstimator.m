@@ -20,7 +20,7 @@ classdef LassoGaussianEstimator < BayesianEstimator
             p.addParameter('regularization', this.Lambda, @(x)(isnumeric(x) && numel(x) == 1));
             parse(p, varargin{:});
             
-            lambda = p.Results.regularization;
+            lambda = p.Results.regularization / length(input);
             target = input' - this.combinedBias;
             
             if(strcmp(this.Solver, 'sparsa'))
