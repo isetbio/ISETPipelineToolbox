@@ -30,7 +30,7 @@ classdef LassoGaussianEstimator < BayesianEstimator
             elseif(strcmp(this.Solver, 'sgd'))
                 Mdl = fitrlinear(this.combinedRender, target, 'Lambda', lambda, ...
                     'Learner', 'leastsquares', 'Regularization', 'lasso', 'FitBias', false, 'Solver', 'sgd', 'Verbose', ...
-                    this.Verbose, 'BetaTolerance', 1e-8, 'GradientTolerance', 1e-8, 'IterationLimit', this.IterationLimit, 'BatchSize', length(input));
+                    this.Verbose, 'BetaTolerance', 1e-8, 'IterationLimit', this.IterationLimit, 'BatchSize', length(input));
             else
                 error('Invalid Solver Name.')
             end
