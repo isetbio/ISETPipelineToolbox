@@ -3,12 +3,14 @@ classdef LassoGaussianEstimator < BayesianEstimator
     properties
         Verbose;
         Lambda;
+        IterationLimit;
     end
         
     methods
         function this = LassoGaussianEstimator(render, basis, mu)
             this@BayesianEstimator(render, basis, mu);
             this.Lambda = 1;
+            this.IterationLimit = 5e3;
         end
         
         function reconImage = estimate(this, input, varargin)
@@ -21,7 +23,7 @@ classdef LassoGaussianEstimator < BayesianEstimator
             
             Mdl = fitrlinear(this.combinedRender, target, 'Lambda', lambda, ...
                 'Learner', 'leastsquares', 'Regularization', 'lasso', 'FitBias', false, 'Solver', 'sparsa', 'Verbose', ...
-                this.Verbose, 'BetaTolerance', 1e-8, 'GradientTolerance', 1e-8, 'IterationLimit', 5e3);
+                this.Verbose, 'BetaTolerance', 1e-8, 'GradientTolerance', 1e-8, 'IterationLimit', this.IterationLimit);
             reconImage = (this.Basis(:, 1:this.nDim) * Mdl.Beta + this.Mu)';
         end
         
@@ -35,6 +37,10 @@ classdef LassoGaussianEstimator < BayesianEstimator
         
         function setLambda(this, lambda)
             this.Lambda = lambda;
+        end
+        
+        function setIterationLimit(this, limit)
+            this.IterationLimit = limit;
         end
     end
 end
