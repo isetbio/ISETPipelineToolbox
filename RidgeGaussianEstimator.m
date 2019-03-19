@@ -1,20 +1,28 @@
 classdef RidgeGaussianEstimator < BayesianEstimator
-    %RIDGEGAUSSIANESTIMATOR 
-       
+    %RIDGEGAUSSIANESTIMATOR
+    properties
+        Lambda;
+    end
+    
     methods
         
-        function obj = RidgeGaussianEstimator(render, basis, mu)
-            obj@BayesianEstimator(render, basis, mu);
+        function this = RidgeGaussianEstimator(render, basis, mu)
+            this@BayesianEstimator(render, basis, mu);
+            this.Lambda = 1;
         end
         
-        function reconImage = estimate(obj, input, varargin)
+        function reconImage = estimate(this, input, varargin)
             p = inputParser;
-            p.addParameter('regularization', 1.0, @(x)(isnumeric(x) && numel(x) == 1));
+            p.addParameter('regularization', this.Lambda, @(x)(isnumeric(x) && numel(x) == 1));
             parse(p, varargin{:});
             
-            coff = (obj.combinedRender' * obj.combinedRender + ...
-                p.Results.regularization * diag(ones(1, obj.nDim))) \ obj.combinedRender' * (input' - obj.combinedBias);
-            reconImage = (obj.Basis(:, 1:obj.nDim) * coff + obj.Mu)';            
+            coff = (this.combinedRender' * this.combinedRender + ...
+                p.Results.regularization * diag(ones(1, this.nDim))) \ this.combinedRender' * (input' - this.combinedBias);
+            reconImage = (this.Basis(:, 1:this.nDim) * coff + this.Mu)';
+        end
+        
+        function setLambda(this, lambda)
+            this.Lambda = lambda;
         end
         
     end
