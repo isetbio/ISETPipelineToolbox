@@ -5,6 +5,7 @@ classdef LassoGaussianEstimator < BayesianEstimator
         Lambda;
         IterationLimit;
         Solver;
+        Tolerance;
     end
         
     methods
@@ -12,6 +13,7 @@ classdef LassoGaussianEstimator < BayesianEstimator
             this@BayesianEstimator(render, basis, mu);
             this.Lambda = 1;
             this.Solver = 'sparsa';
+            this.Tolerance = 1e-6;
             this.IterationLimit = 5e3;            
         end
         
@@ -26,7 +28,7 @@ classdef LassoGaussianEstimator < BayesianEstimator
             if(strcmp(this.Solver, 'sparsa'))
                 [Mdl, fitInfo] = fitrlinear(this.combinedRender, target, 'Lambda', lambda, ...
                     'Learner', 'leastsquares', 'Regularization', 'lasso', 'FitBias', false, 'Solver', 'sparsa', 'Verbose', ...
-                    this.Verbose, 'BetaTolerance', 1e-8, 'GradientTolerance', 1e-8, 'IterationLimit', this.IterationLimit);
+                    this.Verbose, 'BetaTolerance', this.Tolerance, 'GradientTolerance', this.Tolerance, 'IterationLimit', this.IterationLimit);
             elseif(strcmp(this.Solver, 'sgd'))
                 [Mdl, fitInfo] = fitrlinear(this.combinedRender, target, 'Lambda', lambda, ...
                     'Learner', 'leastsquares', 'Regularization', 'lasso', 'FitBias', false, 'Solver', 'sgd', 'Verbose', ...
@@ -57,6 +59,10 @@ classdef LassoGaussianEstimator < BayesianEstimator
         
         function setSolver(this, solver)
             this.Solver = solver;
+        end
+        
+        function setTolerance(this, tol)
+            this.Tolerance = tol;
         end
     end
 end
