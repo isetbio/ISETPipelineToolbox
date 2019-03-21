@@ -184,12 +184,15 @@ classdef ConeResponse < handle
                 'showColorBar', ~true, ...
                 'labelColorBarTicks', ~true);
             set(gca, 'XTick', [], 'YTick', []);
-            title('Cone Excitation Pattern');
+            set(gca,'YDir','reverse');
+            title('Cone Excitation Pattern');            
         end
         
         function visualizeOI(obj)
             % Visualize optical image
-            visualizeOpticalImage(obj.LastOI, 'displayRetinalContrastProfiles', true);
+            visualizeOpticalImage(obj.LastOI, 'displayRadianceMaps', false, ...
+                'displayRetinalContrastProfiles', false);
+            set(gca,'YDir','reverse');
         end
         
     end
