@@ -51,7 +51,10 @@ classdef ConeResponse < handle
     %   'display'             - Display object used in isetbio routine.
     %                           Default is 'LCD-Apple'.
     %   'viewDistance'        - Double. View distance from the screen.
-    %                         - Default is 0.57.
+    %                           Default is 0.57.
+    %   'spatialDensity'      - Vector. Density of L, M and S cone.
+    %                           Default is [].
+    
     
     properties (Access = public)
         Display;
@@ -82,21 +85,33 @@ classdef ConeResponse < handle
             p.addParameter('eccBasedConeQuantal', false, @islogical);
             p.addParameter('display', display);
             p.addParameter('viewDistance', 0.57, @(x) (isnumeric(x) && numel(x) == 1));
+            p.addParameter('spatialDensity', []);
             
             parse(p, varargin{:});
             obj.FovealDegree    = p.Results.fovealDegree;
+            spatialDensity      = p.Results.spatialDensity;
             eccBasedConeDensity = p.Results.eccBasedConeDensity;
             eccBasedConeQuantal = p.Results.eccBasedConeQuantal;
             
             % Create cone moasic
             fprintf('Create cone moasic object: \n');
             
-            theMosaic = coneMosaicHex(5, ...                               % hex lattice sampling factor
-                'fovDegs', obj.FovealDegree, ...                           % match mosaic width to stimulus size
-                'eccBasedConeDensity', eccBasedConeDensity, ...            % cone density varies with eccentricity
-                'eccBasedConeQuantalEfficiency', eccBasedConeQuantal, ...  % cone quantal efficiency varies with eccentricity
-                'integrationTime', 0.2, ...                                % 0.1s integration time
-                'maxGridAdjustmentIterations', 50);                        % terminate iterative lattice adjustment after 50 iterations
+            if(isempty(spatialDensity))
+                theMosaic = coneMosaicHex(5, ...                               % hex lattice sampling factor
+                    'fovDegs', obj.FovealDegree, ...                           % match mosaic width to stimulus size
+                    'eccBasedConeDensity', eccBasedConeDensity, ...            % cone density varies with eccentricity
+                    'eccBasedConeQuantalEfficiency', eccBasedConeQuantal, ...  % cone quantal efficiency varies with eccentricity
+                    'integrationTime', 0.2, ...                                % 0.1s integration time
+                    'maxGridAdjustmentIterations', 50);                        % terminate iterative lattice adjustment after 50 iterations
+            else
+                theMosaic = coneMosaicHex(5, ...
+                    'fovDegs', obj.FovealDegree, ...
+                    'spatialDensity', spatialDensity, ...
+                    'sConeMinDistanceFactor', 0, ...
+                    'sConeFreeRadiusMicrons', 0, ...
+                    'integrationTime', 0.2, ...
+                    'maxGridAdjustmentIterations', 50);
+            end
             
             % Poisson noise model, mean response
             theMosaic.noiseFlag = 'none';
@@ -177,7 +192,7 @@ classdef ConeResponse < handle
             mosaic = obj.Mosaic;
         end
         
-        function visualizeExcitation(obj)            
+        function visualizeExcitation(obj)
             figure();
             obj.Mosaic.renderActivationMap(gca, squeeze(obj.LastResponse(1,:,:)), ...
                 'mapType', 'modulated disks', ...
@@ -186,7 +201,7 @@ classdef ConeResponse < handle
                 'titleForColorBar', 'R*/cone/tau');
             set(gca, 'XTick', [], 'YTick', []);
             set(gca,'YDir','reverse');
-            title('Cone Excitation Pattern');            
+            title('Cone Excitation Pattern');
         end
         
         function visualizeOI(obj)
