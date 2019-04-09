@@ -129,6 +129,8 @@ classdef ConeResponse < handle
             this.Mosaic.visualizeGrid(...
                 'backgroundColor', [1 1 1], ...
                 'ticksInVisualDegs', true);
+            set(gca, 'XTick', [], 'YTick', []);
+            set(gca,'YDir','reverse');
         end
         
         function [excitation, theOI, linearizedImage, allCone, L, M, S] = compute(this, image)
@@ -220,8 +222,14 @@ classdef ConeResponse < handle
             mosaic = this.Mosaic;
         end
         
-        function visualizeExcitation(this)
-            figure();
+        function visualizeExcitation(this, asSubplot)
+            if ~exist('asSubplot','var')
+                % third parameter does not exist, so default it to something
+                asSubplot = false;
+            end
+            if ~asSubplot
+                figure();
+            end            
             this.Mosaic.renderActivationMap(gca, squeeze(this.LastResponse(1,:,:)), ...
                 'mapType', 'modulated disks', ...
                 'showColorBar', true, ...
