@@ -189,9 +189,11 @@ classdef ConeResponse < handle
             
         end
         
-        function [allCone] = coneExcitationRnd(this, factor, type)
+        function [allCone, coneCount] = coneExcitationRnd(this, factor, type)
+            nCone = sum(sum(this.Mosaic.pattern ~= 0));
             sizeExci   = size(this.LastResponse);
             excitation = reshape(this.LastResponse(1, :, :), [sizeExci(2), sizeExci(3)]);
+            nghSize    = ceil(sqrt(sizeExci(2) * sizeExci(3) / nCone));
             
             switch type
                 case 'L'
@@ -206,6 +208,10 @@ classdef ConeResponse < handle
             coneIdx = find(this.Mosaic.pattern == coneType);
             exciIdx = datasample(coneIdx, 1);
             excitation(exciIdx) = excitation(exciIdx) * factor;
+            
+            J = floor(exciIdx/sizeExci(3)); I = exciIdx - sizeExci(3) * J; J = J + 1;
+            nghMtx = this.Mosaic.pattern(max(1, I - nghSize):min(sizeExci(2), I + nghSize), max(1, J - nghSize):min(sizeExci(3), J + nghSize));
+            coneCount = [sum(sum(nghMtx == this.L_Cone_Idx)), sum(sum(nghMtx == this.M_Cone_Idx)), sum(sum(nghMtx == this.S_Cone_Idx))];
             
             this.LastResponse(1, :, :) = excitation;
             this.LastResponse(2, :, :) = excitation;
@@ -229,11 +235,11 @@ classdef ConeResponse < handle
             end
             if ~asSubplot
                 figure();
-            end            
+            end
             this.Mosaic.renderActivationMap(gca, squeeze(this.LastResponse(1,:,:)), ...
                 'mapType', 'modulated disks', ...
-                'showColorBar', true, ...
-                'labelColorBarTicks', true, ...
+                'showColorBar', ~asSubplot, ...
+                'labelColorBarTicks', ~asSubplot, ...
                 'titleForColorBar', 'R*/cone/tau');
             set(gca, 'XTick', [], 'YTick', []);
             set(gca,'YDir','reverse');
