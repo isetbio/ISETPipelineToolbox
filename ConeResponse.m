@@ -73,7 +73,7 @@ classdef ConeResponse < handle
     
     methods (Access = public)
         
-        function obj = ConeResponse(varargin)
+        function this = ConeResponse(varargin)
             % CONERESPONSE  Construct ConeResponse object.
             %   Construct ConeResponse object with optional argument:
             %   FovealDegree, eccBasedConeDensity, eccBasedConeQuantal.
@@ -88,7 +88,7 @@ classdef ConeResponse < handle
             p.addParameter('spatialDensity', []);
             
             parse(p, varargin{:});
-            obj.FovealDegree    = p.Results.fovealDegree;
+            this.FovealDegree    = p.Results.fovealDegree;
             spatialDensity      = p.Results.spatialDensity;
             eccBasedConeDensity = p.Results.eccBasedConeDensity;
             eccBasedConeQuantal = p.Results.eccBasedConeQuantal;
@@ -98,14 +98,14 @@ classdef ConeResponse < handle
             
             if(isempty(spatialDensity))
                 theMosaic = coneMosaicHex(5, ...                               % hex lattice sampling factor
-                    'fovDegs', obj.FovealDegree, ...                           % match mosaic width to stimulus size
+                    'fovDegs', this.FovealDegree, ...                           % match mosaic width to stimulus size
                     'eccBasedConeDensity', eccBasedConeDensity, ...            % cone density varies with eccentricity
                     'eccBasedConeQuantalEfficiency', eccBasedConeQuantal, ...  % cone quantal efficiency varies with eccentricity
                     'integrationTime', 0.2, ...                                % 0.1s integration time
                     'maxGridAdjustmentIterations', 50);                        % terminate iterative lattice adjustment after 50 iterations
             else
                 theMosaic = coneMosaicHex(5, ...
-                    'fovDegs', obj.FovealDegree, ...
+                    'fovDegs', this.FovealDegree, ...
                     'spatialDensity', spatialDensity, ...
                     'sConeMinDistanceFactor', 0, ...
                     'sConeFreeRadiusMicrons', 0, ...
@@ -115,27 +115,27 @@ classdef ConeResponse < handle
             
             % Poisson noise model, mean response
             theMosaic.noiseFlag = 'none';
-            obj.Mosaic = theMosaic;
+            this.Mosaic = theMosaic;
             
             % Display
-            obj.Display = p.Results.display;
-            obj.Display.dist = p.Results.viewDistance;
+            this.Display = p.Results.display;
+            this.Display.dist = p.Results.viewDistance;
             
             % Point spread function of human eye
-            obj.PSF = oiCreate('wvf human');
+            this.PSF = oiCreate('wvf human');
         end
         
-        function visualizeMosaic(obj)
-            obj.Mosaic.visualizeGrid(...
+        function visualizeMosaic(this)
+            this.Mosaic.visualizeGrid(...
                 'backgroundColor', [1 1 1], ...
                 'ticksInVisualDegs', true);
         end
         
-        function [excitation, theOI, linearizedImage, allCone, L, M, S] = compute(obj, image)
+        function [excitation, theOI, linearizedImage, allCone, L, M, S] = compute(this, image)
             % COMPUTE   Compute optical image and cone mosaic excitation.
             %
             % Syntax:
-            %   [excitation, OI, allCone, L, M, S] = obj.compute(image)
+            %   [excitation, OI, allCone, L, M, S] = this.compute(image)
             %
             % Description:
             %   Compute OI and cone excitation array of provided RGB image
@@ -158,14 +158,14 @@ classdef ConeResponse < handle
             
             meanLuminanceCdPerM2 = [];
             [realizedStimulusScene, ~, linearizedImage] = sceneFromFile(image, 'rgb', ...
-                meanLuminanceCdPerM2, obj.Display);
+                meanLuminanceCdPerM2, this.Display);
             
             % set the angular scene width
-            realizedStimulusScene = sceneSet(realizedStimulusScene, 'fov', obj.FovealDegree);
+            realizedStimulusScene = sceneSet(realizedStimulusScene, 'fov', this.FovealDegree);
             
             % optics
-            theOI = oiCompute(obj.PSF, realizedStimulusScene);
-            obj.LastOI = theOI;
+            theOI = oiCompute(this.PSF, realizedStimulusScene);
+            this.LastOI = theOI;
             
             % cone excitations
             nTrialsNum = 2;
@@ -173,28 +173,56 @@ classdef ConeResponse < handle
             
             % compute mosaic excitation responses
             % without the eye movement path
-            obj.LastResponse = obj.Mosaic.compute(theOI, 'emPath', emPath);
+            this.LastResponse = this.Mosaic.compute(theOI, 'emPath', emPath);
             
-            sizeExci   = size(obj.LastResponse);
-            excitation = reshape(obj.LastResponse(1, :, :), [sizeExci(2), sizeExci(3)]);
+            sizeExci   = size(this.LastResponse);
+            excitation = reshape(this.LastResponse(1, :, :), [sizeExci(2), sizeExci(3)]);
             
             % LMS cone excitation
-            L = obj.getConetypeResponse(obj.L_Cone_Idx);
-            M = obj.getConetypeResponse(obj.M_Cone_Idx);
-            S = obj.getConetypeResponse(obj.S_Cone_Idx);
+            L = this.getConetypeResponse(this.L_Cone_Idx);
+            M = this.getConetypeResponse(this.M_Cone_Idx);
+            S = this.getConetypeResponse(this.S_Cone_Idx);
             
             allCone = [L; M; S];
             
         end
         
-        function mosaic = getMosaic(obj)
-            % Return the cone mosaic object
-            mosaic = obj.Mosaic;
+        function [allCone] = coneExcitationRnd(this, factor, type)
+            sizeExci   = size(this.LastResponse);
+            excitation = reshape(this.LastResponse(1, :, :), [sizeExci(2), sizeExci(3)]);
+            
+            switch type
+                case 'L'
+                    coneType = this.L_Cone_Idx;
+                case 'M'
+                    coneType = this.M_Cone_Idx;
+                case 'S'
+                    coneType = this.S_Cone_Idx;
+                otherwise
+                    error('Unknown cone type.');
+            end
+            coneIdx = find(this.Mosaic.pattern == coneType);
+            exciIdx = datasample(coneIdx, 1);
+            excitation(exciIdx) = excitation(exciIdx) * factor;
+            
+            this.LastResponse(1, :, :) = excitation;
+            this.LastResponse(2, :, :) = excitation;
+            
+            L = this.getConetypeResponse(this.L_Cone_Idx);
+            M = this.getConetypeResponse(this.M_Cone_Idx);
+            S = this.getConetypeResponse(this.S_Cone_Idx);
+            
+            allCone = [L; M; S];
         end
         
-        function visualizeExcitation(obj)
+        function mosaic = getMosaic(this)
+            % Return the cone mosaic object
+            mosaic = this.Mosaic;
+        end
+        
+        function visualizeExcitation(this)
             figure();
-            obj.Mosaic.renderActivationMap(gca, squeeze(obj.LastResponse(1,:,:)), ...
+            this.Mosaic.renderActivationMap(gca, squeeze(this.LastResponse(1,:,:)), ...
                 'mapType', 'modulated disks', ...
                 'showColorBar', true, ...
                 'labelColorBarTicks', true, ...
@@ -204,9 +232,9 @@ classdef ConeResponse < handle
             title('Cone Excitation Pattern');
         end
         
-        function visualizeOI(obj)
+        function visualizeOI(this)
             % Visualize optical image
-            visualizeOpticalImage(obj.LastOI, 'displayRadianceMaps', false, ...
+            visualizeOpticalImage(this.LastOI, 'displayRadianceMaps', false, ...
                 'displayRetinalContrastProfiles', false);
             set(gca,'YDir','reverse');
         end
@@ -214,10 +242,10 @@ classdef ConeResponse < handle
     end
     
     methods (Access = private)
-        function response = getConetypeResponse(obj, type)
-            sizeExci = size(obj.LastResponse);
-            excitation = reshape(obj.LastResponse(1, :, :), [sizeExci(2), sizeExci(3)]);
-            response   = excitation(obj.Mosaic.pattern == type);
+        function response = getConetypeResponse(this, type)
+            sizeExci = size(this.LastResponse);
+            excitation = reshape(this.LastResponse(1, :, :), [sizeExci(2), sizeExci(3)]);
+            response   = excitation(this.Mosaic.pattern == type);
         end
     end
     
