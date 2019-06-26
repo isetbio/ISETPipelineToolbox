@@ -1,4 +1,4 @@
-function sample = sampleImage(inputImage, size)
+function sample = sampleImage(inputImage, n)
 % Sample a small patch of particular size (n by n) from the input image.
 
 nRow = size(inputImage, 1);
