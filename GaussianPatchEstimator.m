@@ -4,20 +4,22 @@ classdef GaussianPatchEstimator < handle
         Render;  % Render matrix estimated from isetbio rountine
         Basis;   % Image Basis (i.e., PCA or ICA basis)
         Mu;
-        Disp;       % Display option for optimization
-        Lambda;     % Regularization
-        Size;       % Size of original image
-        Patch;      % Size of reconstruction blocks
+        Disp;    % Display option for optimization
+        Lambda;  % Regularization
+        Size;    % Size of original image
+        Patch;   % Size of reconstruction blocks
+        Stride;  % Step stride size
     end
     
     methods
         
         % Constructor for the estimator
-        function this = GaussianPatchEstimator(render, basis, mu, lambda, imageSize)
+        function this = GaussianPatchEstimator(render, basis, mu, lambda, stride, imageSize)
             this.Render = render;
             this.Basis  = basis;
             this.Mu     = mu;
             this.Lambda = lambda;
+            this.Stride = stride;
             this.Size   = imageSize;
             this.Patch  = sqrt(size(basis, 1) / 3); % Assume square basis image
             this.Disp   = 'iter';
@@ -42,8 +44,8 @@ classdef GaussianPatchEstimator < handle
             nlogll   = 0;
             gradient = zeros(length(image(:)), 1);
             
-            for x = 1:(this.Size(1) - this.Patch + 1)
-                for y = 1:(this.Size(2) - this.Patch + 1)
+            for x = 1:this.Stride:(this.Size(1) - this.Patch + 1)
+                for y = 1:this.Stride:(this.Size(2) - this.Patch + 1)
                     idxX = x:1:(x+this.Patch-1);
                     idxY = y:1:(y+this.Patch-1);
                     imagePatch = image(idxX, idxY, :);
@@ -74,11 +76,10 @@ classdef GaussianPatchEstimator < handle
             loss = @(x) this.reconObjective(measure, x);
             
             if ~exist('init','var')
-                % third parameter does not exist, so default it to something
                 init = rand([prod(this.Size), 1]);
             end
             
-            options  = optimset('GradObj','on', 'Display', 'iter', 'MaxIter', 1e3);
+            options  = optimset('GradObj','on', 'Display', 'iter', 'MaxIter', 2e2);
             solution = fminlbfgs(loss, init, options);
             
             reconstruction = reshape(solution, this.Size);
