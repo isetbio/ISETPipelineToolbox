@@ -79,7 +79,7 @@ classdef GaussianPatchEstimator < handle
                 init = rand([prod(this.Size), 1]);
             end
             
-            options  = optimset('GradObj','on', 'Display', 'iter', 'MaxIter', 2e2);
+            options  = optimset('GradObj','on', 'Display', 'iter', 'MaxIter', 1e3);
             solution = fminlbfgs(loss, init, options);
             
             reconstruction = reshape(solution, this.Size);
