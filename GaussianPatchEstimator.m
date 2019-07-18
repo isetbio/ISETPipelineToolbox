@@ -72,14 +72,16 @@ classdef GaussianPatchEstimator < handle
             gradient = gradientPrior + gradientLlhd;
         end
         
-        function reconstruction = estimate(this, measure, init)
+        function reconstruction = estimate(this, measure, maxIter, init)
             loss = @(x) this.reconObjective(measure, x);
-            
             if ~exist('init','var')
                 init = rand([prod(this.Size), 1]);
             end
+            if ~exist('maxIter', 'var')
+                maxIter = 1e3;
+            end
             
-            options  = optimset('GradObj','on', 'Display', 'iter', 'MaxIter', 1e3);
+            options  = optimset('GradObj','on', 'Display', 'iter', 'MaxIter', maxIter);
             solution = fminlbfgs(loss, init, options);
             
             reconstruction = reshape(solution, this.Size);
