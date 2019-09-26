@@ -189,6 +189,28 @@ classdef ConeResponse < handle
             
         end
         
+        function [excitation, allCone, L, M, S] = computeWithOI(this, opticalImage)
+            this.LastOI = opticalImage;
+            
+            % cone excitations
+            nTrialsNum = 2;
+            emPath = zeros(nTrialsNum, 1, 2);
+            
+            % compute mosaic excitation responses
+            % without the eye movement path
+            this.LastResponse = this.Mosaic.compute(opticalImage, 'emPath', emPath);
+            
+            sizeExci   = size(this.LastResponse);
+            excitation = reshape(this.LastResponse(1, :, :), [sizeExci(2), sizeExci(3)]);
+            
+            % LMS cone excitation
+            L = this.getConetypeResponse(this.L_Cone_Idx);
+            M = this.getConetypeResponse(this.M_Cone_Idx);
+            S = this.getConetypeResponse(this.S_Cone_Idx);
+            
+            allCone = [L; M; S];
+        end
+        
         function [allCone, coneCount] = coneExcitationRnd(this, factor, type)
             nCone = sum(sum(this.Mosaic.pattern ~= 0));
             sizeExci   = size(this.LastResponse);
