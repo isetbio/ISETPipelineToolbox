@@ -188,7 +188,7 @@ classdef ConeResponse < handle
             allCone = [L; M; S];
             
         end
-        
+               
         function [excitation, allCone, L, M, S] = computeWithOI(this, opticalImage)
             this.LastOI = opticalImage;
             
@@ -210,6 +210,11 @@ classdef ConeResponse < handle
             
             allCone = [L; M; S];
         end
+        
+        function [excitation, allCone, L, M, S] = computeWithScene(this, inputScene)
+            opticalImage = oiCompute(this.PSF, inputScene);
+            [excitation, allCone, L, M, S] = this.computeWithOI(opticalImage);
+        end        
         
         function [allCone, coneCount] = coneExcitationRnd(this, factor, type)
             nCone = sum(sum(this.Mosaic.pattern ~= 0));
