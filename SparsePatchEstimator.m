@@ -7,7 +7,7 @@ classdef SparsePatchEstimator < PatchEstimator
             this@PatchEstimator(render, basis, mu, lambda, stride, imageSize);
         end
         
-        % Patchwise Gaussian prior and gradient
+        % Patchwise sparse prior and gradient
         function [nlogll, gradient] = priorPatch(this, patchVec)
             projection = this.Basis * (patchVec - this.Mu);
             nlogll   = sum(abs(projection));
