@@ -19,7 +19,7 @@ classdef PatchEstimator < handle
     end
 
     methods
-        
+                       
         % Constructor for the estimator
         function this = PatchEstimator(render, basis, mu, lambda, stride, imageSize)
             this.Render = render;
@@ -89,6 +89,10 @@ classdef PatchEstimator < handle
             reconstruction = reshape(solution, this.Size);
         end
         
+        function [nlogPrior, gradPrior, nlogLlhd, gradLlhd] = evalEstimate(this, measure, imageVec)
+            [nlogPrior, gradPrior] = this.prior(reshape(imageVec, this.Size));
+            [nlogLlhd,  gradLlhd]  = this.likelihood(measure, imageVec);
+        end
     end
 end
 
