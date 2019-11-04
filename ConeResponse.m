@@ -63,6 +63,7 @@ classdef ConeResponse < handle
         Mosaic;
         LastResponse;
         LastOI;
+        PupilSize;
     end
     
     properties (Access = private)
@@ -86,6 +87,7 @@ classdef ConeResponse < handle
             p.addParameter('display', display);
             p.addParameter('viewDistance', 0.57, @(x) (isnumeric(x) && numel(x) == 1));
             p.addParameter('spatialDensity', []);
+            p.addParameter('pupilSize', 3.0, @(x) (isnumeric(x) && numel(x) == 1));
             
             parse(p, varargin{:});
             this.FovealDegree    = p.Results.fovealDegree;
@@ -122,7 +124,8 @@ classdef ConeResponse < handle
             this.Display.dist = p.Results.viewDistance;
             
             % Point spread function of human eye
-            this.PSF = oiCreate('wvf human');
+            this.PupilSize = p.Results.pupilSize;
+            this.PSF = oiCreate('wvf human', p.Results.pupilSize);
         end
         
         function visualizeMosaic(this)
