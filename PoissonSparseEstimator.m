@@ -15,7 +15,7 @@ classdef PoissonSparseEstimator < SparsePatchEstimator
             dldx1  = this.Render;
             dldx2  = (-measure) .* this.Render ./ lambda;
             
-            gradient = sum(dldx1 + dldx2, 1);
+            gradient = (sum(dldx1 + dldx2, 1))';
         end
         
     end
