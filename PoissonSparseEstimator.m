@@ -10,10 +10,9 @@ classdef PoissonSparseEstimator < SparsePatchEstimator
         function [nlogll, gradient] = likelihood(this, measure, imageVec)
             lambda = this.Render * imageVec;
             idpdLl = -lambda + measure .* log(lambda);
-            nlogll = -sum(idpdLl);                        
+            nlogll = -sum(idpdLl);
             gradient = (sum(this.Render + (-measure) .* this.Render ./ lambda, 1))';
         end
-        
     end
 end
 

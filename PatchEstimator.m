@@ -15,11 +15,11 @@ classdef PatchEstimator < handle
         
         % Prior on one small patch of the image
         [nlogll, gradient] = priorPatch(this, patchVec)
-
+        
     end
-
+    
     methods
-                       
+        
         % Constructor for the estimator
         function this = PatchEstimator(render, basis, mu, lambda, stride, imageSize)
             this.Render = render;
@@ -38,7 +38,7 @@ classdef PatchEstimator < handle
             nlogll = sum((pred - measure) .^ 2);
             gradient = (2 * (pred - measure)' * this.Render)';
         end
-                        
+        
         % Prior loss and gradient
         function [nlogll, gradient] = prior(this, image)
             nlogll   = 0;
@@ -72,20 +72,32 @@ classdef PatchEstimator < handle
             gradient = gradientPrior + gradientLlhd;
         end
         
-        function reconstruction = estimate(this, measure, maxIter, init)
+        function reconstruction = estimate(this, measure, maxIter, init, bounded)
             loss = @(x) this.reconObjective(measure, x);
-
+            
             if ~exist('maxIter', 'var')
                 maxIter = 1e3;
             end
-
+            
             if ~exist('init', 'var')
                 init = rand([prod(this.Size), 1]);
             end
             
-            options  = optimset('GradObj','on', 'Display', 'iter', 'MaxIter', maxIter);
-            solution = fminlbfgs(loss, init, options);
+            if ~exist('bounded', 'var')
+                bounded = false;
+            end
             
+            if bounded
+                options = optimoptions('fmincon', 'Display', 'iter-detailed', 'MaxIterations', maxIter, 'CheckGradients', false, ...
+                    'Algorithm', 'interior-point', 'SpecifyObjectiveGradient', true, 'HessianApproximation', 'lbfgs');
+                lb = init * 0;
+                ub = ones(size(init));
+                solution = fmincon(loss, init, [], [], [], [], lb, ub, [], options);
+            else
+                options  = optimset('GradObj', 'on', 'Display', 'iter', 'MaxIter', maxIter);
+                solution = fminlbfgs(loss, init, options);
+            end
+                        
             reconstruction = reshape(solution, this.Size);
         end
         
