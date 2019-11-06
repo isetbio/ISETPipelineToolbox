@@ -9,11 +9,11 @@ classdef PoissonSparseEstimator < SparsePatchEstimator
         % Override the likelihood function
         function [nlogll, gradient] = likelihood(this, measure, imageVec)
             lambda = this.Render * imageVec;
-            idpdLl = -lambda + measure' .* log(lambda);
+            idpdLl = -lambda + measure .* log(lambda);
             nlogll = -sum(idpdLl);
             
             dldx1  = this.Render;
-            dldx2  = (-measure') .* this.Render ./ lambda;
+            dldx2  = (-measure) .* this.Render ./ lambda;
             
             gradient = sum(dldx1 + dldx2, 1);
         end
