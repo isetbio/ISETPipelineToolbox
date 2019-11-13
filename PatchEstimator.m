@@ -72,7 +72,7 @@ classdef PatchEstimator < handle
             gradient = gradientPrior + gradientLlhd;
         end
         
-        function reconstruction = estimate(this, measure, maxIter, init, bounded)
+        function reconstruction = estimate(this, measure, maxIter, init, bounded, ub)
             loss = @(x) this.reconObjective(measure, x);
             
             if ~exist('maxIter', 'var')
@@ -87,11 +87,15 @@ classdef PatchEstimator < handle
                 bounded = false;
             end
             
+            if ~exist('ub', 'var')
+                ub = 1;
+            end
+            
             if bounded
                 options = optimoptions('fmincon', 'Display', 'iter-detailed', 'MaxIterations', maxIter, 'CheckGradients', false, ...
                     'Algorithm', 'interior-point', 'SpecifyObjectiveGradient', true, 'HessianApproximation', 'lbfgs');
                 lb = init * 0;
-                ub = ones(size(init));
+                ub = ones(size(init)) * ub;
                 solution = fmincon(loss, init, [], [], [], [], lb, ub, [], options);
             else
                 options  = optimset('GradObj', 'on', 'Display', 'iter', 'MaxIter', maxIter);
