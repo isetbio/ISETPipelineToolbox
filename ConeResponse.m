@@ -283,6 +283,10 @@ classdef ConeResponse < handle
             set(gca,'YDir','reverse');
         end
         
+        function rgbOI = rgbOpticalImage(this)
+            rgbOI = oiGet(this.LastOI, 'rgb image');
+        end
+        
     end
     
     methods (Access = private)
