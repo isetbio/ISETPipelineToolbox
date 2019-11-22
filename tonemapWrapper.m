@@ -1,4 +1,4 @@
-function tonemapWrapper(imageSequence, figureNo)
+function tonemapWrapper(imageSequence, displayFile, figureNo)
 if ~exist('figureNo', 'var')
     figureNo = 1;
 end
@@ -6,7 +6,7 @@ end
 tonemapParams.alpha = 0.1;
 tonemapParams.gain = 70;
 
-tonemapImageSet(figureNo, imageSequence, CRT12BitDisplay, tonemapParams);
+tonemapImageSet(figureNo, imageSequence, displayFile, tonemapParams);
 end
 
 
