@@ -1,5 +1,5 @@
 function tonemapWrapper(imageSequence, figureNo)
-if ~exist(figureNo, 'var')
+if ~exist('figureNo', 'var')
     figureNo = 1;
 end
 
