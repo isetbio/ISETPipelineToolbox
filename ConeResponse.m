@@ -64,6 +64,7 @@ classdef ConeResponse < handle
         LastResponse;
         LastOI;
         PupilSize;
+        DefaultMosaic;
     end
     
     properties (Access = private)
@@ -118,6 +119,7 @@ classdef ConeResponse < handle
             % Poisson noise model, mean response
             theMosaic.noiseFlag = 'none';
             this.Mosaic = theMosaic;
+            this.DefaultMosaic = this.Mosaic.pattern;
             
             % Display
             this.Display = p.Results.display;
@@ -191,7 +193,7 @@ classdef ConeResponse < handle
             allCone = [L; M; S];
             
         end
-               
+        
         function [excitation, allCone, L, M, S] = computeWithOI(this, opticalImage)
             this.LastOI = opticalImage;
             
@@ -217,7 +219,7 @@ classdef ConeResponse < handle
         function [excitation, allCone, L, M, S] = computeWithScene(this, inputScene)
             opticalImage = oiCompute(this.PSF, inputScene);
             [excitation, allCone, L, M, S] = this.computeWithOI(opticalImage);
-        end        
+        end
         
         function [allCone, coneCount] = coneExcitationRnd(this, factor, type)
             nCone = sum(sum(this.Mosaic.pattern ~= 0));
@@ -285,6 +287,65 @@ classdef ConeResponse < handle
         
         function rgbOI = rgbOpticalImage(this)
             rgbOI = oiGet(this.LastOI, 'rgb image');
+        end
+        
+        function [L, M, S, numCone] = coneCount(this)
+            L = sum(this.Mosaic.pattern == this.L_Cone_Idx, 'all');
+            M = sum(this.Mosaic.pattern == this.M_Cone_Idx, 'all');
+            S = sum(this.Mosaic.pattern == this.S_Cone_Idx, 'all');
+            numCone = L + M + S;
+        end
+        
+        function resetMCone(this)
+            this.Mosaic.pattern = this.DefaultMosaic;
+        end
+        
+        function reassignMCone(this, ratio, showMosaic)
+            if ~exist('showMosaic', 'var')
+                showMosaic = true;
+            end
+            
+            [~, M, ~, numCone] = this.coneCount;
+            
+            numM = floor(ratio * numCone);
+            if(numM > M)
+                error('Targe M cone ratio is higher than the original mosaic.');
+            end
+            
+            numReassign = M - numM;
+            Mindex = find(this.Mosaic.pattern == this.M_Cone_Idx);
+            reassignIdx = sort(datasample(1:length(Mindex), numReassign, 2, 'Replace',false));
+            reassignIdx = Mindex(reassignIdx);
+            
+            this.Mosaic.pattern(reassignIdx) = this.L_Cone_Idx;
+            if showMosaic
+                this.visualizeMosaic();
+            end
+        end
+        
+        function renderMtx = forwardRender(this, imageSize, validation)
+            if ~exist('validation', 'var')
+                validation = true;
+            end
+            
+            testInput = rand(imageSize);
+            [~, ~, testLinear, testCone] = this.compute(testInput);
+            
+            renderMtx = zeros(length(testCone), length(testLinear(:)));
+            
+            parfor idx = 1:length(testLinear(:))
+                input = zeros(size(testLinear));
+                input(idx) = 1.0;
+                
+                [~, ~, ~, coneVec] = this.compute(input);
+                renderMtx(:, idx) = coneVec;
+            end
+            
+            if validation
+                figure();
+                scatter(testCone, renderMtx * testLinear(:));
+                axis square;
+            end
         end
         
     end
