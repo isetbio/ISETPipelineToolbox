@@ -133,7 +133,8 @@ classdef ConeResponse < handle
         function visualizeMosaic(this)
             this.Mosaic.visualizeGrid(...
                 'backgroundColor', [1 1 1], ...
-                'ticksInVisualDegs', true);
+                'ticksInVisualDegs', true, ...
+                'generateNewFigure', true);
             set(gca, 'XTick', [], 'YTick', []);
             set(gca,'YDir','reverse');
         end
