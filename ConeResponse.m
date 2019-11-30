@@ -343,8 +343,9 @@ classdef ConeResponse < handle
             end
             
             if validation
-                figure();
+                figure(); hold on;
                 scatter(testCone, renderMtx * testLinear(:));
+                plot(xlim, ylim, '--k', 'LineWidth', 2);
                 axis square;
             end
         end
