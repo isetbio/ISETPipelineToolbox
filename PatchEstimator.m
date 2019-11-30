@@ -68,8 +68,8 @@ classdef PatchEstimator < handle
             [nlogllPrior, gradientPrior] = this.prior(reshape(imageVec, this.Size));
             [nlogllLlhd,  gradientLlhd]  = this.likelihood(measure, imageVec);
             
-            loss = double(nlogllPrior + nlogllLlhd);
-            gradient = double(gradientPrior + gradientLlhd);
+            loss = nlogllPrior + nlogllLlhd;
+            gradient = gradientPrior + gradientLlhd;
         end
         
         function reconstruction = estimate(this, measure, maxIter, init, bounded, ub)

@@ -332,7 +332,7 @@ classdef ConeResponse < handle
             testInput = rand(imageSize);
             [~, ~, testLinear, testCone] = this.compute(testInput);
             
-            renderMtx = zeros(length(testCone), length(testLinear(:)), 'single');
+            renderMtx = zeros(length(testCone), length(testLinear(:)));
             
             parfor idx = 1:length(testLinear(:))
                 input = zeros(size(testLinear));
