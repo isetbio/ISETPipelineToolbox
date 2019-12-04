@@ -127,7 +127,7 @@ classdef ConeResponse < handle
             
             % Point spread function of human eye
             this.PupilSize = p.Results.pupilSize;
-            this.PSF = oiCreate('wvf human', p.Results.pupilSize);
+            this.PSF = oiCreate('human', p.Results.pupilSize);
         end
         
         function visualizeMosaic(this)
