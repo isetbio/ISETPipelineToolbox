@@ -65,9 +65,7 @@ classdef ConeResponse < handle
         LastOI;
         PupilSize;
         DefaultMosaic;
-    end
-    
-    properties (Access = private)
+        
         L_Cone_Idx = 2;
         M_Cone_Idx = 3;
         S_Cone_Idx = 4;
@@ -304,8 +302,32 @@ classdef ConeResponse < handle
             numCone = L + M + S;
         end
         
-        function resetMCone(this)
+        function resetCone(this)
             this.Mosaic.pattern = this.DefaultMosaic;
+        end
+        
+        function reassignCone(this, ratio, target, replace, showMosaic)
+            if ~exist('showMosaic', 'var')
+                showMosaic = true;
+            end
+            
+            [L, M, S, numCone] = this.coneCount();
+            coneCount = [L, M, S];
+            
+            numTarget = floor(ratio * numCone);
+            if(numTarget > coneCount(target - 1))
+                 error('Targe cone ratio is higher than the original mosaic.');
+            end
+            
+            numReassign = coneCount(target - 1) - numTarget;
+            coneIdx = find(this.Mosaic.pattern == target);
+            reassignIdx = sort(datasample(1:length(coneIdx), numReassign, 2, 'Replace',false));
+            reassignIdx = coneIdx(reassignIdx);
+
+            this.Mosaic.pattern(reassignIdx) = replace;
+            if showMosaic
+                this.visualizeMosaic();
+            end
         end
         
         function reassignMCone(this, ratio, showMosaic)
@@ -313,22 +335,15 @@ classdef ConeResponse < handle
                 showMosaic = true;
             end
             
-            [~, M, ~, numCone] = this.coneCount;
-            
-            numM = floor(ratio * numCone);
-            if(numM > M)
-                error('Targe M cone ratio is higher than the original mosaic.');
+            this.reassignCone(ratio, this.M_Cone_Idx, this.L_Cone_Idx, showMosaic);
+        end
+        
+        function reassignLCone(this, ratio, showMosaic)
+            if ~exist('showMosaic', 'var')
+                showMosaic = true;
             end
             
-            numReassign = M - numM;
-            Mindex = find(this.Mosaic.pattern == this.M_Cone_Idx);
-            reassignIdx = sort(datasample(1:length(Mindex), numReassign, 2, 'Replace',false));
-            reassignIdx = Mindex(reassignIdx);
-            
-            this.Mosaic.pattern(reassignIdx) = this.L_Cone_Idx;
-            if showMosaic
-                this.visualizeMosaic();
-            end
+            this.reassignCone(ratio, this.L_Cone_Idx, this.M_Cone_Idx, showMosaic);
         end
         
         function renderMtx = forwardRender(this, imageSize, validation)
