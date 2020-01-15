@@ -306,6 +306,29 @@ classdef ConeResponse < handle
             this.Mosaic.pattern = this.DefaultMosaic;
         end
         
+        function resetSCone(this)
+            coneIdx = find(this.Mosaic.pattern == this.S_Cone_Idx);
+            for idx = 1:length(coneIdx)
+                if rand < 0.5
+                    this.Mosaic.pattern(coneIdx(idx)) = this.L_Cone_Idx;
+                else
+                    this.Mosaic.pattern(coneIdx(idx)) = this.M_Cone_Idx;
+                end
+            end
+        end
+        
+        function reassignSCone(this, ratio)
+            [~, ~, S, numCone] = this.coneCount();
+            deltaS = floor(ratio * numCone) - S;
+                        
+            coneIdx = find(this.Mosaic.pattern == this.L_Cone_Idx | this.Mosaic.pattern == this.M_Cone_Idx);
+            reassignIdx = sort(datasample(1:length(coneIdx), deltaS, 2, 'Replace',false));
+            reassignIdx = coneIdx(reassignIdx);
+            
+            this.Mosaic.pattern(reassignIdx) = this.S_Cone_Idx;
+            this.visualizeMosaic();
+        end
+        
         function reassignCone(this, ratio, target, replace, showMosaic)
             if ~exist('showMosaic', 'var')
                 showMosaic = true;
@@ -344,7 +367,7 @@ classdef ConeResponse < handle
             end
             
             this.reassignCone(ratio, this.L_Cone_Idx, this.M_Cone_Idx, showMosaic);
-        end
+        end                
         
         function renderMtx = forwardRender(this, imageSize, validation)
             if ~exist('validation', 'var')
