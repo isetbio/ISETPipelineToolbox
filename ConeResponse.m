@@ -320,7 +320,7 @@ classdef ConeResponse < handle
         function reassignSCone(this, ratio)
             [~, ~, S, numCone] = this.coneCount();
             deltaS = floor(ratio * numCone) - S;
-                        
+            
             coneIdx = find(this.Mosaic.pattern == this.L_Cone_Idx | this.Mosaic.pattern == this.M_Cone_Idx);
             reassignIdx = sort(datasample(1:length(coneIdx), deltaS, 2, 'Replace',false));
             reassignIdx = coneIdx(reassignIdx);
@@ -339,14 +339,14 @@ classdef ConeResponse < handle
             
             numTarget = floor(ratio * numCone);
             if(numTarget > coneCount(target - 1))
-                 error('Targe cone ratio is higher than the original mosaic.');
+                error('Targe cone ratio is higher than the original mosaic.');
             end
             
             numReassign = coneCount(target - 1) - numTarget;
             coneIdx = find(this.Mosaic.pattern == target);
             reassignIdx = sort(datasample(1:length(coneIdx), numReassign, 2, 'Replace',false));
             reassignIdx = coneIdx(reassignIdx);
-
+            
             this.Mosaic.pattern(reassignIdx) = replace;
             if showMosaic
                 this.visualizeMosaic();
@@ -367,7 +367,7 @@ classdef ConeResponse < handle
             end
             
             this.reassignCone(ratio, this.L_Cone_Idx, this.M_Cone_Idx, showMosaic);
-        end                
+        end
         
         function renderMtx = forwardRender(this, imageSize, validation)
             if ~exist('validation', 'var')
@@ -395,6 +395,49 @@ classdef ConeResponse < handle
             end
         end
         
+        function reconValidation(this, input, recon, imageSize, coneVec, estimator)
+            
+            figure();
+            plotAxis = tight_subplot(2, 3, [.05 .05], [.05 .05], [.05 .05]);
+            
+            axes(plotAxis(1));
+            imshow(input);            
+            
+            [~, ~, linear, ~] = this.compute(input);
+            nlogll = estimator.prior(linear);
+            title(sprintf('Original: %.2f \n Loss: %.2f', nlogll, estimator.reconObjective(coneVec, linear(:))));
+            axes(plotAxis(2));
+                        
+            oiImage = this.rgbOpticalImage();
+            coor = (size(oiImage, 1) - imageSize)/2;
+            imshow(imcrop(oiImage, [coor + 1, coor + 1, imageSize, imageSize]));
+            title('Optical Image');
+            
+            axes(plotAxis(3));
+            this.visualizeExcitation(true);
+            title(sprintf('Cone Excitation \n Likelihood %.2f', estimator.likelihood(coneVec, linear(:))), 'FontSize', 11);
+            
+            axes(plotAxis(4));
+            rgbRecon = invGammaCorrection(recon, this.Display);
+            imshow(rgbRecon);
+            title('Reconstruction');
+            
+            [~, ~, linear, ~] = this.compute(rgbRecon);
+            nlogll = estimator.prior(linear);
+            title(sprintf('Reconstruction: %.2f \n Loss: %.2f', nlogll, estimator.reconObjective(coneVec, linear(:))));
+            
+            axes(plotAxis(5));            
+                        
+            oiImage = this.rgbOpticalImage();
+            coor = (size(oiImage, 1) - imageSize)/2;
+            imshow(imcrop(oiImage, [coor + 1, coor + 1, imageSize, imageSize]));
+            title('Optical Image');
+            
+            axes(plotAxis(6));
+            this.visualizeExcitation(true);
+            title(sprintf('Cone Excitation \n Likelihood %.2f', estimator.likelihood(coneVec, linear(:))), 'FontSize', 11);
+            
+        end        
     end
     
     methods (Access = private)
