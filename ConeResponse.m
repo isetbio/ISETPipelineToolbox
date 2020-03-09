@@ -87,45 +87,50 @@ classdef ConeResponse < handle
             p.addParameter('viewDistance', 0.57, @(x) (isnumeric(x) && numel(x) == 1));
             p.addParameter('spatialDensity', []);
             p.addParameter('pupilSize', 3.0, @(x) (isnumeric(x) && numel(x) == 1));
+            p.addParameter('override', false, @islogical);
             
             parse(p, varargin{:});
-            this.FovealDegree    = p.Results.fovealDegree;
+            this.FovealDegree   = p.Results.fovealDegree;
             spatialDensity      = p.Results.spatialDensity;
             eccBasedConeDensity = p.Results.eccBasedConeDensity;
             eccBasedConeQuantal = p.Results.eccBasedConeQuantal;
             
-            % Create cone moasic
-            fprintf('Create cone moasic object: \n');
-            
-            if(isempty(spatialDensity))
-                theMosaic = coneMosaicHex(5, ...                               % hex lattice sampling factor
-                    'fovDegs', this.FovealDegree, ...                           % match mosaic width to stimulus size
-                    'eccBasedConeDensity', eccBasedConeDensity, ...            % cone density varies with eccentricity
-                    'eccBasedConeQuantalEfficiency', eccBasedConeQuantal, ...  % cone quantal efficiency varies with eccentricity
-                    'integrationTime', 0.2, ...                                % 0.1s integration time
-                    'maxGridAdjustmentIterations', 50);                        % terminate iterative lattice adjustment after 50 iterations
+            if(~p.Results.override)
+                % Create cone moasic
+                fprintf('Create cone moasic object: \n');
+                
+                if(isempty(spatialDensity))
+                    theMosaic = coneMosaicHex(5, ...                               % hex lattice sampling factor
+                        'fovDegs', this.FovealDegree, ...                          % match mosaic width to stimulus size
+                        'eccBasedConeDensity', eccBasedConeDensity, ...            % cone density varies with eccentricity
+                        'eccBasedConeQuantalEfficiency', eccBasedConeQuantal, ...  % cone quantal efficiency varies with eccentricity
+                        'integrationTime', 0.2, ...                                % 0.1s integration time
+                        'maxGridAdjustmentIterations', 50);                        % terminate iterative lattice adjustment after 50 iterations
+                else
+                    theMosaic = coneMosaicHex(5, ...
+                        'fovDegs', this.FovealDegree, ...
+                        'spatialDensity', spatialDensity, ...
+                        'sConeMinDistanceFactor', 0, ...
+                        'sConeFreeRadiusMicrons', 0, ...
+                        'integrationTime', 0.2, ...
+                        'maxGridAdjustmentIterations', 50);
+                end
+                
+                % Poisson noise model, mean response
+                theMosaic.noiseFlag = 'none';
+                this.Mosaic = theMosaic;
+                this.DefaultMosaic = this.Mosaic.pattern;
+                
+                % Point spread function of human eye
+                this.PupilSize = p.Results.pupilSize;
+                this.PSF = oiCreate('human', p.Results.pupilSize);
             else
-                theMosaic = coneMosaicHex(5, ...
-                    'fovDegs', this.FovealDegree, ...
-                    'spatialDensity', spatialDensity, ...
-                    'sConeMinDistanceFactor', 0, ...
-                    'sConeFreeRadiusMicrons', 0, ...
-                    'integrationTime', 0.2, ...
-                    'maxGridAdjustmentIterations', 50);
+                fprintf('Override, will not create mosaic and optics object \n');
             end
-            
-            % Poisson noise model, mean response
-            theMosaic.noiseFlag = 'none';
-            this.Mosaic = theMosaic;
-            this.DefaultMosaic = this.Mosaic.pattern;
             
             % Display
             this.Display = p.Results.display;
             this.Display.dist = p.Results.viewDistance;
-            
-            % Point spread function of human eye
-            this.PupilSize = p.Results.pupilSize;
-            this.PSF = oiCreate('human', p.Results.pupilSize);
         end
         
         function visualizeMosaic(this)
@@ -401,13 +406,13 @@ classdef ConeResponse < handle
             plotAxis = tight_subplot(2, 3, [.05 .05], [.05 .05], [.05 .05]);
             
             axes(plotAxis(1));
-            imshow(input);            
+            imshow(input);
             
             [~, ~, linear, ~] = this.compute(input);
             nlogll = estimator.prior(linear);
             title(sprintf('Original: %.2f \n Loss: %.2f', nlogll, estimator.reconObjective(coneVec, linear(:))));
             axes(plotAxis(2));
-                        
+            
             oiImage = this.rgbOpticalImage();
             coor = (size(oiImage, 1) - imageSize)/2;
             imshow(imcrop(oiImage, [coor + 1, coor + 1, imageSize, imageSize]));
@@ -426,8 +431,8 @@ classdef ConeResponse < handle
             nlogll = estimator.prior(linear);
             title(sprintf('Reconstruction: %.2f \n Loss: %.2f', nlogll, estimator.reconObjective(coneVec, linear(:))));
             
-            axes(plotAxis(5));            
-                        
+            axes(plotAxis(5));
+            
             oiImage = this.rgbOpticalImage();
             coor = (size(oiImage, 1) - imageSize)/2;
             imshow(imcrop(oiImage, [coor + 1, coor + 1, imageSize, imageSize]));
@@ -437,7 +442,7 @@ classdef ConeResponse < handle
             this.visualizeExcitation(true);
             title(sprintf('Cone Excitation \n Likelihood %.2f', estimator.likelihood(coneVec, linear(:))), 'FontSize', 11);
             
-        end        
+        end
     end
     
     methods (Access = private)
