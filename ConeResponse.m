@@ -410,7 +410,7 @@ classdef ConeResponse < handle
             
             [~, ~, linear, ~] = this.compute(input);
             nlogll = estimator.prior(linear);
-            title(sprintf('Original: %.2f \n Loss: %.2f', nlogll, estimator.reconObjective(coneVec, linear(:))));
+            title(sprintf('Original Prior: %.2f \n Loss: %.2f', nlogll, estimator.reconObjective(coneVec, linear(:))));
             axes(plotAxis(2));
             
             oiImage = this.rgbOpticalImage();
