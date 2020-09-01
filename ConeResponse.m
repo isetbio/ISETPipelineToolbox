@@ -384,12 +384,14 @@ classdef ConeResponse < handle
             
             renderMtx = zeros(length(testCone), length(testLinear(:)), 'single');
             
+            updateWaitbar = waitbarParfor(length(testLinear(:)), "Calculation in progress...");
             parfor idx = 1:length(testLinear(:))
                 input = zeros(size(testLinear));
                 input(idx) = 1.0;
                 
                 [~, ~, ~, coneVec] = this.compute(input);
                 renderMtx(:, idx) = single(coneVec);
+                updateWaitbar();
             end
             
             if validation
