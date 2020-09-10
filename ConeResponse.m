@@ -88,12 +88,14 @@ classdef ConeResponse < handle
             p.addParameter('spatialDensity', []);
             p.addParameter('pupilSize', 3.0, @(x) (isnumeric(x) && numel(x) == 1));
             p.addParameter('override', false, @islogical);
+            p.addParameter('integrationTime', 0.2, @(x) (isnumeric(x) && numel(x) == 1));
             
             parse(p, varargin{:});
             this.FovealDegree   = p.Results.fovealDegree;
             spatialDensity      = p.Results.spatialDensity;
             eccBasedConeDensity = p.Results.eccBasedConeDensity;
             eccBasedConeQuantal = p.Results.eccBasedConeQuantal;
+            integrationTime     = p.Results.integrationTime;
             
             if(~p.Results.override)
                 % Create cone moasic
@@ -104,7 +106,7 @@ classdef ConeResponse < handle
                         'fovDegs', this.FovealDegree, ...                          % match mosaic width to stimulus size
                         'eccBasedConeDensity', eccBasedConeDensity, ...            % cone density varies with eccentricity
                         'eccBasedConeQuantalEfficiency', eccBasedConeQuantal, ...  % cone quantal efficiency varies with eccentricity
-                        'integrationTime', 0.2, ...                                % 0.1s integration time
+                        'integrationTime', integrationTime, ...                                % 0.2s default integration time
                         'maxGridAdjustmentIterations', 50);                        % terminate iterative lattice adjustment after 50 iterations
                 else
                     theMosaic = coneMosaicHex(5, ...
@@ -112,7 +114,7 @@ classdef ConeResponse < handle
                         'spatialDensity', spatialDensity, ...
                         'sConeMinDistanceFactor', 0, ...
                         'sConeFreeRadiusMicrons', 0, ...
-                        'integrationTime', 0.2, ...
+                        'integrationTime', integrationTime, ...
                         'maxGridAdjustmentIterations', 50);
                 end
                 
