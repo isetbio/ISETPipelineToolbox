@@ -60,6 +60,7 @@ classdef ConeResponse < handle
         Display;
         FovealDegree;
         PSF;
+        noLCA;
         Mosaic;
         LastResponse;
         LastOI;
@@ -73,7 +74,7 @@ classdef ConeResponse < handle
     
     methods(Static)
        function psfNoLCA = psfNoLCA()
-            pupilDiameterMm = 5.0;
+            pupilDiameterMm = 3.0;
             wave = (400:10:700)';
             accommodatedWavelength = 530;
             zCoeffs = zeros(66,1);
@@ -168,6 +169,7 @@ classdef ConeResponse < handle
             % Display
             this.Display = p.Results.display;
             this.Display.dist = p.Results.viewDistance;
+            this.noLCA = this.psfNoLCA();
         end
         
         function visualizeMosaic(this)
@@ -242,9 +244,8 @@ classdef ConeResponse < handle
             
             % set the angular scene width
             realizedStimulusScene = sceneSet(realizedStimulusScene, 'fov', this.FovealDegree);
-            psfNoLCA = this.psfNoLCA();
             
-            opticalImage = oiCompute(psfNoLCA, realizedStimulusScene);
+            opticalImage = oiCompute(this.noLCA, realizedStimulusScene);
             [excitation, allCone, L, M, S] = this.computeWithOI(opticalImage);
         end
         
@@ -275,9 +276,8 @@ classdef ConeResponse < handle
             [excitation, allCone, L, M, S] = this.computeWithOI(opticalImage);
         end
         
-        function [excitation, allCone, L, M, S] = computeWithSceneNoLCA(this, inputScene)
-            psfNoLCA = this.psfNoLCA();
-            opticalImage = oiCompute(psfNoLCA, inputScene);
+        function [excitation, allCone, L, M, S] = computeWithSceneNoLCA(this, inputScene)            
+            opticalImage = oiCompute(this.noLCA, inputScene);
             [excitation, allCone, L, M, S] = this.computeWithOI(opticalImage);
         end
         
@@ -430,9 +430,13 @@ classdef ConeResponse < handle
             this.reassignCone(ratio, this.L_Cone_Idx, this.M_Cone_Idx, showMosaic);
         end
         
-        function renderMtx = forwardRender(this, imageSize, validation)
+        function renderMtx = forwardRender(this, imageSize, validation, lca)
             if ~exist('validation', 'var')
                 validation = true;
+            end
+            
+            if ~exist('lca', 'var')
+                lca = true;
             end
             
             testInput = rand(imageSize);
@@ -445,7 +449,12 @@ classdef ConeResponse < handle
                 input = zeros(size(testLinear));
                 input(idx) = 1.0;
                 
-                [~, ~, ~, coneVec] = this.compute(input);
+                if lca
+                    [~, ~, ~, coneVec] = this.compute(input);
+                else
+                    [~, ~, ~, coneVec] = this.computeNoLCA(input);
+                end
+                
                 renderMtx(:, idx) = single(coneVec);
                 updateWaitbar();
             end
