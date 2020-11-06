@@ -71,6 +71,41 @@ classdef ConeResponse < handle
         S_Cone_Idx = 4;
     end
     
+    methods(Static)
+       function psfNoLCA = psfNoLCA()
+            pupilDiameterMm = 5.0;
+            wave = (400:10:700)';
+            accommodatedWavelength = 530;
+            zCoeffs = zeros(66,1);
+            
+            % Set up wavefront optics object
+            
+            % Compute pupil function using 'no lca' key/value pair to turn off LCA.
+            % You can turn it back on to compare the effect.
+            wvfP = wvfCreate('calc wavelengths', wave, 'zcoeffs', zCoeffs, ...
+                'name', sprintf('human-%d', pupilDiameterMm));
+            wvfP = wvfSet(wvfP, 'measured pupil size', pupilDiameterMm);
+            wvfP = wvfSet(wvfP, 'calc pupil size', pupilDiameterMm);
+            
+            % Deal with best focus by specifying that the wavefront parameters
+            % were measured at the wavelength we want to say is in focus. This
+            % is a little bit of a hack but seems OK for the diffraction limited case
+            % we're using here.
+            wvfP = wvfSet(wvfP, 'measured wavelength', accommodatedWavelength);
+            
+            % Make optical image object using wvfP and no LCA calc
+            
+            % Same as above but don't defeat LCA calc
+            wvfPNoLca = wvfComputePupilFunction(wvfP,false,'no lca',true);
+            wvfPNoLca = wvfComputePSF(wvfPNoLca);
+            psfNoLCA = wvf2oi(wvfPNoLca);
+            opticsNoLca = oiGet(psfNoLCA, 'optics');
+            opticsNoLca = opticsSet(opticsNoLca, 'model', 'shift invariant');
+            opticsNoLca = opticsSet(opticsNoLca, 'name', 'human-wvf-nolca');
+            psfNoLCA = oiSet(psfNoLCA,'optics',opticsNoLca);
+        end
+   end
+    
     methods (Access = public)
         
         function this = ConeResponse(varargin)
@@ -200,6 +235,19 @@ classdef ConeResponse < handle
             
         end
         
+        function [excitation, opticalImage, linearizedImage, allCone, L, M, S] = computeNoLCA(this, image)
+            meanLuminanceCdPerM2 = [];
+            [realizedStimulusScene, ~, linearizedImage] = sceneFromFile(image, 'rgb', ...
+                meanLuminanceCdPerM2, this.Display);
+            
+            % set the angular scene width
+            realizedStimulusScene = sceneSet(realizedStimulusScene, 'fov', this.FovealDegree);
+            psfNoLCA = this.psfNoLCA();
+            
+            opticalImage = oiCompute(psfNoLCA, realizedStimulusScene);
+            [excitation, allCone, L, M, S] = this.computeWithOI(opticalImage);
+        end
+        
         function [excitation, allCone, L, M, S] = computeWithOI(this, opticalImage)
             this.LastOI = opticalImage;
             
@@ -224,6 +272,12 @@ classdef ConeResponse < handle
         
         function [excitation, allCone, L, M, S] = computeWithScene(this, inputScene)
             opticalImage = oiCompute(this.PSF, inputScene);
+            [excitation, allCone, L, M, S] = this.computeWithOI(opticalImage);
+        end
+        
+        function [excitation, allCone, L, M, S] = computeWithSceneNoLCA(this, inputScene)
+            psfNoLCA = this.psfNoLCA();
+            opticalImage = oiCompute(psfNoLCA, inputScene);
             [excitation, allCone, L, M, S] = this.computeWithOI(opticalImage);
         end
         
