@@ -440,8 +440,12 @@ classdef ConeResponse < handle
             end
             
             testInput = rand(imageSize);
-            [~, ~, testLinear, testCone] = this.compute(testInput);
-            
+            if lca
+                [~, ~, testLinear, testCone] = this.compute(testInput);
+            else
+                [~, ~, testLinear, testCone] = this.computeNoLCA(testInput);
+            end
+                        
             renderMtx = zeros(length(testCone), length(testLinear(:)), 'single');
             
             updateWaitbar = waitbarParfor(length(testLinear(:)), "Calculation in progress...");
