@@ -60,7 +60,7 @@ classdef ConeResponse < handle
         Display;
         FovealDegree;
         PSF;
-        noLCA;
+        diffLmt;
         Mosaic;
         LastResponse;
         LastOI;
@@ -73,39 +73,30 @@ classdef ConeResponse < handle
     end
     
     methods(Static)
-       function psfNoLCA = psfNoLCA()
+        function psfDiffLmt = psfDiffLmt()
+            % Set up wavefront optics object
             pupilDiameterMm = 3.0;
             wave = (400:10:700)';
             accommodatedWavelength = 530;
             zCoeffs = zeros(66,1);
             
-            % Set up wavefront optics object
-            
-            % Compute pupil function using 'no lca' key/value pair to turn off LCA.
-            % You can turn it back on to compare the effect.
             wvfP = wvfCreate('calc wavelengths', wave, 'zcoeffs', zCoeffs, ...
                 'name', sprintf('human-%d', pupilDiameterMm));
             wvfP = wvfSet(wvfP, 'measured pupil size', pupilDiameterMm);
             wvfP = wvfSet(wvfP, 'calc pupil size', pupilDiameterMm);
-            
-            % Deal with best focus by specifying that the wavefront parameters
-            % were measured at the wavelength we want to say is in focus. This
-            % is a little bit of a hack but seems OK for the diffraction limited case
-            % we're using here.
             wvfP = wvfSet(wvfP, 'measured wavelength', accommodatedWavelength);
             
-            % Make optical image object using wvfP and no LCA calc
-            
-            % Same as above but don't defeat LCA calc
+            % Compute pupil function using 'no lca' key/value pair to turn off LCA.
+            % You can turn it back on to compare the effect.
             wvfPNoLca = wvfComputePupilFunction(wvfP,false,'no lca',true);
             wvfPNoLca = wvfComputePSF(wvfPNoLca);
-            psfNoLCA = wvf2oi(wvfPNoLca);
-            opticsNoLca = oiGet(psfNoLCA, 'optics');
+            psfDiffLmt = wvf2oi(wvfPNoLca);
+            opticsNoLca = oiGet(psfDiffLmt, 'optics');
             opticsNoLca = opticsSet(opticsNoLca, 'model', 'shift invariant');
             opticsNoLca = opticsSet(opticsNoLca, 'name', 'human-wvf-nolca');
-            psfNoLCA = oiSet(psfNoLCA,'optics',opticsNoLca);
+            psfDiffLmt = oiSet(psfDiffLmt,'optics',opticsNoLca);
         end
-   end
+    end
     
     methods (Access = public)
         
@@ -169,7 +160,7 @@ classdef ConeResponse < handle
             % Display
             this.Display = p.Results.display;
             this.Display.dist = p.Results.viewDistance;
-            this.noLCA = this.psfNoLCA();
+            this.diffLmt = this.psfDiffLmt();
         end
         
         function visualizeMosaic(this)
@@ -237,7 +228,7 @@ classdef ConeResponse < handle
             
         end
         
-        function [excitation, opticalImage, linearizedImage, allCone, L, M, S] = computeNoLCA(this, image)
+        function [excitation, opticalImage, linearizedImage, allCone, L, M, S] = computeDiffLmt(this, image)
             meanLuminanceCdPerM2 = [];
             [realizedStimulusScene, ~, linearizedImage] = sceneFromFile(image, 'rgb', ...
                 meanLuminanceCdPerM2, this.Display);
@@ -245,7 +236,7 @@ classdef ConeResponse < handle
             % set the angular scene width
             realizedStimulusScene = sceneSet(realizedStimulusScene, 'fov', this.FovealDegree);
             
-            opticalImage = oiCompute(this.noLCA, realizedStimulusScene);
+            opticalImage = oiCompute(this.diffLmt, realizedStimulusScene);
             [excitation, allCone, L, M, S] = this.computeWithOI(opticalImage);
         end
         
@@ -276,8 +267,8 @@ classdef ConeResponse < handle
             [excitation, allCone, L, M, S] = this.computeWithOI(opticalImage);
         end
         
-        function [excitation, allCone, L, M, S] = computeWithSceneNoLCA(this, inputScene)            
-            opticalImage = oiCompute(this.noLCA, inputScene);
+        function [excitation, allCone, L, M, S] = computeWithSceneDiffLmt(this, inputScene)
+            opticalImage = oiCompute(this.diffLmt, inputScene);
             [excitation, allCone, L, M, S] = this.computeWithOI(opticalImage);
         end
         
@@ -430,22 +421,22 @@ classdef ConeResponse < handle
             this.reassignCone(ratio, this.L_Cone_Idx, this.M_Cone_Idx, showMosaic);
         end
         
-        function renderMtx = forwardRender(this, imageSize, validation, lca)
+        function renderMtx = forwardRender(this, imageSize, validation, optics)
             if ~exist('validation', 'var')
                 validation = true;
             end
             
-            if ~exist('lca', 'var')
-                lca = true;
+            if ~exist('optics', 'var')
+                optics = true;
             end
             
             testInput = rand(imageSize);
-            if lca
+            if optics
                 [~, ~, testLinear, testCone] = this.compute(testInput);
             else
-                [~, ~, testLinear, testCone] = this.computeNoLCA(testInput);
+                [~, ~, testLinear, testCone] = this.computeDiffLmt(testInput);
             end
-                        
+            
             renderMtx = zeros(length(testCone), length(testLinear(:)), 'single');
             
             updateWaitbar = waitbarParfor(length(testLinear(:)), "Calculation in progress...");
@@ -456,7 +447,7 @@ classdef ConeResponse < handle
                 if lca
                     [~, ~, ~, coneVec] = this.compute(input);
                 else
-                    [~, ~, ~, coneVec] = this.computeNoLCA(input);
+                    [~, ~, ~, coneVec] = this.computeDiffLmt(input);
                 end
                 
                 renderMtx(:, idx) = single(coneVec);
