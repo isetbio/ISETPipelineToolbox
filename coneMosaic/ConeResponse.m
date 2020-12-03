@@ -105,7 +105,7 @@ classdef ConeResponse < handle
             pupilDiameterMm = 3.0;
             
             % get Zernike coefficients 
-            zCoeffs = wvfLoadThibosVirtualEyes(pupilDiameterMM);
+            zCoeffs = wvfLoadThibosVirtualEyes(pupilDiameterMm);
             wvfP = wvfCreate('calc wavelengths', wave, 'zcoeffs', zCoeffs, ...
                 'name', sprintf('human-%d', pupilDiameterMm));
             wvfP = wvfSet(wvfP, 'measured pupil size', pupilDiameterMm);
