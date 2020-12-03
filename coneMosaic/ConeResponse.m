@@ -75,11 +75,12 @@ classdef ConeResponse < handle
     methods(Static)
         function psfDiffLmt = psfDiffLmt()
             % Set up wavefront optics object
-            pupilDiameterMm = 3.0;
             wave = (400:10:700)';
             accommodatedWavelength = 530;
-            zCoeffs = zeros(66,1);
+            pupilDiameterMm = 3.0;
             
+            % zero Zernike coefficients (diffraction limited)
+            zCoeffs = zeros(66,1);            
             wvfP = wvfCreate('calc wavelengths', wave, 'zcoeffs', zCoeffs, ...
                 'name', sprintf('human-%d', pupilDiameterMm));
             wvfP = wvfSet(wvfP, 'measured pupil size', pupilDiameterMm);
@@ -87,15 +88,41 @@ classdef ConeResponse < handle
             wvfP = wvfSet(wvfP, 'measured wavelength', accommodatedWavelength);
             
             % Compute pupil function using 'no lca' key/value pair to turn off LCA.
-            % You can turn it back on to compare the effect.
             wvfPNoLca = wvfComputePupilFunction(wvfP,false,'no lca',true);
             wvfPNoLca = wvfComputePSF(wvfPNoLca);
+            
             psfDiffLmt = wvf2oi(wvfPNoLca);
             opticsNoLca = oiGet(psfDiffLmt, 'optics');
             opticsNoLca = opticsSet(opticsNoLca, 'model', 'shift invariant');
             opticsNoLca = opticsSet(opticsNoLca, 'name', 'human-wvf-nolca');
             psfDiffLmt = oiSet(psfDiffLmt,'optics',opticsNoLca);
         end
+        
+        function psfNoLCA = psfNoLCA()
+            % Set up wavefront optics object
+            wave = (400:10:700)';
+            accommodatedWavelength = 530;
+            pupilDiameterMm = 3.0;
+            
+            % get Zernike coefficients 
+            zCoeffs = wvfLoadThibosVirtualEyes(pupilDiameterMM);
+            wvfP = wvfCreate('calc wavelengths', wave, 'zcoeffs', zCoeffs, ...
+                'name', sprintf('human-%d', pupilDiameterMm));
+            wvfP = wvfSet(wvfP, 'measured pupil size', pupilDiameterMm);
+            wvfP = wvfSet(wvfP, 'calc pupil size', pupilDiameterMm);
+            wvfP = wvfSet(wvfP, 'measured wavelength', accommodatedWavelength);
+            
+            % Compute pupil function using 'no lca' key/value pair to turn off LCA.
+            wvfPNoLca = wvfComputePupilFunction(wvfP,false,'no lca',true);
+            wvfPNoLca = wvfComputePSF(wvfPNoLca);
+            
+            psfDiffLmt = wvf2oi(wvfPNoLca);
+            opticsNoLca = oiGet(psfDiffLmt, 'optics');
+            opticsNoLca = opticsSet(opticsNoLca, 'model', 'shift invariant');
+            opticsNoLca = opticsSet(opticsNoLca, 'name', 'human-wvf-nolca');
+            psfNoLCA = oiSet(psfDiffLmt,'optics',opticsNoLca);
+        end
+        
     end
     
     methods (Access = public)
