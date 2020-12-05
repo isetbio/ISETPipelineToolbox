@@ -471,7 +471,7 @@ classdef ConeResponse < handle
                 input = zeros(size(testLinear));
                 input(idx) = 1.0;
                 
-                if lca
+                if optics
                     [~, ~, ~, coneVec] = this.compute(input);
                 else
                     [~, ~, ~, coneVec] = this.computeDiffLmt(input);
