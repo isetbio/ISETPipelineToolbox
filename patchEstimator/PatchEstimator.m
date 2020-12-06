@@ -102,7 +102,7 @@ classdef PatchEstimator < handle
                 ub = ones(size(init)) * ub;
                 solution = fmincon(loss, init, [], [], [], [], lb, ub, [], options);
             else
-                options  = optimset('GradObj', 'on', 'Display', disp, 'MaxIter', maxIter);
+                options  = optimset('GradObj', 'on', 'Display', disp, 'MaxIter', maxIter, 'MaxFunctionEvaluations', maxIter * 4);
                 solution = fminlbfgs(loss, init, options);
             end
                         
