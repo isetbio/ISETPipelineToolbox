@@ -448,13 +448,17 @@ classdef ConeResponse < handle
             this.reassignCone(ratio, this.L_Cone_Idx, this.M_Cone_Idx, showMosaic);
         end
         
-        function renderMtx = forwardRender(this, imageSize, validation, optics)
+        function renderMtx = forwardRender(this, imageSize, validation, optics, waitBar)
             if ~exist('validation', 'var')
                 validation = true;
             end
             
             if ~exist('optics', 'var')
                 optics = true;
+            end
+            
+            if ~exist('waitBar', 'var')
+                waitBar = true;
             end
             
             testInput = rand(imageSize);
@@ -466,7 +470,10 @@ classdef ConeResponse < handle
             
             renderMtx = zeros(length(testCone), length(testLinear(:)), 'single');
             
-            updateWaitbar = waitbarParfor(length(testLinear(:)), "Calculation in progress...");
+            updateWaitbar = [];
+            if waitBar
+                updateWaitbar = waitbarParfor(length(testLinear(:)), "Calculation in progress...");
+            end
             parfor idx = 1:length(testLinear(:))
                 input = zeros(size(testLinear));
                 input(idx) = 1.0;
@@ -478,7 +485,10 @@ classdef ConeResponse < handle
                 end
                 
                 renderMtx(:, idx) = single(coneVec);
-                updateWaitbar();
+                
+                if waitBar
+                    updateWaitbar();
+                end
             end
             
             if validation
