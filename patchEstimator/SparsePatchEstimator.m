@@ -12,7 +12,7 @@ classdef SparsePatchEstimator < PatchEstimator
             projection = this.Basis * (patchVec - this.Mu);
             nlogll   = sum(abs(projection));
 
-            zero = 1e-2;
+            zero = 1e-4;
             gradient = ((projection > zero) - (projection < -zero))' * this.Basis;             
         end
             
