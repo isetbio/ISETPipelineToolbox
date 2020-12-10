@@ -401,11 +401,10 @@ classdef ConeResponse < handle
             deltaS = floor(ratio * numCone) - S;
             
             coneIdx = find(this.Mosaic.pattern == this.L_Cone_Idx | this.Mosaic.pattern == this.M_Cone_Idx);
-            reassignIdx = sort(datasample(1:length(coneIdx), deltaS, 2, 'Replace',false));
+            reassignIdx = sort(datasample(1:length(coneIdx), deltaS, 2, 'Replace', false));
             reassignIdx = coneIdx(reassignIdx);
             
-            this.Mosaic.pattern(reassignIdx) = this.S_Cone_Idx;
-            this.visualizeMosaic();
+            this.Mosaic.pattern(reassignIdx) = this.S_Cone_Idx;            
         end
         
         function reassignCone(this, ratio, target, replace, showMosaic)
@@ -423,7 +422,7 @@ classdef ConeResponse < handle
             
             numReassign = coneCount(target - 1) - numTarget;
             coneIdx = find(this.Mosaic.pattern == target);
-            reassignIdx = sort(datasample(1:length(coneIdx), numReassign, 2, 'Replace',false));
+            reassignIdx = sort(datasample(1:length(coneIdx), numReassign, 2, 'Replace', false));
             reassignIdx = coneIdx(reassignIdx);
             
             this.Mosaic.pattern(reassignIdx) = replace;
