@@ -73,11 +73,15 @@ classdef ConeResponse < handle
     end
     
     methods(Static)
-        function psfDiffLmt = psfDiffLmt()
+        function psfDiffLmt = psfDiffLmt(pupilSize)
+            if ~exist('pupilSize', 'var')
+                pupilSize = 3.0;
+            end
+            
             % Set up wavefront optics object
             wave = (400:10:700)';
             accommodatedWavelength = 530;
-            pupilDiameterMm = 3.0;
+            pupilDiameterMm = pupilSize;
             
             % zero Zernike coefficients (diffraction limited)
             zCoeffs = zeros(66,1);            
@@ -91,6 +95,7 @@ classdef ConeResponse < handle
             wvfPNoLca = wvfComputePupilFunction(wvfP,false,'no lca',true);
             wvfPNoLca = wvfComputePSF(wvfPNoLca);
             
+            % Optics object
             psfDiffLmt = wvf2oi(wvfPNoLca);
             opticsNoLca = oiGet(psfDiffLmt, 'optics');
             opticsNoLca = opticsSet(opticsNoLca, 'model', 'shift invariant');
@@ -98,13 +103,17 @@ classdef ConeResponse < handle
             psfDiffLmt = oiSet(psfDiffLmt,'optics',opticsNoLca);
         end
         
-        function psfNoLCA = psfNoLCA()
+        function psfNoLCA = psfNoLCA(pupilSize)
+            if ~exist('pupilSize', 'var')
+                pupilSize = 3.0;
+            end
+            
             % Set up wavefront optics object
             wave = (400:10:700)';
             accommodatedWavelength = 530;
-            pupilDiameterMm = 3.0;
+            pupilDiameterMm = pupilSize;
             
-            % get Zernike coefficients 
+            % get Zernike coefficients for humans
             zCoeffs = wvfLoadThibosVirtualEyes(pupilDiameterMm);
             wvfP = wvfCreate('calc wavelengths', wave, 'zcoeffs', zCoeffs, ...
                 'name', sprintf('human-%d', pupilDiameterMm));
@@ -116,6 +125,7 @@ classdef ConeResponse < handle
             wvfPNoLca = wvfComputePupilFunction(wvfP,false,'no lca',true);
             wvfPNoLca = wvfComputePSF(wvfPNoLca);
             
+            % Optics object
             psfDiffLmt = wvf2oi(wvfPNoLca);
             opticsNoLca = oiGet(psfDiffLmt, 'optics');
             opticsNoLca = opticsSet(opticsNoLca, 'model', 'shift invariant');
