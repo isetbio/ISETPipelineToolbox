@@ -82,6 +82,20 @@ classdef PatchEstimator < handle
             gradient = gradientPrior + double(gather(gradientLlhd));
         end                
         
+        function reconstruction = runEstimate(this, coneVec, varargin)
+            p = inputParser;
+            p.addParameter('maxIter', 1e3, @(x)(isnumeric(x) && numel(x) == 1));
+            p.addParameter('init', rand([prod(this.Size), 1]));
+            p.addParameter('bounded', true, @(x)(islogical(x) && numel(x) == 1));
+            p.addParameter('ub', 1.0, @(x)(isnumeric(x) && numel(x) == 1));
+            p.addParameter('display', 'iter');
+            p.addParameter('gpu', false, @(x)(islogical(x) && numel(x) == 1));
+            
+            reconstruction = this.estimate(coneVec, p.Results.maxIter, p.Results.init, ...
+                p.Results.bounded, p.Results.ub, p.Results.display, p.Results.gpu);
+
+        end
+        
         function reconstruction = estimate(this, measure, maxIter, init, bounded, ub, disp, gpu)
             loss = @(x) this.reconObjective(measure, x);
             
