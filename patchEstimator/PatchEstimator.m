@@ -91,6 +91,7 @@ classdef PatchEstimator < handle
             p.addParameter('display', 'iter');
             p.addParameter('gpu', false, @(x)(islogical(x) && numel(x) == 1));
             
+            parse(p, varargin{:});
             reconstruction = this.estimate(coneVec, p.Results.maxIter, p.Results.init, ...
                 p.Results.bounded, p.Results.ub, p.Results.display, p.Results.gpu);
 
