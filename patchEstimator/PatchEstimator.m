@@ -76,10 +76,10 @@ classdef PatchEstimator < handle
         % likelihood function calculation
         function [loss, gradient] = reconObjectiveGPU(this, measure, imageVec)        
             [nlogllPrior, gradientPrior] = this.prior(reshape(imageVec, this.Size));
-            [nlogllLlhd,  gradientLlhd]  = this.likelihood(measure, gpuArray(imageVec));
+            [nlogllLlhd,  gradientLlhd]  = this.likelihood(measure, gpuArray(single(imageVec)));
             
-            loss = nlogllPrior + gather(nlogllLlhd);
-            gradient = gradientPrior + gather(gradientLlhd);
+            loss = nlogllPrior + double(gather(nlogllLlhd));
+            gradient = gradientPrior + double(gather(gradientLlhd));
         end                
         
         function reconstruction = estimate(this, measure, maxIter, init, bounded, ub, disp, gpu)
@@ -110,7 +110,7 @@ classdef PatchEstimator < handle
             end
             
             if gpu
-                measure = gpuArray(measure);
+                measure = gpuArray(single(measure));
                 loss = @(x) this.reconObjectiveGPU(measure, x);
             end
             
