@@ -72,7 +72,17 @@ classdef PatchEstimator < handle
             gradient = gradientPrior + gradientLlhd;
         end
         
-        function reconstruction = estimate(this, measure, maxIter, init, bounded, ub, disp)
+        % use GPU (gpuArray) to compute the large matrix product in the
+        % likelihood function calculation
+        function [loss, gradient] = reconObjectiveGPU(this, measure, imageVec)        
+            [nlogllPrior, gradientPrior] = this.prior(reshape(imageVec, this.Size));
+            [nlogllLlhd,  gradientLlhd]  = this.likelihood(measure, gpuArray(imageVec));
+            
+            loss = nlogllPrior + gather(nlogllLlhd);
+            gradient = gradientPrior + gather(gradientLlhd);
+        end                
+        
+        function reconstruction = estimate(this, measure, maxIter, init, bounded, ub, disp, gpu)
             loss = @(x) this.reconObjective(measure, x);
             
             if ~exist('maxIter', 'var')
@@ -93,6 +103,15 @@ classdef PatchEstimator < handle
             
             if ~exist('disp', 'var')
                 disp = 'iter';
+            end
+            
+            if ~exist('gpu', 'var')
+                gpu = false;
+            end
+            
+            if gpu
+                measure = gpuArray(measure);
+                loss = @(x) this.reconObjectiveGPU(measure, x);
             end
             
             if bounded
