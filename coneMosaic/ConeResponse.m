@@ -141,7 +141,7 @@ classdef ConeResponse < handle
             % CONERESPONSE  Construct ConeResponse object.
             %   Construct ConeResponse object with optional argument:
             %   FovealDegree, eccBasedConeDensity, eccBasedConeQuantal.
-            display = displayCreate('LCD-Apple');
+            display = displayCreate('CRT12BitDisplay');
             
             p = inputParser;
             p.addParameter('fovealDegree', 1.0, @(x)(isnumeric(x) && numel(x) == 1));
