@@ -131,12 +131,13 @@ classdef PatchEstimator < handle
             
             if bounded
                 options = optimoptions('fmincon', 'Display', disp, 'MaxIterations', maxIter, 'CheckGradients', false, ...
-                    'Algorithm', 'interior-point', 'SpecifyObjectiveGradient', true, 'HessianApproximation', 'lbfgs');
+                    'Algorithm', 'interior-point', 'SpecifyObjectiveGradient', true, ...
+                    'HessianApproximation', 'lbfgs', 'MaxFunctionEvaluations', floor(maxIter * 1.25));
                 lb = init * 0;
                 ub = ones(size(init)) * ub;
                 solution = fmincon(loss, init, [], [], [], [], lb, ub, [], options);
             else
-                options  = optimset('GradObj', 'on', 'Display', disp, 'MaxIter', maxIter, 'MaxFunctionEvaluations', maxIter * 4);
+                options  = optimset('GradObj', 'on', 'Display', disp, 'MaxIter', maxIter, 'MaxFunctionEvaluations', floor(maxIter * 1.25));
                 solution = fminlbfgs(loss, init, options);
             end
                         
