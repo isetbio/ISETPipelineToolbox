@@ -10,7 +10,6 @@ Please also see the Methods section of our paper. For actual usage, the best way
     ├── ConeResponsePeripheral.m    # Extend the base class to use peripheral cone mosaic and optics
     ├── PeripheralModel.m           # Static function that returns optical model (PSF) at different visual eccentricity
     ├── ConeResponseCmosaic.m       # Extend the base class to use the newly updated cone mosaic 
-
 ├── imageEstimator                  # Deprecated; Regression-based method for image reconstruction    
     ├── ...
 ├── patchEstimator                  # The main algorithm used in our paper
