@@ -1,17 +1,17 @@
 classdef PeripheralModel
-            
+    
     methods(Static)
         
         function [theConeMosaic, theOI] = eyeModelEcc(eccXrange, eccYrange, fovDegs, pupilDiam)
             theSubjectIndex = [];
-            desiredPupilDiamMM = pupilDiam;            
+            desiredPupilDiamMM = pupilDiam;
             applyCentralCorrection = true;
             % Get a struct with the Polans data
-            d = PeripheralModel.Polans2015Data(applyCentralCorrection);            
+            d = PeripheralModel.Polans2015Data(applyCentralCorrection);
             
             wavefrontSpatialSamples = 201;
-            wavelengthsListToCompute = 450:100:750;           
-                                    
+            wavelengthsListToCompute = 450:100:750;
+            
             for eccYindex = 1:numel(eccYrange)
                 for eccXindex = 1:numel(eccXrange)
                     
@@ -41,10 +41,32 @@ classdef PeripheralModel
                     % Generate oi at this eccentricity
                     theOI = PeripheralModel.makeCustomOI(zCoeffs, d.measurementPupilDiameMM, d.measurementWavelength, ...
                         desiredPupilDiamMM, wavelengthsListToCompute, wavefrontSpatialSamples, nearestEccXY, d.eye);
-                                        
+                    
                 end
-            end                        
- 
+            end
+            
+        end
+        
+        function [mosaic, psfObj, psfData] = eyeModelCmosaic(eccX, eccY, fovDegs, pupilDiam)
+            
+            mosaicEcc = [eccX, eccY];
+            
+            % Generate mosaic centered at target eccentricity
+            mosaic = cMosaic(...
+                'sizeDegs', [1 1] * fovDegs, ...
+                'eccentricityDegs', mosaicEcc, ...
+                'noiseFlag', 'none', ...
+                'integrationTime', 0.1);
+            
+            % Generate optics appropriate for the mosaic's eccentricity
+            [oiEnsemble, psfEnsemble] = mosaic.oiEnsembleGenerate(mosaicEcc, ...
+                'zernikeDataBase', 'Polans2015', ...
+                'subjectID', 6, ...
+                'pupilDiameterMM', pupilDiam);
+            
+            psfObj = oiEnsemble{1};
+            psfData = psfEnsemble{1};
+            
         end
         
         function theOI = makeCustomOI(zCoeffs, measPupilDiameterMM, measWavelength, ...
