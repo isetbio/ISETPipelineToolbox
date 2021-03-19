@@ -27,7 +27,7 @@ Please also see the Methods section of our paper. For actual usage, the best way
     ├── ... 
 ...
 ```
-Please see here for the original source of (fminlbfgs)[https://www.mathworks.com/matlabcentral/fileexchange/23245-fminlbfgs-fast-limited-memory-optimizer].
+Please see here for the original source of [fminlbfgs](https://www.mathworks.com/matlabcentral/fileexchange/23245-fminlbfgs-fast-limited-memory-optimizer).
 
 ## Contact
 Feel free to contact me if you any questions or comments at   
