@@ -2,6 +2,8 @@ classdef ConeResponseCmosaic < ConeResponse
     
     properties (Access = public)
         psfData;
+        eccX;
+        eccY;        
     end
     
     methods (Access = public)
@@ -14,6 +16,9 @@ classdef ConeResponseCmosaic < ConeResponse
             
             parse(p, varargin{:});
             [mosaic, psfObj, psfData] = PeripheralModel.eyeModelCmosaic(eccX, eccY, p.Results.fovealDegree, p.Results.pupilSize);
+            
+            this.eccX = eccX;
+            this.eccY = eccY;
             
             this.Mosaic = mosaic;
             this.PupilSize = p.Results.pupilSize;
@@ -30,11 +35,11 @@ classdef ConeResponseCmosaic < ConeResponse
             activationRange = prctile(this.LastResponse(:), [1 99]);
             this.Mosaic.visualize('figureHandle', figure(), ...
                 'activation', this.LastResponse, ...
-                'activationRange', activationRange, ...                
+                'activationRange', activationRange, ...
                 'plotTitle',  'Cone Response');
         end
         
-        function visualizePSF(this)            
+        function visualizePSF(this)
             [~, wIdx] = min(abs(this.psfData.supportWavelength-550));
             wavePSF = squeeze(this.psfData.data(:,:,wIdx));
             zLevels = 0.1:0.1:0.9;
@@ -57,13 +62,53 @@ classdef ConeResponseCmosaic < ConeResponse
             realizedStimulusScene = sceneSet(realizedStimulusScene, 'fov', this.FovealDegree);
             
             % optics
-            theOI = oiCompute(this.PSF, realizedStimulusScene);
+            theOI = oiCompute(realizedStimulusScene, this.PSF);
             this.LastOI = theOI;
             
             % compute cone response
             this.LastResponse = this.Mosaic.compute(theOI, 'nTrials', 1);
             allCone = this.LastResponse(:);
         end
+        
+        % Compute render matrix
+        function renderMtx = forwardRender(this, imageSize, validation, waitBar)
+            if ~exist('validation', 'var')
+                validation = true;
+            end
+            if ~exist('waitBar', 'var')
+                waitBar = true;
+            end
+            
+            testInput = rand(imageSize);
+            [testCone, testLinear] = this.compute(testInput);
+            
+            renderMtx = zeros(length(testCone), length(testLinear(:)), 'single');
+            
+            updateWaitbar = [];
+            if waitBar
+                updateWaitbar = waitbarParfor(length(testLinear(:)), "Calculation in progress...");
+            end
+            
+            parfor idx = 1:length(testLinear(:))
+                input = zeros(size(testLinear));
+                input(idx) = 1.0;
+                
+                coneVec = this.compute(input);
+                renderMtx(:, idx) = single(coneVec);
+                
+                if waitBar
+                    updateWaitbar();
+                end
+            end
+            
+            if validation
+                figure(); hold on;
+                scatter(testCone, renderMtx * testLinear(:));
+                plot(xlim, ylim, '--k', 'LineWidth', 2);
+                axis square;
+            end
+        end
+        
     end
 end
 
