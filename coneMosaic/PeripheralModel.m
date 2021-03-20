@@ -3,7 +3,9 @@ classdef PeripheralModel
     methods(Static)
         
         function [theConeMosaic, theOI] = eyeModelEcc(eccXrange, eccYrange, fovDegs, pupilDiam)
-            theSubjectIndex = [];
+            % Select data for a particular subject
+            % Use [] to indicate average subject
+            subID = 6;
             desiredPupilDiamMM = pupilDiam;
             applyCentralCorrection = true;
             % Get a struct with the Polans data
@@ -36,7 +38,7 @@ classdef PeripheralModel
                     
                     
                     % Get zCoeffs for this eccentricity
-                    [zCoeffs, nearestEccXY] = PeripheralModel.zCoeffsForSubjectAndEccentricity(d,theSubjectIndex, eccXY);
+                    [zCoeffs, nearestEccXY] = PeripheralModel.zCoeffsForSubjectAndEccentricity(d, subID, eccXY);
                     
                     % Generate oi at this eccentricity
                     theOI = PeripheralModel.makeCustomOI(zCoeffs, d.measurementPupilDiameMM, d.measurementWavelength, ...
@@ -47,8 +49,7 @@ classdef PeripheralModel
             
         end
         
-        function [mosaic, psfObj, psfData] = eyeModelCmosaic(eccX, eccY, fovDegs, pupilDiam)
-            
+        function [mosaic, psfObj, psfData] = eyeModelCmosaic(eccX, eccY, fovDegs, pupilDiam)            
             mosaicEcc = [eccX, eccY];
             
             % Generate mosaic centered at target eccentricity
@@ -66,8 +67,7 @@ classdef PeripheralModel
                 'pupilDiameterMM', pupilDiam);
             
             psfObj = oiEnsemble{1};
-            psfData = psfEnsemble{1};
-            
+            psfData = psfEnsemble{1};            
         end
         
         function theOI = makeCustomOI(zCoeffs, measPupilDiameterMM, measWavelength, ...
