@@ -18,6 +18,7 @@ Please also see the Methods section of our paper. For actual usage, the best way
     ├── SparsePatch...              # Implement the sparse coding image prior
     ├── Poisson...                  # Implement the Poisson likelihood function
 ├── imageHelper                     # Some helper function for image processing
+    ├── MarkovPrior.m               # Gaussian prior for which we have control over its spatial and chromatic correlation
     ├── computeBasisPCA.m           # PCA on dataset of natural images
     ├── whitening.m                 # Apply the whitening transformation to images
     ├── sampleImage.m               # Crop image to a specific size
