@@ -22,6 +22,7 @@ Please also see the Methods section of our paper. For actual usage, the best way
     ├── computeBasisPCA.m           # PCA on dataset of natural images
     ├── whitening.m                 # Apply the whitening transformation to images
     ├── sampleImage.m               # Crop image to a specific size
+    ├── labDistance.m               # The Spatial CIELAB loss function
     ├── ... 
 ├── visualHelper                    # Some helper functions for visualization
     ├── ... 
