@@ -11,11 +11,13 @@ classdef ConeResponseCmosaic < ConeResponse
             p = inputParser;
             p.addParameter('fovealDegree', 1.0, @(x)(isnumeric(x) && numel(x) == 1));
             p.addParameter('pupilSize', 3.0, @(x) (isnumeric(x) && numel(x) == 1));
+            p.addParameter('subjectID', 6, @(x) (isnumeric(x) && numel(x) == 1));
             
             this@ConeResponse(varargin{:}, 'override', true);
             
             parse(p, varargin{:});
-            [mosaic, psfObj, psfData] = PeripheralModel.eyeModelCmosaic(eccX, eccY, p.Results.fovealDegree, p.Results.pupilSize);
+            [mosaic, psfObj, psfData] = PeripheralModel.eyeModelCmosaic...
+                (eccX, eccY, p.Results.fovealDegree, p.Results.pupilSize, p.Results.subjectID);
             
             this.eccX = eccX;
             this.eccY = eccY;
@@ -43,7 +45,7 @@ classdef ConeResponseCmosaic < ConeResponse
             [~, wIdx] = min(abs(this.psfData.supportWavelength-550));
             wavePSF = squeeze(this.psfData.data(:,:,wIdx));
             zLevels = 0.1:0.1:0.9;
-            xyRangeArcMin = 3;
+            xyRangeArcMin = 8 * [-1, 1];
             
             figure();
             PolansOptics.renderPSF(gca(), ...
@@ -66,7 +68,7 @@ classdef ConeResponseCmosaic < ConeResponse
             this.LastOI = theOI;
             
             % compute cone response
-            this.LastResponse = this.Mosaic.compute(theOI, 'nTrials', 1);
+            this.LastResponse = this.Mosaic.compute(theOI, 'opticalImagePositionDegs', 'mosaic-centered');
             allCone = this.LastResponse(:);
         end
         

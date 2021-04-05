@@ -144,6 +144,8 @@ classdef ConeResponse < handle
             display = displayCreate('CRT12BitDisplay');
             
             p = inputParser;
+            p.KeepUnmatched = true;
+            
             p.addParameter('fovealDegree', 1.0, @(x)(isnumeric(x) && numel(x) == 1));
             p.addParameter('eccBasedConeDensity', false, @islogical);
             p.addParameter('eccBasedConeQuantal', false, @islogical);
