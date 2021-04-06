@@ -72,6 +72,15 @@ classdef ConeResponseCmosaic < ConeResponse
             allCone = this.LastResponse(:);
         end
         
+        function allCone = computeWithScene(this, inputScene)
+            opticalImage = oiCompute(inputScene, this.PSF);
+            
+            % compute cone response
+            this.LastOI = opticalImage;
+            this.LastResponse = this.Mosaic.compute(opticalImage, 'opticalImagePositionDegs', 'mosaic-centered');
+            allCone = this.LastResponse(:);            
+        end
+        
         % Compute render matrix
         function renderMtx = forwardRender(this, imageSize, validation, waitBar)
             if ~exist('validation', 'var')
@@ -106,7 +115,7 @@ classdef ConeResponseCmosaic < ConeResponse
             if validation
                 figure(); hold on;
                 scatter(testCone, renderMtx * testLinear(:));
-                plot(xlim, ylim, '--k', 'LineWidth', 2);
+                plot(xlim, xlim, '--k', 'LineWidth', 2);
                 axis square;
             end
         end
