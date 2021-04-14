@@ -80,3 +80,7 @@ for idx = 1 : nShow
     scene.data.photons = image;
     imshow(sceneGet(scene, 'rgbimage'), 'InitialMagnification', 1e3);
 end
+
+%% PCA Analysis
+imgData = reshape(samples, [size(samples, 1), prod(imageSize)]);
+[pcaBasis, ~, pcaVar, ~, ~, mu] = pca(imgData);
