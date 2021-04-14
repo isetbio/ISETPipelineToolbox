@@ -36,11 +36,11 @@ rdt.crp(hyperspectralRootDir);
 dataBaseName = 'stanford_database';
 
 % Select a scene family - Note: some data bases do not have this
-dataBaseSceneFamily = 'fruit';
+dataBaseSceneFamily = 'landscape';
 rdt.crp(fullfile(hyperspectralRootDir, dataBaseName, dataBaseSceneFamily));
 
 % Select a scene name whithin the family
-sceneName = 'FreshFruit_Cx';
+sceneName = 'StanfordMemorial';
 % Fetch the hyperspectral data
 hyperspectralData = rdt.readArtifact(sceneName);
 
