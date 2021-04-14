@@ -3,7 +3,7 @@ rdt = RdtClient('isetbio');
 rdt.crp('/resources/scenes/hyperspectral');
 rdt.openBrowser
 
-%% Read and load images
+%% Manchster DB
 hyperspectralRootDir = '/resources/scenes/hyperspectral';
 rdt = RdtClient('isetbio');
 rdt.crp(hyperspectralRootDir);
@@ -27,7 +27,7 @@ theScene = sceneFromBasis(hyperspectralData);
 figure();
 image(sceneGet(theScene, 'rgbimage'));
 
-%% Read and load images another example
+%% Stanford DB
 hyperspectralRootDir = '/resources/scenes/hyperspectral';
 rdt = RdtClient('isetbio');
 rdt.crp(hyperspectralRootDir);
@@ -49,3 +49,44 @@ theScene = sceneFromBasis(hyperspectralData);
 % Plot it
 figure();
 image(sceneGet(theScene, 'rgbimage'));
+
+%% Penn DB 
+hyperspectralRootDir = '/resources/scenes/hyperspectral';
+rdt = RdtClient('isetbio');
+rdt.crp(hyperspectralRootDir);
+
+% Select a database
+dataBaseName = 'penn_database';
+
+% Select a scene family - Note: some data bases do not have this
+rdt.crp(fullfile(hyperspectralRootDir, dataBaseName));
+
+% Select a scene name whithin the family
+sceneName = 'BearFruitGrayY';
+% Fetch the hyperspectral data
+scene = rdt.readArtifact(sceneName);
+
+% Plot it
+figure();
+image(sceneGet(scene.scene, 'rgbimage'));
+
+%% Harvard DB
+hyperspectralRootDir = '/resources/scenes/hyperspectral';
+rdt = RdtClient('isetbio');
+rdt.crp(hyperspectralRootDir);
+
+% Select a database
+dataBaseName = 'harvard_database';
+
+% Select a scene family - Note: some data bases do not have this
+rdt.crp(fullfile(hyperspectralRootDir, dataBaseName));
+
+% Select a scene name whithin the family
+sceneName = 'imgh0';
+
+% Fetch the hyperspectral data
+scene = rdt.readArtifact(sceneName);
+
+% Plot it
+figure();
+image(sceneGet(scene.scene, 'rgbimage'));
