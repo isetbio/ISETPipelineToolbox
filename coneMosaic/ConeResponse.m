@@ -306,11 +306,11 @@ classdef ConeResponse < handle
             [excitation, allCone, L, M, S] = this.computeWithOI(opticalImage);
         end
         
-        function allCone = computeHyperspectral(this, image, wave)
+        function allCone = computeHyperspectral(this, wave, scale, image)
             scene = sceneCreate('whitenoise');
             
             scene.spectrum.wave = wave;
-            scene.data.photons = image;
+            scene.data.photons = image .* scale;
             scene = sceneSet(scene, 'fov', this.FovealDegree);
             
             opticalImage = oiCompute(scene, this.PSF);
@@ -468,6 +468,33 @@ classdef ConeResponse < handle
             end
             
             this.reassignCone(ratio, this.L_Cone_Idx, this.M_Cone_Idx, showMosaic);
+        end
+        
+        function renderMtx = hyperRender(this, imageSize, wave, scale, waitBar)
+            if ~exist('waitBar', 'var')
+                waitBar = true;
+            end
+            
+            testInput = rand(imageSize);
+            testCone = this.computeHyperspectral(wave, scale, testInput);
+            
+            renderMtx = zeros(length(testCone), length(testInput(:)), 'single');
+            updateWaitbar = [];
+            if waitBar
+                updateWaitbar = waitbarParfor(length(testLinear(:)), "Calculation in progress...");
+            end
+            
+            parfor idx = 1:length(testInput(:))
+                input = zeros(size(testInput));
+                input(idx) = 1.0;
+                
+                coneVec = this.computeHyperspectral(wave, scale, input);
+                renderMtx(:, idx) = single(coneVec);
+                
+                if waitBar
+                    updateWaitbar();
+                end
+            end
         end
         
         function renderMtx = forwardRender(this, imageSize, validation, optics, waitBar)
