@@ -481,7 +481,7 @@ classdef ConeResponse < handle
             renderMtx = zeros(length(testCone), length(testInput(:)), 'single');
             updateWaitbar = [];
             if waitBar
-                updateWaitbar = waitbarParfor(length(testLinear(:)), "Calculation in progress...");
+                updateWaitbar = waitbarParfor(length(testInput(:)), "Calculation in progress...");
             end
             
             parfor idx = 1:length(testInput(:))
