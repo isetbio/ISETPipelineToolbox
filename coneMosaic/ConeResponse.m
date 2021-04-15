@@ -84,7 +84,7 @@ classdef ConeResponse < handle
             pupilDiameterMm = pupilSize;
             
             % zero Zernike coefficients (diffraction limited)
-            zCoeffs = zeros(66,1);            
+            zCoeffs = zeros(66,1);
             wvfP = wvfCreate('calc wavelengths', wave, 'zcoeffs', zCoeffs, ...
                 'name', sprintf('human-%d', pupilDiameterMm));
             wvfP = wvfSet(wvfP, 'measured pupil size', pupilDiameterMm);
@@ -306,6 +306,17 @@ classdef ConeResponse < handle
             [excitation, allCone, L, M, S] = this.computeWithOI(opticalImage);
         end
         
+        function allCone = computeHyperspectral(this, image, wave)
+            scene = sceneCreate('whitenoise');
+            
+            scene.spectrum.wave = wave;
+            scene.data.photons = image;
+            scene = sceneSet(scene, 'fov', this.FovealDegree);
+            
+            opticalImage = oiCompute(scene, this.PSF);
+            [~, allCone] = this.computeWithOI(opticalImage);
+        end
+        
         function [excitation, allCone, L, M, S] = computeWithSceneDiffLmt(this, inputScene)
             opticalImage = oiCompute(this.diffLmt, inputScene);
             [excitation, allCone, L, M, S] = this.computeWithOI(opticalImage);
@@ -416,7 +427,7 @@ classdef ConeResponse < handle
             reassignIdx = sort(datasample(1:length(coneIdx), deltaS, 2, 'Replace', false));
             reassignIdx = coneIdx(reassignIdx);
             
-            this.Mosaic.pattern(reassignIdx) = this.S_Cone_Idx;            
+            this.Mosaic.pattern(reassignIdx) = this.S_Cone_Idx;
         end
         
         function reassignCone(this, ratio, target, replace, showMosaic)
