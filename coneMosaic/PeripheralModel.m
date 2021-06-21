@@ -61,12 +61,18 @@ classdef PeripheralModel
                 'integrationTime', 0.1, ...
                 'useParfor', false);
             
+            subCntRef = true;
+            if ismember(subjectID, [1, 2, 4, 7])
+                subCntRef = false;
+            end
+            
             % Generate optics appropriate for the mosaic's eccentricity
             [oiEnsemble, psfEnsemble] = mosaic.oiEnsembleGenerate(mosaicEcc, ...
                 'zernikeDataBase', 'Polans2015', ...
                 'subjectID', subjectID, ...
                 'pupilDiameterMM', pupilDiam, ...
-                'subtractCentralRefraction', true);
+                'subtractCentralRefraction', subCntRef, ...
+                'wavefrontSpatialSamples', 501);
             
             psfObj = oiEnsemble{1};
             psfData = psfEnsemble{1};

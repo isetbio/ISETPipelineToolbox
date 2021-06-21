@@ -3,7 +3,7 @@ classdef ConeResponseCmosaic < ConeResponse
     properties (Access = public)
         psfData;
         eccX;
-        eccY;        
+        eccY;
     end
     
     methods (Access = public)
@@ -47,7 +47,6 @@ classdef ConeResponseCmosaic < ConeResponse
             zLevels = 0.1:0.1:0.9;
             xyRangeArcMin = 8 * [-1, 1];
             
-            figure();
             PolansOptics.renderPSF(gca(), ...
                 this.psfData.supportX, this.psfData.supportY, wavePSF/max(wavePSF(:)), ...
                 xyRangeArcMin, zLevels,  gray(1024), [0 0 0]);
@@ -78,7 +77,7 @@ classdef ConeResponseCmosaic < ConeResponse
             % compute cone response
             this.LastOI = opticalImage;
             this.LastResponse = this.Mosaic.compute(opticalImage, 'opticalImagePositionDegs', 'mosaic-centered');
-            allCone = this.LastResponse(:);            
+            allCone = this.LastResponse(:);
         end
         
         % Compute render matrix
