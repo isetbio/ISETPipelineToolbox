@@ -12,12 +12,13 @@ classdef ConeResponseCmosaic < ConeResponse
             p.addParameter('fovealDegree', 1.0, @(x)(isnumeric(x) && numel(x) == 1));
             p.addParameter('pupilSize', 3.0, @(x) (isnumeric(x) && numel(x) == 1));
             p.addParameter('subjectID', 6, @(x) (isnumeric(x) && numel(x) == 1));
+            p.addParameter('randomMesh', false, @islogical);
             
             this@ConeResponse(varargin{:}, 'override', true);
             
             parse(p, varargin{:});
             [mosaic, psfObj, psfData] = PeripheralModel.eyeModelCmosaic...
-                (eccX, eccY, p.Results.fovealDegree, p.Results.pupilSize, p.Results.subjectID);
+                (eccX, eccY, p.Results.fovealDegree, p.Results.pupilSize, p.Results.randomMesh, p.Results.subjectID);
             
             this.eccX = eccX;
             this.eccY = eccY;
