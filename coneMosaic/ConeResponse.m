@@ -396,6 +396,28 @@ classdef ConeResponse < handle
         function rgbOI = rgbOpticalImage(this)
             rgbOI = oiGet(this.LastOI, 'rgb image');
         end
+
+        function setConeRatio(this, l, m)
+            assert(l + m <= 1.0);
+            [~, ~, ~, numCone] = this.coneCount();
+
+            numL = floor(numCone * l);
+            numM = floor(numCone * m);
+            numS = numCone - numL - numM;
+
+            typeArray = [ones(1, numL) * this.L_Cone_Idx, ... 
+                         ones(1, numM) * this.M_Cone_Idx, ...
+                         ones(1, numS) * this.S_Cone_Idx];
+
+            typeArray = typeArray(randperm(length(typeArray)));
+            coneIdx = find(this.Mosaic.pattern > 0);
+            assert(length(typeArray) == length(coneIdx));
+
+            for idx = 1 : length(coneIdx)
+                this.Mosaic.pattern(coneIdx(idx)) = typeArray(idx);
+            end
+        end
+
         
         function [L, M, S, numCone] = coneCount(this)
             L = sum(this.Mosaic.pattern == this.L_Cone_Idx, 'all');
