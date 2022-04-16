@@ -30,13 +30,21 @@ classdef ConeResponseCmosaic < ConeResponse
         end
         
         % Override the visualization with new method
-        function visualizeMosaic(this)
-            this.Mosaic.visualize('figureHandle', figure());
+        function visualizeMosaic(this, figureHandle)
+            if ~exist('figureHandle', 'var')
+                figureHandle = figure();
+            end
+
+            this.Mosaic.visualize('figureHandle', figureHandle);
         end
         
-        function visualizeExcitation(this)
+        function visualizeExcitation(this, figureHandle)
+            if ~exist('figureHandle', 'var')
+                figureHandle = figure();
+            end
+
             activationRange = prctile(this.LastResponse(:), [1 99]);
-            this.Mosaic.visualize('figureHandle', figure(), ...
+            this.Mosaic.visualize('figureHandle', figureHandle, ...
                 'activation', this.LastResponse, ...
                 'activationRange', activationRange, ...
                 'plotTitle',  'Cone Response');
