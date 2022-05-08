@@ -49,7 +49,7 @@ classdef PeripheralModel
             
         end
         
-        function [mosaic, psfObj, psfData] = eyeModelCmosaic(eccX, eccY, fovDegs, pupilDiam, randomMesh, subjectID)
+        function [mosaic, psfObj, psfData, zCoeffs] = eyeModelCmosaic(eccX, eccY, fovDegs, pupilDiam, randomMesh, subjectID)
             mosaicEcc = [eccX, eccY];
             
             % Generate mosaic centered at target eccentricity
@@ -70,7 +70,7 @@ classdef PeripheralModel
             end
             
             % Generate optics appropriate for the mosaic's eccentricity
-            [oiEnsemble, psfEnsemble] = mosaic.oiEnsembleGenerate(mosaicEcc, ...
+            [oiEnsemble, psfEnsemble, zCoeffs] = mosaic.oiEnsembleGenerate(mosaicEcc, ...
                 'zernikeDataBase', 'Polans2015', ...
                 'subjectID', subjectID, ...
                 'pupilDiameterMM', pupilDiam, ...
