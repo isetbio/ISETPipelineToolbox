@@ -73,7 +73,7 @@ classdef ConeResponse < handle
     end
     
     methods(Static)
-        function psfDiffLmt = psfDiffLmt(pupilSize)
+        function oiDiffLmt = psfDiffLmt(pupilSize)
             if ~exist('pupilSize', 'var')
                 pupilSize = 3.0;
             end
@@ -96,11 +96,11 @@ classdef ConeResponse < handle
             wvfPNoLca = wvfComputePSF(wvfPNoLca);
             
             % Optics object
-            psfDiffLmt = wvf2oi(wvfPNoLca);
-            opticsNoLca = oiGet(psfDiffLmt, 'optics');
+            oiDiffLmt = wvf2oi(wvfPNoLca);
+            opticsNoLca = oiGet(oiDiffLmt, 'optics');
             opticsNoLca = opticsSet(opticsNoLca, 'model', 'shift invariant');
             opticsNoLca = opticsSet(opticsNoLca, 'name', 'human-wvf-nolca');
-            psfDiffLmt = oiSet(psfDiffLmt,'optics',opticsNoLca);
+            oiDiffLmt = oiSet(oiDiffLmt,'optics',opticsNoLca);
         end
         
         function psfNoLCA = psfNoLCA(pupilSize)

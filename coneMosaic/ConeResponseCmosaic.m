@@ -13,6 +13,7 @@ classdef ConeResponseCmosaic < ConeResponse
             p.addParameter('pupilSize', 3.0, @(x) (isnumeric(x) && numel(x) == 1));
             p.addParameter('subjectID', 6, @(x) (isnumeric(x) && numel(x) == 1));
             p.addParameter('randomMesh', false, @islogical);
+            p.addParameter('useRandomSeed', true, @islogical)
             
             this@ConeResponse(varargin{:}, 'override', true);
             
@@ -101,7 +102,11 @@ classdef ConeResponseCmosaic < ConeResponse
         end
         
         % Compute render matrix
-        function renderMtx = forwardRender(this, imageSize, validation, waitBar)
+        function renderMtx = forwardRender(this, imageSize, validation, waitBar, varargin)
+            p = inputParser;
+            p.addParameter('useDoublePrecision', false, @islogical);
+            parse(p, varargin{:});
+
             if ~exist('validation', 'var')
                 validation = true;
             end
@@ -124,7 +129,11 @@ classdef ConeResponseCmosaic < ConeResponse
                 input(idx) = 1.0;
                 
                 coneVec = this.compute(input);
-                renderMtx(:, idx) = single(coneVec);
+                if (p.Results.useDoublePrecision)
+                    renderMtx(:, idx) = single(coneVec);
+                else
+                    renderMtx(:, idx) = coneVec;
+                end
                 
                 if waitBar
                     updateWaitbar();

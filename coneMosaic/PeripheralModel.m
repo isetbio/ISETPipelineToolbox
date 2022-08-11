@@ -49,14 +49,25 @@ classdef PeripheralModel
             
         end
         
-        function [mosaic, psfObj, psfData, zCoeffs] = eyeModelCmosaic(eccX, eccY, fovDegs, pupilDiam, randomMesh, subjectID)
+        function [mosaic, psfObj, psfData, zCoeffs] = eyeModelCmosaic(eccX, eccY, fovDegs, pupilDiam, randomMesh, subjectID, varargin)
+            p = inputParser;
+            p.addParameter('useRandomSeed', true, @islogical);
+            parse(p, varargin{:});
+      
             mosaicEcc = [eccX, eccY];
+
+            % Use random seed?
+            if (p.Results.useRandomSeed)
+                randomSeed = randi(65535);
+            else
+                randomSeed = 0;
+            end
             
             % Generate mosaic centered at target eccentricity
             mosaic = cMosaic(...
                 'sizeDegs', [1 1] * fovDegs, ...
                 'computeMeshFromScratch', randomMesh, ...
-                'randomSeed', randi(65535), ...     % set the random seed to generate a different mosaic each time
+                'randomSeed', randomSeed, ...       % set the random seed to generate a different mosaic each time, or not
                 'maxMeshIterations', 100, ...       % stop iterative procedure after this many iterations
                 'eccentricityDegs', mosaicEcc, ...
                 'whichEye', PolansOptics.constants.rightEye, ...
