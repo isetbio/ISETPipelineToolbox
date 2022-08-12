@@ -129,7 +129,7 @@ classdef ConeResponseCmosaic < ConeResponse
                 input(idx) = 1.0;
                 
                 coneVec = this.compute(input);
-                if (p.Results.useDoublePrecision)
+                if (~p.Results.useDoublePrecision)
                     renderMtx(:, idx) = single(coneVec);
                 else
                     renderMtx(:, idx) = coneVec;
