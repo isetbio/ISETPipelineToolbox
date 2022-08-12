@@ -117,7 +117,11 @@ classdef ConeResponseCmosaic < ConeResponse
             testInput = rand(imageSize);
             [testCone, testLinear] = this.compute(testInput);
             
-            renderMtx = zeros(length(testCone), length(testLinear(:)), 'single');
+            if (p.Results.useDoublePrecision)
+                renderMtx = zeros(length(testCone), length(testLinear(:)));
+            else
+                renderMtx = zeros(length(testCone), length(testLinear(:)), 'single');
+            end
             
             updateWaitbar = [];
             if waitBar
