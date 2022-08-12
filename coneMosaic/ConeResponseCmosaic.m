@@ -77,17 +77,17 @@ classdef ConeResponseCmosaic < ConeResponse
         end
         
         % Compute cone response to image
-        function [allCone, linearImage] = compute(this, image)
-            % create a visual scene from a display
+        function [allCone, linearStimulusImage] = compute(this, stimulusImageRGB)
+            % Create a visual scene from a display
             meanLuminanceCdPerM2 = [];
-            [realizedStimulusScene, ~, linearImage] = sceneFromFile(image, 'rgb', ...
+            [stimulusScene, ~, linearStimulusImage] = sceneFromFile(stimulusImageRGB, 'rgb', ...
                 meanLuminanceCdPerM2, this.Display);
             
-            % set the angular scene width
-            realizedStimulusScene = sceneSet(realizedStimulusScene, 'fov', this.FovealDegree);
+            % Set the angular scene width
+            stimulusScene = sceneSet(stimulusScene, 'fov', this.FovealDegree);
             
             % optics
-            theOI = oiCompute(realizedStimulusScene, this.PSF);
+            theOI = oiCompute(stimulusScene, this.PSF);
             this.LastOI = theOI;
             
             % compute cone response
