@@ -14,12 +14,15 @@ classdef ConeResponseCmosaic < ConeResponse
             p.addParameter('subjectID', 6, @(x) (isnumeric(x) && numel(x) == 1));
             p.addParameter('randomMesh', false, @islogical);
             p.addParameter('useRandomSeed', true, @islogical)
-            
+            parse(p, varargin{:});
+
+            % Setting override to true here avoids older coneMosaicHex
+            % code, and allows us to set the cMosaic below.
             this@ConeResponse(varargin{:}, 'override', true);
             
-            parse(p, varargin{:});
             [mosaic, psfObj, psfData] = PeripheralModel.eyeModelCmosaic...
-                (eccX, eccY, p.Results.fovealDegree, p.Results.pupilSize, p.Results.randomMesh, p.Results.subjectID);
+                (eccX, eccY, p.Results.fovealDegree, p.Results.pupilSize, p.Results.randomMesh, p.Results.subjectID, ...
+                'useRandomSeed',p.Results.useRandomSeed);
             
             this.eccX = eccX;
             this.eccY = eccY;
@@ -132,12 +135,22 @@ classdef ConeResponseCmosaic < ConeResponse
                 input = zeros(size(testLinear));
                 input(idx) = 1.0;
                 
-                coneVec = this.compute(input);
+                [coneVec, chkLinear] = this.compute(input);
                 if (~p.Results.useDoublePrecision)
                     renderMtx(:, idx) = single(coneVec);
                 else
                     renderMtx(:, idx) = coneVec;
                 end
+                if (any(input(:) ~= chkLinear(:)))
+                    error('Conversion to linear not as expected for RGB input of 1\n');
+                end
+
+                % You can uncomment this line in a desparate attempt to figure
+                % out why render matrix doesn't reproduce test responses.
+                %
+                % if (max(coneVec(:)) < 10)
+                %     fprintf('Warning: Small maximum cone excitation %g\n',max(coneVec(:)));
+                % end
                 
                 if waitBar
                     updateWaitbar();
