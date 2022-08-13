@@ -52,6 +52,7 @@ classdef PeripheralModel
         function [mosaic, psfObj, psfData, zCoeffs] = eyeModelCmosaic(eccX, eccY, fovDegs, pupilDiam, randomMesh, subjectID, varargin)
             p = inputParser;
             p.addParameter('useRandomSeed', true, @islogical);
+            p.addParameter('defocusDiopters', 0, @isnumeric);
             parse(p, varargin{:});
       
             mosaicEcc = [eccX, eccY];
@@ -86,7 +87,8 @@ classdef PeripheralModel
                 'subjectID', subjectID, ...
                 'pupilDiameterMM', pupilDiam, ...
                 'subtractCentralRefraction', subCntRef, ...
-                'wavefrontSpatialSamples', 501);
+                'wavefrontSpatialSamples', 501, ...
+                'refractiveErrorDiopters', p.Results.defocusDiopters);
             
             psfObj = oiEnsemble{1};
             psfData = psfEnsemble{1};

@@ -14,6 +14,7 @@ classdef ConeResponseCmosaic < ConeResponse
             p.addParameter('subjectID', 6, @(x) (isnumeric(x) && numel(x) == 1));
             p.addParameter('randomMesh', false, @islogical);
             p.addParameter('useRandomSeed', true, @islogical)
+            p.addParameter('defocusDiopters', 0, @isnumeric);
             parse(p, varargin{:});
 
             % Setting override to true here avoids older coneMosaicHex
@@ -22,7 +23,7 @@ classdef ConeResponseCmosaic < ConeResponse
             
             [mosaic, psfObj, psfData] = PeripheralModel.eyeModelCmosaic...
                 (eccX, eccY, p.Results.fovealDegree, p.Results.pupilSize, p.Results.randomMesh, p.Results.subjectID, ...
-                'useRandomSeed',p.Results.useRandomSeed);
+                'useRandomSeed',p.Results.useRandomSeed,'defocusDiopters',p.Results.defocusDiopters);
             
             this.eccX = eccX;
             this.eccY = eccY;
