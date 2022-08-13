@@ -13,7 +13,7 @@ classdef ConeResponseCmosaic < ConeResponse
             p.addParameter('pupilSize', 3.0, @(x) (isnumeric(x) && numel(x) == 1));
             p.addParameter('subjectID', 6, @(x) (isnumeric(x) && numel(x) == 1));
             p.addParameter('randomMesh', false, @islogical);
-            p.addParameter('useRandomSeed', true, @islogical)
+            p.addParameter('useRandomSeed', true, @islogical);
             p.addParameter('defocusDiopters', 0, @isnumeric);
             parse(p, varargin{:});
 

@@ -73,23 +73,33 @@ classdef ConeResponse < handle
     end
     
     methods(Static)
-        function oiDiffLmt = psfDiffLmt(pupilSize)
+        function oiDiffLmt = psfDiffLmt(pupilDiamMM,varargin)
+
+            % Parse input
+            p = inputParser;
+            p.addParameter('defocusDiopters', 0, @isnumeric);
+            parse(p, varargin{:});
+
             if ~exist('pupilSize', 'var')
-                pupilSize = 3.0;
+                pupilDiamMM = 3.0;
             end
             
             % Set up wavefront optics object
             wave = (400:10:700)';
             accommodatedWavelength = 530;
-            pupilDiameterMm = pupilSize;
+            pupilDiameterMm = pupilDiamMM;
             
-            % zero Zernike coefficients (diffraction limited)
+            % Zero Zernike coefficients (diffraction limited)
             zCoeffs = zeros(66,1);
             wvfP = wvfCreate('calc wavelengths', wave, 'zcoeffs', zCoeffs, ...
                 'name', sprintf('human-%d', pupilDiameterMm));
             wvfP = wvfSet(wvfP, 'measured pupil size', pupilDiameterMm);
             wvfP = wvfSet(wvfP, 'calc pupil size', pupilDiameterMm);
             wvfP = wvfSet(wvfP, 'measured wavelength', accommodatedWavelength);
+
+            % Add in specified defocus
+            defocusMicrons = wvfDefocusDioptersToMicrons(p.Results.defocusDiopters,pupilDiamMM);
+            wvfP = wvfSet(wvfP,'zcoeffs', defocusMicrons, 'defocus');
             
             % Compute pupil function using 'no lca' key/value pair to turn off LCA.
             wvfPNoLca = wvfComputePupilFunction(wvfP,false,'no lca',true);
