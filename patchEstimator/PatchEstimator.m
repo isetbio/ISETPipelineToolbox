@@ -82,7 +82,7 @@ classdef PatchEstimator < handle
             gradient = gradientPrior + double(gather(gradientLlhd));
         end
 
-        function reconstruction = runEstimate(this, coneVec, varargin)
+        function [reconstruction,initLoss,solnLoss] = runEstimate(this, coneVec, varargin)
             p = inputParser;
             p.addParameter('maxIter', 1e3, @(x)(isnumeric(x) && numel(x) == 1));
             p.addParameter('init', rand([prod(this.Size), 1]));
@@ -92,12 +92,12 @@ classdef PatchEstimator < handle
             p.addParameter('gpu', false, @(x)(islogical(x) && numel(x) == 1));
 
             parse(p, varargin{:});
-            reconstruction = this.estimate(coneVec, p.Results.maxIter, p.Results.init, ...
+            [reconstruction,initLoss,solnLoss] = this.estimate(coneVec, p.Results.maxIter, p.Results.init, ...
                 p.Results.bounded, p.Results.ub, p.Results.display, p.Results.gpu);
 
         end
 
-        function reconstruction = estimate(this, measure, maxIter, init, bounded, ub, disp, gpu)
+        function [reconstruction,initLoss,solnLoss] = estimate(this, measure, maxIter, init, bounded, ub, disp, gpu)
             loss = @(x) this.reconObjective(measure, x);
 
             if ~exist('maxIter', 'var')
@@ -130,7 +130,7 @@ classdef PatchEstimator < handle
             end
 
             if bounded
-                options = optimoptions('fmincon', 'Display', disp, 'MaxIterations', maxIter, 'CheckGradients', false, ...
+                    options = optimoptions('fmincon', 'Display', disp, 'MaxIterations', maxIter, 'CheckGradients', false, ...
                     'Algorithm', 'interior-point', 'SpecifyObjectiveGradient', true, ...
                     'HessianApproximation', 'lbfgs', 'MaxFunctionEvaluations', floor(maxIter * 1.25));
                 lb = init * 0;
@@ -141,6 +141,8 @@ classdef PatchEstimator < handle
                 solution = fminlbfgs(loss, init, options);
             end
 
+            initLoss = loss(init);
+            solnLoss = loss(solution);
             reconstruction = reshape(solution, this.Size);
         end
 
