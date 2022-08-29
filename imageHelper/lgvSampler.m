@@ -6,7 +6,7 @@ p = inputParser;
 p.addParameter('burnIn', 250);
 p.addParameter('nStep', 250);
 p.addParameter('tau', 1e-5);
-p.addParameter('gamma', 2.5e-5);
+p.addParameter('gamma', 2.5e-4);
 p.addParameter('stride',4)
 parse(p, varargin{:});
 
