@@ -6,14 +6,14 @@ p = inputParser;
 p.addParameter('burnIn', 250);
 p.addParameter('nStep', 250);
 p.addParameter('tau', 1e-5);
-p.addParameter('gamma', 2.5e-4);
+p.addParameter('gamma', 2.5e-5);
 p.addParameter('stride',4)
 parse(p, varargin{:});
 
 nStep = p.Results.nStep;
 tau = p.Results.tau;
 gamma = p.Results.gamma;
-stride = p.resutls.stride;
+stride = p.Results.stride;
 
 % create image estimator object
 regPara = 1.0;
