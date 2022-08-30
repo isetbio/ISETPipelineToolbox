@@ -39,8 +39,8 @@ for idx = 1:totalStep
     [~, grad] = estm.prior(reshape(image, imSize));
     image = image + tau * (-grad) + sqrt(2 * gamma) * normrnd(0, 1, prod(imSize), 1);
 
-    if mod(idx, nStep) == 0        
-        samples(sampleIdx, :, :, :) = reshape(image, imSize);
+    if mod(idx, nStep) == 0  
+        samples(sampleIdx, :, :, :) = reshape(image + prior.mu', imSize);
         fprintf('Sample %d / %d \n', sampleIdx, nSample);
 
         sampleIdx = sampleIdx + 1;      
