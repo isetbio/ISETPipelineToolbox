@@ -53,6 +53,7 @@ classdef PeripheralModel
             p = inputParser;
             p.addParameter('useRandomSeed', true, @islogical);
             p.addParameter('defocusDiopters', 0, @isnumeric);
+            p.addParameter('wave',400:10:700, @isnumeric);
             parse(p, varargin{:});
       
             mosaicEcc = [eccX, eccY];
@@ -74,6 +75,7 @@ classdef PeripheralModel
                 'whichEye', PolansOptics.constants.rightEye, ...
                 'noiseFlag', 'none', ...
                 'integrationTime', 0.1, ...
+                'wave',p.Results.wave, ...
                 'useParfor', false);
             
             subCntRef = true;
