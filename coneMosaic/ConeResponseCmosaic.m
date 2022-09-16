@@ -50,7 +50,7 @@ classdef ConeResponseCmosaic < ConeResponse
         end
         
         % Override the visualization with new method
-        function visualizeMosaic(this, figureHandle, axesHandle)
+        function visualizeMosaic(this, figureHandle, axesHandle, domainVisualizationLimits)
             if ~exist('figureHandle', 'var')
                 figureHandle = figure();
             end
@@ -59,8 +59,13 @@ classdef ConeResponseCmosaic < ConeResponse
                 axesHandle = [];
             end
 
+            if ~exist('domainVisualizationLimits', 'var')
+                domainVisualizationLimits = [];
+            end
+
             this.Mosaic.visualize('figureHandle', figureHandle, ...
-                                  'axesHandle', axesHandle);
+                                  'axesHandle', axesHandle, ...
+                                  'domainVisualizationLimits', domainVisualizationLimits);
         end
         
         function visualizeExcitation(this, figureHandle, axesHandle)
