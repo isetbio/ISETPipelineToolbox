@@ -16,6 +16,13 @@ classdef ConeResponseCmosaic < ConeResponse
             p.addParameter('useRandomSeed', true, @islogical);
             p.addParameter('defocusDiopters', 0, @isnumeric);
             p.addParameter('wave',400:10:700, @isnumeric);
+            p.addParameter('rodIntrusionAdjustedConeAperture', false, @(x) ((islogical(x))||((isscalar(x))&&((x>0)&&(x<=1)))));
+            p.addParameter('eccVaryingConeAperture', true, @islogical);
+            p.addParameter('eccVaryingConeBlur', false, @islogical);
+            p.addParameter('eccVaryingOuterSegmentLength', true, @islogical);
+            p.addParameter('eccVaryingMacularPigmentDensity', true, @islogical);
+            p.addParameter('eccVaryingMacularPigmentDensityDynamic', false, @islogical);
+            p.addParameter('anchorAllEccVaryingParamsToTheirFovealValues', false, @islogical);
             parse(p, varargin{:});
 
             % Setting override to true here avoids older coneMosaicHex
@@ -24,7 +31,14 @@ classdef ConeResponseCmosaic < ConeResponse
             
             [mosaic, psfObj, psfData] = PeripheralModel.eyeModelCmosaic ...
                 (eccX, eccY, p.Results.fovealDegree, p.Results.pupilSize, p.Results.randomMesh, p.Results.subjectID, ...
-                'useRandomSeed',p.Results.useRandomSeed,'defocusDiopters',p.Results.defocusDiopters,'wave',p.Results.wave);
+                'useRandomSeed',p.Results.useRandomSeed,'defocusDiopters',p.Results.defocusDiopters,'wave',p.Results.wave, ...
+                'rodIntrusionAdjustedConeAperture', p.Results.rodIntrusionAdjustedConeAperture, ...
+                'eccVaryingConeAperture', p.Results.eccVaryingConeAperture, ...
+                'eccVaryingConeBlur', p.Results.eccVaryingConeBlur, ...
+                'eccVaryingOuterSegmentLength', p.Results.eccVaryingOuterSegmentLength, ...
+                'eccVaryingMacularPigmentDensity', p.Results.eccVaryingMacularPigmentDensity, ...
+                'eccVaryingMacularPigmentDensityDynamic', p.Results.eccVaryingMacularPigmentDensity, ...
+                'anchorAllEccVaryingParamsToTheirFovealValues', p.Results.anchorAllEccVaryingParamsToTheirFovealValues);
             
             this.eccX = eccX;
             this.eccY = eccY;
