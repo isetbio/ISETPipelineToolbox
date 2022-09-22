@@ -32,3 +32,22 @@ sample = sample - min(sample(:));
 sample = sample / max(sample(:));
 
 end
+
+function image = returnSample(imSize)
+
+imCenter = floor(imSize / 2);
+amplitude = zeros(imSize);
+phase = exp(1i * (rand(imSize) * 2 * pi));
+
+for x = 1:imSize(1)
+    for y = 1:imSize(2)
+        amplitude(x, y) = ...
+            1 / sqrt((x - imCenter(1)) ^ 2 + ...
+                     (y - imCenter(2)) ^ 2 + 1);
+    end
+end
+
+specturm = 1e3 * amplitude .* phase;
+image = real(ifft2(ifftshift(specturm)));
+
+end
