@@ -31,6 +31,8 @@ sample = (pca_mtx \ sample')';
 sample = sample - min(sample(:));
 sample = sample / max(sample(:));
 
+sample = reshape(sample, imSize);
+
 end
 
 function image = returnSample(imSize)
