@@ -7,7 +7,7 @@ function sample = sparseSampler(prior, imSize)
 %
 % Inputs:
 %   prior    - Learned sparse prior with basis function and mean
-%   imSize   - Size of the large image sampled
+%   imSize   - Size of the large image being sampled
 %
 % Outputs:
 %   sample   - Sampled image
