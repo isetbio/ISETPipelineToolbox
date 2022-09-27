@@ -123,13 +123,13 @@ classdef PatchEstimator < handle
                 multistartStruct.initImages{multistartStruct.runIndex} = rand([prod(this.Size), 1]);
                 
                 [multistartStruct.reconImages{multistartStruct.runIndex},multistartStruct.initLosses(multistartStruct.runIndex),multistartStruct.reconLosses(multistartStruct.runIndex)] = this.runEstimate(coneVec, ...
-                    'init', multistartStruct.initImages{multistartStruct.runIndex}, ...
+                    'init', multistartStruct.initImages{multistartStruct.runIndex}(:), ...
                     'maxIter',p.Results.maxIter,'bounded',p.Results.bounded,'ub',p.Results.ub, ...
                     'display',p.Results.display,'gpu',p.Results.gpu);
 
                 multistartStruct.initPreds(:,multistartStruct.runIndex) = this.Render * multistartStruct.initImages{multistartStruct.runIndex}(:);
                 [tempNegLogPrior,~,tempNegLogLikely] = ...
-                     estimator.evalEstimate(coneVec, multistartStruct.initImages{multistartStruct.runIndex}(:));
+                     this.evalEstimate(coneVec, multistartStruct.initImages{multistartStruct.runIndex}(:));
                 if (tempNegLogPrior + tempNegLogLikely ~= multistartStruct.initLosses(multistartStruct.runIndex))
                     error('Cannot reconstruct loss from prior and likelihood');
                 end
@@ -138,7 +138,7 @@ classdef PatchEstimator < handle
 
                 multistartStruct.reconPreds(:,multistartStruct.runIndex) = this.Render * multistartStruct.reconImages{multistartStruct.runIndex}(:);
                 [tempNegLogPrior,~,tempNegLogLikely] = ...
-                     estimator.evalEstimate(coneVec, multistartStruct.reconImages{multistartStruct.runIndex}(:));
+                     this.evalEstimate(coneVec, multistartStruct.reconImages{multistartStruct.runIndex}(:));
                 if (tempNegLogPrior + tempNegLogLikely ~= multistartStruct.reconLosses(multistartStruct.runIndex))
                     error('Cannot reconstruct loss from prior and likelihood');
                 end
@@ -151,16 +151,16 @@ classdef PatchEstimator < handle
             for ii = 1:p.Results.nPinkStart
                 multistartStruct.runIndex = multistartStruct.runIndex + 1;
                 multistartStruct.initTypes{multistartStruct.runIndex} = 'pinkNoise';
-                initImages{runIndex} = spectrumSampler(this.Size));
+                multistartStruct.initImages{multistartStruct.runIndex} = spectrumSampler(this.Size);
 
                 [multistartStruct.reconImages{multistartStruct.runIndex},multistartStruct.initLosses(multistartStruct.runIndex),multistartStruct.reconLosses(multistartStruct.runIndex)] = this.runEstimate(coneVec, ...
-                    'init', multistartStruct.initImages{multistartStruct.runIndex}, ...
+                    'init', multistartStruct.initImages{multistartStruct.runIndex}(:), ...
                     'maxIter',p.Results.maxIter,'bounded',p.Results.bounded,'ub',p.Results.ub, ...
                     'display',p.Results.display,'gpu',p.Results.gpu);
 
                  multistartStruct.initPreds(:,multistartStruct.runIndex) = this.Render * multistartStruct.initImages{multistartStruct.runIndex}(:);
                  [tempNegLogPrior,~,tempNegLogLikely] = ...
-                     estimator.evalEstimate(coneVec, multistartStruct.initImages{multistartStruct.runIndex}(:));
+                     this.evalEstimate(coneVec, multistartStruct.initImages{multistartStruct.runIndex}(:));
                 if (tempNegLogPrior + tempNegLogLikely ~= multistartStruct.initLosses(multistartStruct.runIndex))
                     error('Cannot reconstruct loss from prior and likelihood');
                 end
@@ -169,7 +169,7 @@ classdef PatchEstimator < handle
 
                 multistartStruct.reconPreds(:,multistartStruct.runIndex) = this.Render * multistartStruct.reconImages{multistartStruct.runIndex}(:);
                 [tempNegLogPrior,~,tempNegLogLikely] = ...
-                     estimator.evalEstimate(coneVec, multistartStruct.reconImages{multistartStruct.runIndex}(:));
+                     this.evalEstimate(coneVec, multistartStruct.reconImages{multistartStruct.runIndex}(:));
                 if (tempNegLogPrior + tempNegLogLikely ~= multistartStruct.reconLosses(multistartStruct.runIndex))
                     error('Cannot reconstruct loss from prior and likelihood');
                 end
@@ -177,7 +177,7 @@ classdef PatchEstimator < handle
                 multistartStruct.reconLogLikelihoods(multistartStruct.runIndex) = -tempNegLogLikely;
             end
 
-            % Run estimates from specified number of sparse prior pathc starting
+            % Run estimates from specified number of sparse prior patch starting
             % points
             if (p.Results.nSparsePriorPatchStart > 0)
                 if (isempty(p.Results.sparsePrior))
@@ -187,16 +187,16 @@ classdef PatchEstimator < handle
             for ii = 1:p.Results.nSparsePriorPatchStart
                 multistartStruct.runIndex = multistartStruct.runIndex + 1;
                 multistartStruct.initTypes{multistartStruct.runIndex} = 'sparsePriorPatch';
-                initImages{runIndex} = spectrumSampler(this.Size));
+                multistartStruct.initImages{multistartStruct.runIndex} = sparseSampler(p.Results.sparsePrior,this.Size);
 
                 [multistartStruct.reconImages{multistartStruct.runIndex},multistartStruct.initLosses(multistartStruct.runIndex),multistartStruct.reconLosses(multistartStruct.runIndex)] = this.runEstimate(coneVec, ...
-                    'init', multistartStruct.initImages{multistartStruct.runIndex}, ...
+                    'init', multistartStruct.initImages{multistartStruct.runIndex}(:), ...
                     'maxIter',p.Results.maxIter,'bounded',p.Results.bounded,'ub',p.Results.ub, ...
                     'display',p.Results.display,'gpu',p.Results.gpu);
 
                 multistartStruct.initPreds(:,multistartStruct.runIndex) = this.Render * multistartStruct.initImages{multistartStruct.runIndex}(:);
                 [tempNegLogPrior,~,tempNegLogLikely] = ...
-                     estimator.evalEstimate(coneVec, multistartStruct.initImages{multistartStruct.runIndex}(:));
+                     this.evalEstimate(coneVec, multistartStruct.initImages{multistartStruct.runIndex}(:));
                 if (tempNegLogPrior + tempNegLogLikely ~= multistartStruct.initLosses(multistartStruct.runIndex))
                     error('Cannot reconstruct loss from prior and likelihood');
                 end
@@ -205,7 +205,7 @@ classdef PatchEstimator < handle
 
                 multistartStruct.reconPreds(:,multistartStruct.runIndex) = this.Render * multistartStruct.reconImages{multistartStruct.runIndex}(:);
                 [tempNegLogPrior,~,tempNegLogLikely] = ...
-                     estimator.evalEstimate(coneVec, multistartStruct.reconImages{multistartStruct.runIndex}(:));
+                     this.evalEstimate(coneVec, multistartStruct.reconImages{multistartStruct.runIndex}(:));
                 if (tempNegLogPrior + tempNegLogLikely ~= multistartStruct.reconLosses(multistartStruct.runIndex))
                     error('Cannot reconstruct loss from prior and likelihood');
                 end
@@ -220,13 +220,13 @@ classdef PatchEstimator < handle
                 multistartStruct.initImages{multistartStruct.runIndex} = p.Results.specifiedStarts{multistartStruct.runIndex};
 
                 [multistartStruct.reconImages{multistartStruct.runIndex},multistartStruct.initLosses(multistartStruct.runIndex),multistartStruct.reconLosses(multistartStruct.runIndex)] = this.runEstimate(coneVec, ...
-                    'init', multistartStruct.initImages{multistartStruct.runIndex}, ...
+                    'init', multistartStruct.initImages{multistartStruct.runIndex}(:), ...
                     'maxIter',p.Results.maxIter,'bounded',p.Results.bounded,'ub',p.Results.ub, ...
                     'display',p.Results.display,'gpu',p.Results.gpu);
 
                 multistartStruct.initPreds(:,multistartStruct.runIndex) = this.Render * multistartStruct.initImages{multistartStruct.runIndex}(:);
                 [tempNegLogPrior,~,tempNegLogLikely] = ...
-                     estimator.evalEstimate(coneVec, multistartStruct.initImages{multistartStruct.runIndex}(:));
+                     this.evalEstimate(coneVec, multistartStruct.initImages{multistartStruct.runIndex}(:));
                 if (tempNegLogPrior + tempNegLogLikely ~= multistartStruct.initLosses(multistartStruct.runIndex))
                     error('Cannot reconstruct loss from prior and likelihood');
                 end
@@ -235,7 +235,7 @@ classdef PatchEstimator < handle
 
                 multistartStruct.reconPreds(:,multistartStruct.runIndex) = this.Render * multistartStruct.reconImages{multistartStruct.runIndex}(:);
                 [tempNegLogPrior,~,tempNegLogLikely] = ...
-                     estimator.evalEstimate(coneVec, multistartStruct.reconImages{multistartStruct.runIndex}(:));
+                     this.evalEstimate(coneVec, multistartStruct.reconImages{multistartStruct.runIndex}(:));
                 if (tempNegLogPrior + tempNegLogLikely ~= multistartStruct.reconLosses(multistartStruct.runIndex))
                     error('Cannot reconstruct loss from prior and likelihood');
                 end
@@ -250,7 +250,7 @@ classdef PatchEstimator < handle
         end
 
         function [reconstruction,initLoss,solnLoss] = selectEstimateFromMultistart(this, coneVec, display, fieldOfView, ...
-                initImages, initTypes, reconstructions, initLosses, solnLosses, varargin)
+                multistartStruct, varargin)
 
         end
       
