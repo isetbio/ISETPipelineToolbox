@@ -82,7 +82,9 @@ classdef PatchEstimator < handle
             gradient = gradientPrior + double(gather(gradientLlhd));
         end
 
-        % Run estimate from multiple starting points
+        % Run estimate from multiple starting points.
+        % 
+        % 
         function [multistartStruct] = runMultistartEstimate(this, coneVec, varargin)
             p = inputParser;
             p.KeepUnmatched = false;
