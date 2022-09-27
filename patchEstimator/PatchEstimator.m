@@ -82,6 +82,44 @@ classdef PatchEstimator < handle
             gradient = gradientPrior + double(gather(gradientLlhd));
         end
 
+        function [reconstruction,initLoss,solnLoss] = runMultistartEstimate(this, coneVec, varargin)
+            p = inputParser;
+            p.KeepUnmatched = false;
+            p.addParameter('nWhiteStart', 0, @isnumeric);
+            p.addParameter('nPinkStart',1,@isnumeric);
+            p.addParameter('nPatchStart',1,@isnumeric);
+            p.addParameter('specifiedStarts',{},@iscell);
+
+            p.addParameter('maxIter', 1e3, @(x)(isnumeric(x) && numel(x) == 1));
+            p.addParameter('bounded', true, @(x)(islogical(x) && numel(x) == 1));
+            p.addParameter('ub', 1.0, @(x)(isnumeric(x) && numel(x) == 1));
+            p.addParameter('display', 'iter');
+            p.addParameter('gpu', false, @(x)(islogical(x) && numel(x) == 1));
+
+            parse(p, varargin{:});
+
+            % Keep track of all runs
+            runIndex = 0;
+            initImages = {};
+
+            % Run estimates from specified number of white noise starting
+            % points
+            for ii = 1:nWhiteStart
+                runIndex = runIndex + 1;
+                initImages{runIndex} = rand([prod(this.Size));
+                [reconstructions{runIndex},initLosses(runIndex),solnLosses(runIndex)] = this.runEstimate(coneVec, ...
+                    'init', initImages{runIndex}, ...
+                    'maxIter',p.Results.maxIter,'bounded',p.Results.bounded,'ub',p.Results.ub, ...
+                    'display',p.Results.display,'gpu',p.Results.gpu);
+            end
+
+            % Check that we ran at least one estimate
+            if (runIndex == 0)
+                error('Need to specify at least one starting scheme');
+            end
+           
+        end
+
         function [reconstruction,initLoss,solnLoss] = runEstimate(this, coneVec, varargin)
             p = inputParser;
             p.addParameter('maxIter', 1e3, @(x)(isnumeric(x) && numel(x) == 1));
@@ -90,11 +128,10 @@ classdef PatchEstimator < handle
             p.addParameter('ub', 1.0, @(x)(isnumeric(x) && numel(x) == 1));
             p.addParameter('display', 'iter');
             p.addParameter('gpu', false, @(x)(islogical(x) && numel(x) == 1));
-
             parse(p, varargin{:});
+
             [reconstruction,initLoss,solnLoss] = this.estimate(coneVec, p.Results.maxIter, p.Results.init, ...
                 p.Results.bounded, p.Results.ub, p.Results.display, p.Results.gpu);
-
         end
 
         function [reconstruction,initLoss,solnLoss] = estimate(this, measure, maxIter, init, bounded, ub, disp, gpu)
