@@ -120,6 +120,100 @@ classdef PatchEstimator < handle
            
         end
 
+
+        % meanLuminanceCdPerM2 = [];
+        % scaleFactor = (forwardPupilDiamMM/reconPupilDiamMM)^2;
+        % [recon1Image,recon1InitLoss,recon1SolnLoss] = estimator.runEstimate(forwardExcitationsToStimulusUse * scaleFactor, ...
+        %     'maxIter', 500, 'display', 'iter', 'gpu', false, 'init', 0.5*ones(length(stimulusImageLinear(:)), 1));
+        % [recon1Scene, ~, recon1ImageLinear] = sceneFromFile(gammaCorrection(recon1Image, theForwardDisplay), 'rgb', ...
+        %     meanLuminanceCdPerM2, forwardConeMosaic.Display);
+        % recon1Scene = sceneSet(recon1Scene, 'fov', fieldSizeDegs);
+        % [recon1NegLogPrior,~,recon1NegLogLikely] = ...
+        %     estimator.evalEstimate(forwardExcitationsToStimulusUse * scaleFactor, recon1ImageLinear(:));
+        % visualizeScene(recon1Scene, 'displayRadianceMaps', false,'avoidAutomaticRGBscaling', true);
+        % saveas(gcf,fullfile(outputDir,'Recon1.jpg'),'jpg');
+
+        % Report back the better
+        % if (-(recon1NegLogPrior+recon1NegLogLikely) > -(recon2NegLogPrior+recon2NegLogLikely))
+        %     reconWhichStr = 'Recon1 (random start) better\n';
+        %     reconNegLogPrior = recon1NegLogPrior;
+        %     reconNegLogLikely = recon1NegLogLikely;
+        %     reconImage = recon1Image;
+        %     reconScene = recon1Scene;
+        %     reconImageLinear = recon1ImageLinear;
+        % else
+        %     reconWhichStr = 'Recon2 (stimulus start) better\n';
+        %     reconNegLogPrior = recon2NegLogPrior;
+        %     reconNegLogLikely = recon2NegLogLikely;
+        %     reconImage = recon2Image;
+        %     reconScene = recon2Scene;
+        %     reconImageLinear = recon2ImageLinear;
+        % end
+        % 
+        % % Show reconstruction
+        % [reconScene, ~, reconImageLinear] = sceneFromFile(gammaCorrection(recon2Image, theForwardDisplay), 'rgb', ...
+        %     meanLuminanceCdPerM2, forwardConeMosaic.Display);
+        % reconScene = sceneSet(reconScene, 'fov', fieldSizeDegs);
+        % visualizeScene(reconScene, 'displayRadianceMaps', false, 'avoidAutomaticRGBscaling', true);
+        % saveas(gcf,fullfile(outputDir,'Recon.jpg'),'jpg');
+        % 
+        % % Compute forward excitations from reconstruction
+        % % And compare with stimulus exciations
+        % forwardOI = oiCompute(reconScene,forwardOI);
+        % if (reconstructfromRenderMatrix)
+        %     title('Reconstruction from forward render matrix');
+        %     forwardExcitationsToRecon = squeeze(forwardRenderMatrix*reconImageLinear(:));
+        % else
+        %     title('Reconstruction from forward ISETBio');
+        %     forwardExcitationsToRecon = squeeze(forwardConeMosaic.Mosaic.compute(forwardOI, 'opticalImagePositionDegs', 'mosaic-centered'));
+        % end
+        % figure; clf; hold on;
+        % plot(forwardExcitationsToStimulusUse,forwardExcitationsToRecon,'ro','MarkerFaceColor','r','MarkerSize',10);
+        % axis('square');
+        % maxVal = max([forwardExcitationsToStimulusUse; forwardExcitationsToRecon]);
+        % plot([0 maxVal],[0 maxVal],'k');
+        % xlim([0 maxVal]); ylim([0 maxVal]);
+        % xlabel('Excitations to stimulus');
+        % ylabel('Excitations to reconstruction');
+        % saveas(gcf,fullfile(outputDir,'StimulusVsReconExcitations.jpg'),'jpg');
+        % 
+        % %% Evaluate prior and likelihood of stimulus and reconstruction
+        % [stimNegLogPrior,~,stimNegLogLikely] = ...
+        %     estimator.evalEstimate(forwardExcitationsToStimulusUse * scaleFactor, stimulusImageLinear(:));
+        % txtFileName = fullfile(outputDir,'ReconProbInfo.txt');
+        % if (exist(txtFileName,'file'))
+        %     delete(txtFileName);
+        % end
+        % fid = fopen(txtFileName,'w');
+        % fprintf(fid,'Stimulus: reg weighted log prior %0.6g; estimate part of log likelihood %0.6g; sum %0.6g\n', ...
+        %     -stimNegLogPrior,-stimNegLogLikely,-(stimNegLogPrior+stimNegLogLikely));
+        % fprintf(fid,'Recon1: reg weighted log prior %0.6g; estimate part of log likelihood %0.6g; sum %0.6g\n', ...
+        %     -recon1NegLogPrior,-recon1NegLogLikely,-(recon1NegLogPrior+recon1NegLogLikely));
+        % fprintf(fid,'Recon1 initial loss %0.6g; recon1 solution loss %0.6g; fractional difference (init less soln; should be pos): %0.6g\n', ...
+        %     recon1InitLoss,recon1SolnLoss,(recon1InitLoss-recon1SolnLoss)/abs(recon1InitLoss));
+        % fprintf(fid,'Recon2: reg weighted log prior %0.6g; estimate part of log likelihood %0.6g; sum %0.6g\n', ...
+        %     -recon2NegLogPrior,-recon2NegLogLikely,-(recon2NegLogPrior+recon2NegLogLikely));
+        % fprintf(fid,'Recon2 initial loss %0.6g; recon2 solution loss %0.6g; fractional difference (init less soln; should be pos): %0.6g\n', ...
+        %     recon2InitLoss,recon2SolnLoss,(recon2InitLoss-recon2SolnLoss)/abs(recon2InitLoss));
+        % fprintf(fid,reconWhichStr);
+        % fprintf(fid,'Each of the following should be *higher* for a valid reconstruction\n');
+        % if (-stimNegLogPrior > -reconNegLogPrior)
+        %     fprintf(fid,'\tReconstruction prior *lower* than stimulus\n');
+        % else
+        %     fprintf(fid,'\tReconstruction prior *higher* than stimulus\n');
+        % end
+        % if (-stimNegLogLikely > -reconNegLogLikely)
+        %     fprintf(fid,'\tStimulus likelihood *higher* than reconstruction\n');
+        % else
+        %     fprintf(fid,'\tStimulus likelihood *lower* than reconstruction\n');
+        % end
+        % if (-(stimNegLogPrior+stimNegLogLikely) > -(reconNegLogPrior+reconNegLogLikely))
+        %     fprintf(fid,'\tReconstruction neg objective *lower* than stimulus\n');
+        % else
+        %     fprintf(fid,'\tReconstruction neg objective *higher* than stimulus\n');
+        % end
+        % fclose(fid);
+
         function [reconstruction,initLoss,solnLoss] = runEstimate(this, coneVec, varargin)
             p = inputParser;
             p.addParameter('maxIter', 1e3, @(x)(isnumeric(x) && numel(x) == 1));
