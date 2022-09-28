@@ -217,7 +217,7 @@ classdef PatchEstimator < handle
             for ii = 1:length(p.Results.specifiedStarts)
                 multistartStruct.runIndex = multistartStruct.runIndex + 1;
                 multistartStruct.initTypes{multistartStruct.runIndex} = 'specified';
-                multistartStruct.initImages{multistartStruct.runIndex} = p.Results.specifiedStarts{multistartStruct.runIndex};
+                multistartStruct.initImages{multistartStruct.runIndex} = p.Results.specifiedStarts{ii};
 
                 [multistartStruct.reconImages{multistartStruct.runIndex},multistartStruct.initLosses(multistartStruct.runIndex),multistartStruct.reconLosses(multistartStruct.runIndex)] = this.runEstimate(coneVec, ...
                     'init', multistartStruct.initImages{multistartStruct.runIndex}(:), ...
