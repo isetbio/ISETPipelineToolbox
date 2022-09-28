@@ -254,7 +254,7 @@ classdef PatchEstimator < handle
         end
 
         % Choose best reconstruction
-        function [reconImageLinear,reconIndex] = selectEstimateFromMultistart(this,  multistartStruct)
+        function [reconImageLinear,reconIndex] = selectEstimateFromMultistart(this, multistartStruct)
 
             % Loop through and find best reconstruction based on loss
             minLoss = Inf;
