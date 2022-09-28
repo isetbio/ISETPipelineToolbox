@@ -1,16 +1,24 @@
 function sample = sparseSampler(prior, imSize)
-% Sample a large image with patches 
-% generated from a sparse image prior
+% Sample a large image with patches generated from a sparse image prior
 % 
 % Syntax:
 %   sample = sparseSampler(prior, imSize)
 %
+% Description
+%   Creates a block structured image where each block is drawn from an
+%   Laplacian sparse image prior.
+%
+%   Negative pixel valus are truncated to zero.
+%
 % Inputs:
-%   prior    - Learned sparse prior with basis function and mean
+%   prior    - Learned sparse prior structure with basis function and mean
 %   imSize   - Size of the large image being sampled
 %
 % Outputs:
 %   sample   - Sampled image
+
+% History:
+%   09/28/22 dhb  Truncate to non-negative.
 
 stride = sqrt(size(prior.regBasis, 1) / 3);
 xStep = ceil(imSize(1) / stride);
@@ -27,6 +35,8 @@ for x = 1 : xStep
 end
 
 sample = fullImg(1:imSize(1), 1:1:imSize(2), :);
+sample(sample < 0) = 0;
+
 end
 
 

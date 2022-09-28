@@ -4,11 +4,21 @@ function sample = spectrumSampler(imSize)
 % Syntax:
 %   sample = spectrumSampler(imSize)
 %
+% Description:
+%   Simple 1/f noise color image sampler.  Draws pink noise in three
+%   roughly decorrelated color planes and transforms back to correlated
+%   image space.
+%
+%   Returned pixel values are forced non-negative by truncation to zero.
+%
 % Inputs:
 %   imSize   - Size of the image being sampled
 %
 % Outputs:
 %   sample   - Sampled image
+
+% History:
+%   09/28/22 dhb  Truncate to non-negative.
 
 % Define the transformation from pixel to uncorrected color space
 pca_mtx = [0.57, 0.5825, 0.5714;
@@ -33,6 +43,7 @@ sample = sample / max(sample(:));
 
 sample = reshape(sample, imSize);
 
+sample(sample < 0) = 0;
 end
 
 function image = returnSample(imSize)
