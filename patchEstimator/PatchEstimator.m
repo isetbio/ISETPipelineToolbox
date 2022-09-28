@@ -85,7 +85,7 @@ classdef PatchEstimator < handle
         % Run estimate from multiple starting points.
         % 
         % 
-        function [multistartStruct] = runMultistartEstimate(this, coneVec, varargin)
+        function [multistartStruct,reconImageLinear,reconIndex] = runMultistartEstimate(this, coneVec, varargin)
             p = inputParser;
             p.KeepUnmatched = false;
             p.addParameter('nWhiteStart', 0, @isnumeric);
@@ -111,6 +111,7 @@ classdef PatchEstimator < handle
             multistartStruct.initPreds = [];
             multistartStruct.reconLosses = []; multistartStruct.reconLogPriors = []; multistartStruct.reconLogLikelihoods = [];
             multistartStruct.reconPreds = [];
+            multistartStruct.coneVec = coneVec;
 
             % Some parameters
             meanLuminanceCdPerM2 = [];
@@ -120,7 +121,7 @@ classdef PatchEstimator < handle
             for ii = 1:p.Results.nWhiteStart
                 multistartStruct.runIndex = multistartStruct.runIndex + 1;
                 multistartStruct.initTypes{multistartStruct.runIndex} = 'whiteNoise';
-                multistartStruct.initImages{multistartStruct.runIndex} = rand([prod(this.Size), 1]);
+                multistartStruct.initImages{multistartStruct.runIndex} = rand(this.Size);
                 
                 [multistartStruct.reconImages{multistartStruct.runIndex},multistartStruct.initLosses(multistartStruct.runIndex),multistartStruct.reconLosses(multistartStruct.runIndex)] = this.runEstimate(coneVec, ...
                     'init', multistartStruct.initImages{multistartStruct.runIndex}(:), ...
@@ -217,7 +218,7 @@ classdef PatchEstimator < handle
             for ii = 1:length(p.Results.specifiedStarts)
                 multistartStruct.runIndex = multistartStruct.runIndex + 1;
                 multistartStruct.initTypes{multistartStruct.runIndex} = 'specified';
-                multistartStruct.initImages{multistartStruct.runIndex} = p.Results.specifiedStarts{ii};
+                multistartStruct.initImages{multistartStruct.runIndex} = reshape(p.Results.specifiedStarts{ii},this.Size);
 
                 [multistartStruct.reconImages{multistartStruct.runIndex},multistartStruct.initLosses(multistartStruct.runIndex),multistartStruct.reconLosses(multistartStruct.runIndex)] = this.runEstimate(coneVec, ...
                     'init', multistartStruct.initImages{multistartStruct.runIndex}(:), ...
@@ -247,106 +248,26 @@ classdef PatchEstimator < handle
             if (multistartStruct.runIndex == 0)
                 error('Need to specify at least one starting scheme');
             end
+
+            % Get best reconstruction out of structure
+            [reconImageLinear,reconIndex] = this.selectEstimateFromMultistart(multistartStruct);
         end
 
-        function [reconstruction,initLoss,solnLoss] = selectEstimateFromMultistart(this, coneVec, display, fieldOfView, ...
-                multistartStruct, varargin)
+        % Choose best reconstruction
+        function [reconImageLinear,reconIndex] = selectEstimateFromMultistart(this,  multistartStruct)
 
+            % Loop through and find best reconstruction based on loss
+            minLoss = Inf;
+            reconIndex = NaN;
+            for ii = 1:length(multistartStruct.initLosses)
+                if (multistartStruct.reconLosses(ii) < minLoss)
+                    minLoss = multistartStruct.reconLosses(ii);
+                    reconIndex = ii;
+                    reconImageLinear = multistartStruct.reconImages{ii};
+                end
+            end
         end
       
-        % meanLuminanceCdPerM2 = [];
-        % scaleFactor = (forwardPupilDiamMM/reconPupilDiamMM)^2;
-        % [recon1Image,recon1InitLoss,recon1SolnLoss] = estimator.runEstimate(forwardExcitationsToStimulusUse * scaleFactor, ...
-        %     'maxIter', 500, 'display', 'iter', 'gpu', false, 'init', 0.5*ones(length(stimulusImageLinear(:)), 1));
-        % [recon1Scene, ~, recon1ImageLinear] = sceneFromFile(gammaCorrection(recon1Image, theForwardDisplay), 'rgb', ...
-        %     meanLuminanceCdPerM2, forwardConeMosaic.Display);
-        % recon1Scene = sceneSet(recon1Scene, 'fov', fieldSizeDegs);
-        % [recon1NegLogPrior,~,recon1NegLogLikely] = ...
-        %     estimator.evalEstimate(forwardExcitationsToStimulusUse * scaleFactor, recon1ImageLinear(:));
-        % visualizeScene(recon1Scene, 'displayRadianceMaps', false,'avoidAutomaticRGBscaling', true);
-        % saveas(gcf,fullfile(outputDir,'Recon1.jpg'),'jpg');
-
-        % Report back the better
-        % if (-(recon1NegLogPrior+recon1NegLogLikely) > -(recon2NegLogPrior+recon2NegLogLikely))
-        %     reconWhichStr = 'Recon1 (random start) better\n';
-        %     reconNegLogPrior = recon1NegLogPrior;
-        %     reconNegLogLikely = recon1NegLogLikely;
-        %     reconImage = recon1Image;
-        %     reconScene = recon1Scene;
-        %     reconImageLinear = recon1ImageLinear;
-        % else
-        %     reconWhichStr = 'Recon2 (stimulus start) better\n';
-        %     reconNegLogPrior = recon2NegLogPrior;
-        %     reconNegLogLikely = recon2NegLogLikely;
-        %     reconImage = recon2Image;
-        %     reconScene = recon2Scene;
-        %     reconImageLinear = recon2ImageLinear;
-        % end
-        % 
-        % % Show reconstruction
-        % [reconScene, ~, reconImageLinear] = sceneFromFile(gammaCorrection(recon2Image, theForwardDisplay), 'rgb', ...
-        %     meanLuminanceCdPerM2, forwardConeMosaic.Display);
-        % reconScene = sceneSet(reconScene, 'fov', fieldSizeDegs);
-        % visualizeScene(reconScene, 'displayRadianceMaps', false, 'avoidAutomaticRGBscaling', true);
-        % saveas(gcf,fullfile(outputDir,'Recon.jpg'),'jpg');
-        % 
-        % % Compute forward excitations from reconstruction
-        % % And compare with stimulus exciations
-        % forwardOI = oiCompute(reconScene,forwardOI);
-        % if (reconstructfromRenderMatrix)
-        %     title('Reconstruction from forward render matrix');
-        %     forwardExcitationsToRecon = squeeze(forwardRenderMatrix*reconImageLinear(:));
-        % else
-        %     title('Reconstruction from forward ISETBio');
-        %     forwardExcitationsToRecon = squeeze(forwardConeMosaic.Mosaic.compute(forwardOI, 'opticalImagePositionDegs', 'mosaic-centered'));
-        % end
-        % figure; clf; hold on;
-        % plot(forwardExcitationsToStimulusUse,forwardExcitationsToRecon,'ro','MarkerFaceColor','r','MarkerSize',10);
-        % axis('square');
-        % maxVal = max([forwardExcitationsToStimulusUse; forwardExcitationsToRecon]);
-        % plot([0 maxVal],[0 maxVal],'k');
-        % xlim([0 maxVal]); ylim([0 maxVal]);
-        % xlabel('Excitations to stimulus');
-        % ylabel('Excitations to reconstruction');
-        % saveas(gcf,fullfile(outputDir,'StimulusVsReconExcitations.jpg'),'jpg');
-        % 
-        % %% Evaluate prior and likelihood of stimulus and reconstruction
-        % [stimNegLogPrior,~,stimNegLogLikely] = ...
-        %     estimator.evalEstimate(forwardExcitationsToStimulusUse * scaleFactor, stimulusImageLinear(:));
-        % txtFileName = fullfile(outputDir,'ReconProbInfo.txt');
-        % if (exist(txtFileName,'file'))
-        %     delete(txtFileName);
-        % end
-        % fid = fopen(txtFileName,'w');
-        % fprintf(fid,'Stimulus: reg weighted log prior %0.6g; estimate part of log likelihood %0.6g; sum %0.6g\n', ...
-        %     -stimNegLogPrior,-stimNegLogLikely,-(stimNegLogPrior+stimNegLogLikely));
-        % fprintf(fid,'Recon1: reg weighted log prior %0.6g; estimate part of log likelihood %0.6g; sum %0.6g\n', ...
-        %     -recon1NegLogPrior,-recon1NegLogLikely,-(recon1NegLogPrior+recon1NegLogLikely));
-        % fprintf(fid,'Recon1 initial loss %0.6g; recon1 solution loss %0.6g; fractional difference (init less soln; should be pos): %0.6g\n', ...
-        %     recon1InitLoss,recon1SolnLoss,(recon1InitLoss-recon1SolnLoss)/abs(recon1InitLoss));
-        % fprintf(fid,'Recon2: reg weighted log prior %0.6g; estimate part of log likelihood %0.6g; sum %0.6g\n', ...
-        %     -recon2NegLogPrior,-recon2NegLogLikely,-(recon2NegLogPrior+recon2NegLogLikely));
-        % fprintf(fid,'Recon2 initial loss %0.6g; recon2 solution loss %0.6g; fractional difference (init less soln; should be pos): %0.6g\n', ...
-        %     recon2InitLoss,recon2SolnLoss,(recon2InitLoss-recon2SolnLoss)/abs(recon2InitLoss));
-        % fprintf(fid,reconWhichStr);
-        % fprintf(fid,'Each of the following should be *higher* for a valid reconstruction\n');
-        % if (-stimNegLogPrior > -reconNegLogPrior)
-        %     fprintf(fid,'\tReconstruction prior *lower* than stimulus\n');
-        % else
-        %     fprintf(fid,'\tReconstruction prior *higher* than stimulus\n');
-        % end
-        % if (-stimNegLogLikely > -reconNegLogLikely)
-        %     fprintf(fid,'\tStimulus likelihood *higher* than reconstruction\n');
-        % else
-        %     fprintf(fid,'\tStimulus likelihood *lower* than reconstruction\n');
-        % end
-        % if (-(stimNegLogPrior+stimNegLogLikely) > -(reconNegLogPrior+reconNegLogLikely))
-        %     fprintf(fid,'\tReconstruction neg objective *lower* than stimulus\n');
-        % else
-        %     fprintf(fid,'\tReconstruction neg objective *higher* than stimulus\n');
-        % end
-        % fclose(fid);
-
         function [reconstruction,initLoss,solnLoss] = runEstimate(this, coneVec, varargin)
             p = inputParser;
             p.addParameter('maxIter', 1e3, @(x)(isnumeric(x) && numel(x) == 1));
@@ -448,6 +369,9 @@ classdef PatchEstimator < handle
         function [nlogPrior, gradPrior, nlogLlhd, gradLlhd] = evalEstimate(this, measure, imageVec)
             [nlogPrior, gradPrior] = this.prior(reshape(imageVec, this.Size));
             [nlogLlhd,  gradLlhd]  = this.likelihood(measure, imageVec);
+            if (~isreal(nlogLlhd))
+                error('Log likelihood is not real. That won''t do. Probably there are negative image values.')
+            end
         end
     end
 end
