@@ -9,8 +9,8 @@ classdef PatchEstimator < handle
         Size;    % Size of original image
         Patch;   % Size of reconstruction blocks
         Stride;  % Step stride size
-        LossFactor % Scale of loss function relative to initial loss
-        InitialLoss % Value of loss function at initizialization
+        LossFactor % Normalizing factor for loss
+        LossMultiplier % Value of loss function at initizialization, after normalizing
     end
 
     methods (Abstract)
@@ -33,7 +33,7 @@ classdef PatchEstimator < handle
             this.Patch  = sqrt(size(basis, 1) / 3); % Assume square basis image
             this.Disp   = 'iter';
             this.LossFactor = 1;
-            this.LossMultiplier = 1;
+            this.LossMultiplier = 10;
         end
 
         % Gaussian approximation of the likelihood
