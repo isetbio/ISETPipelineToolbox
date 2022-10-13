@@ -32,8 +32,8 @@ classdef PatchEstimator < handle
             this.Size   = imageSize;
             this.Patch  = sqrt(size(basis, 1) / 3); % Assume square basis image
             this.Disp   = 'iter';
-            this.LossFactor = 10;
-            this.InitialLoss = 1;
+            this.LossFactor = 1;
+            this.LossMultiplier = 1;
         end
 
         % Gaussian approximation of the likelihood
@@ -74,6 +74,10 @@ classdef PatchEstimator < handle
 
             loss = nlogllPrior + nlogllLlhd;
             gradient = gradientPrior + gradientLlhd;
+
+            % Scale loss
+            loss = this.LossFactor*loss;
+            gradient = this.LossFactor*gradient;
         end
 
         % use GPU (gpuArray) to compute the large matrix product in the
@@ -86,8 +90,8 @@ classdef PatchEstimator < handle
             gradient = gradientPrior + double(gather(gradientLlhd));
 
             % Scale loss
-            loss = (this.LossFactor/this.InitialLoss)*loss;
-            gradient = (this.LossFactor/this.InitialLoss)*gradient;
+            loss = this.LossFactor*loss;
+            gradient = this.LossFactor*gradient;
         end
 
         % Run estimate from multiple starting points.
@@ -324,9 +328,9 @@ classdef PatchEstimator < handle
 
             % Grab loss to initialization.  Compute return value
             % unnormalized.
-            this.InitialLoss = 1;
+            this.LossFactor = 1;
             initLoss = loss(init);
-            this.InitialLoss = initLoss;
+            this.LossFactor = this.LossMultiplier/abs(initLoss);
 
             if bounded
                     options = optimoptions('fmincon', 'Display', disp, 'MaxIterations', maxIter, 'CheckGradients', false, ...
@@ -341,7 +345,7 @@ classdef PatchEstimator < handle
             end
 
             % Compute returned loss unnormalized.
-            this.InitialLoss = 1;
+            this.LossFactor = 1;
             solnLoss = loss(solution);
             reconstruction = reshape(solution, this.Size);
         end
@@ -373,7 +377,7 @@ classdef PatchEstimator < handle
             end
 
             init = rand([prod(graySize), 1]);
-            this.InitialLoss = 1;
+            this.LossFactor = 1;
             this.InitialLoss = loss(init);
 
             options = optimoptions('fmincon', 'Display', 'iter', 'MaxIterations', maxIter, 'CheckGradients', false, ...
@@ -384,7 +388,7 @@ classdef PatchEstimator < handle
             ub = ones(size(init)) * 1.0;
             solution = fmincon(loss, init, [], [], [], [], lb, ub, [], options);
 
-            this.InitialLoss = 1;
+            this.LossFactor = 1;
             reconstruction = reshape(solution, graySize);
         end
 
