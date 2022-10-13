@@ -19,7 +19,6 @@ function renderStructure = buildRenderStruct(aoReconDir, ...
 %   08/25/22  chr  Included portion for dichromacy
 %   08/26/22  dhb, chr  Convert to main file, edit cone mosaic options
 
-
 % Get display
 theDisplayLoad = load(fullfile(aoReconDir, 'displays', [displayName 'Display.mat']));
 eval(['theDisplay = theDisplayLoad.' displayFieldName ';']);
@@ -85,7 +84,6 @@ else
     end
 end
 
-
 % Option to replace cones in mosaic with another kind to simulate
 % dichromacy. 
 if (replaceCones)
@@ -95,9 +93,9 @@ if (replaceCones)
     end
 end
 
-theConeMosaic.Display = theDisplay;
 
 % Generate render matrix
+theConeMosaic.Display = theDisplay;
 renderMatrix = theConeMosaic.forwardRender([nPixels nPixels 3], ...
     true, true, 'useDoublePrecision', true);
 renderMatrix = double(renderMatrix);
