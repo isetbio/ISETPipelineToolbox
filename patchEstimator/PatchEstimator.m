@@ -9,6 +9,8 @@ classdef PatchEstimator < handle
         Size;    % Size of original image
         Patch;   % Size of reconstruction blocks
         Stride;  % Step stride size
+        LossFactor % Scale of loss function relative to initial loss
+        InitialLoss % Value of loss function at initizialization
     end
 
     methods (Abstract)
@@ -30,6 +32,8 @@ classdef PatchEstimator < handle
             this.Size   = imageSize;
             this.Patch  = sqrt(size(basis, 1) / 3); % Assume square basis image
             this.Disp   = 'iter';
+            this.LossFactor = 10;
+            this.InitialLoss = 1;
         end
 
         % Gaussian approximation of the likelihood
@@ -80,6 +84,10 @@ classdef PatchEstimator < handle
 
             loss = nlogllPrior + double(gather(nlogllLlhd));
             gradient = gradientPrior + double(gather(gradientLlhd));
+
+            % Scale loss
+            loss = (this.LossFactor/this.InitialLoss)*loss;
+            gradient = (this.LossFactor/this.InitialLoss)*gradient;
         end
 
         % Run estimate from multiple starting points.
@@ -314,6 +322,12 @@ classdef PatchEstimator < handle
                 loss = @(x) this.reconObjectiveGPU(measure, x);
             end
 
+            % Grab loss to initialization.  Compute return value
+            % unnormalized.
+            this.InitialLoss = 1;
+            initLoss = loss(init);
+            this.InitialLoss = initLoss;
+
             if bounded
                     options = optimoptions('fmincon', 'Display', disp, 'MaxIterations', maxIter, 'CheckGradients', false, ...
                     'Algorithm', 'interior-point', 'SpecifyObjectiveGradient', true, ...
@@ -326,11 +340,14 @@ classdef PatchEstimator < handle
                 solution = fminlbfgs(loss, init, options);
             end
 
-            initLoss = loss(init);
+            % Compute returned loss unnormalized.
+            this.InitialLoss = 1;
             solnLoss = loss(solution);
             reconstruction = reshape(solution, this.Size);
         end
 
+        % This grayscale function does not have all the options that the
+        % full estimate function now has.
         function reconstruction = estimateGray(this, measure, maxIter)
             graySize = this.Size([1, 2]); grayLen = prod(graySize);
             rgbSize  = this.Size; rgbLen = prod(rgbSize);
@@ -348,6 +365,7 @@ classdef PatchEstimator < handle
                 [loss, gradient] = reconObj.reconObjective(measure, prmptMtx * x);
                 gradient = (gradient' * prmptMtx)';
             end
+            
             loss = @(x) grayLoss(this, measure, prmptMtx, x);
 
             if ~exist('maxIter', 'var')
@@ -355,6 +373,9 @@ classdef PatchEstimator < handle
             end
 
             init = rand([prod(graySize), 1]);
+            this.InitialLoss = 1;
+            this.InitialLoss = loss(init);
+
             options = optimoptions('fmincon', 'Display', 'iter', 'MaxIterations', maxIter, 'CheckGradients', false, ...
                 'Algorithm', 'interior-point', 'SpecifyObjectiveGradient', true, ...
                 'HessianApproximation', 'lbfgs', 'MaxFunctionEvaluations', floor(maxIter * 1.25));
@@ -363,6 +384,7 @@ classdef PatchEstimator < handle
             ub = ones(size(init)) * 1.0;
             solution = fmincon(loss, init, [], [], [], [], lb, ub, [], options);
 
+            this.InitialLoss = 1;
             reconstruction = reshape(solution, graySize);
         end
 
