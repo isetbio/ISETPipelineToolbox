@@ -33,7 +33,7 @@ classdef PatchEstimator < handle
             this.Patch  = sqrt(size(basis, 1) / 3); % Assume square basis image
             this.Disp   = 'iter';
             this.LossFactor = 1;
-            this.LossMultiplier = 10;
+            this.LossMultiplier = 1e6;
         end
 
         % Gaussian approximation of the likelihood
@@ -333,14 +333,19 @@ classdef PatchEstimator < handle
             this.LossFactor = this.LossMultiplier/abs(initLoss);
 
             if bounded
+                    OptimalityTolerance = 1e-8;
+                    InitBarrierParam = 1e-10;
                     options = optimoptions('fmincon', 'Display', disp, 'MaxIterations', maxIter, 'CheckGradients', false, ...
-                    'Algorithm', 'interior-point', 'SpecifyObjectiveGradient', true, ...
-                    'HessianApproximation', 'lbfgs', 'MaxFunctionEvaluations', floor(maxIter * 1.25));
-                lb = init * 0;
-                ub = ones(size(init)) * ub;
+                    'Algorithm', 'active-set', 'SpecifyObjectiveGradient', true, ...
+                    'HessianApproximation', 'lbfgs','MaxFunctionEvaluations', floor(maxIter * 1.25));
+                    % 'Algorithm', 'interior-point',
+                    % 
+                lb = 0*ones(size(init));
+                ub = ub*ones(size(init));
                 solution = fmincon(loss, init, [], [], [], [], lb, ub, [], options);
             else
-                options  = optimset('GradObj', 'on', 'Display', disp, 'MaxIter', maxIter, 'MaxFunctionEvaluations', floor(maxIter * 1.25));
+                options  = optimset('GradObj', 'on', 'Display', disp, 'MaxIter', maxIter, 'MaxFunctionEvaluations', floor(maxIter * 1.25), ...
+                    'OptimalityTolerance',OptimalityTolerance,'InitBarrierParam',InitBarrierParam);
                 solution = fminlbfgs(loss, init, options);
             end
 
