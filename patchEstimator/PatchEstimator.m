@@ -165,6 +165,7 @@ classdef PatchEstimator < handle
                 multistartStruct.runIndex = multistartStruct.runIndex + 1;
                 multistartStruct.initTypes{multistartStruct.runIndex} = 'pinkNoise';
                 multistartStruct.initImages{multistartStruct.runIndex} = spectrumSampler(this.Size);
+                multistartStruct.initImages{multistartStruct.runIndex}(multistartStruct.initImages{multistartStruct.runIndex} > 1) = 1;
 
                 [multistartStruct.reconImages{multistartStruct.runIndex},multistartStruct.initLosses(multistartStruct.runIndex),multistartStruct.reconLosses(multistartStruct.runIndex)] = this.runEstimate(coneVec, ...
                     'init', multistartStruct.initImages{multistartStruct.runIndex}(:), ...
