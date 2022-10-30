@@ -62,6 +62,7 @@ classdef PeripheralModel
             p.addParameter('eccVaryingMacularPigmentDensityDynamic', false, @islogical);
             p.addParameter('anchorAllEccVaryingParamsToTheirFovealValues', false, @islogical);
             p.addParameter('zernikeDataBase', 'Polans2015', @ischar);
+            p.addParameter('noLCA',false,@islogical);
             parse(p, varargin{:});
       
             mosaicEcc = [eccX, eccY];
@@ -105,7 +106,8 @@ classdef PeripheralModel
                 'pupilDiameterMM', pupilDiam, ...
                 'subtractCentralRefraction', subCntRef, ...
                 'wavefrontSpatialSamples', 501, ...
-                'refractiveErrorDiopters', p.Results.defocusDiopters);
+                'refractiveErrorDiopters', p.Results.defocusDiopters, ...
+                'noLCA',p.Results.noLCA);
             
             psfObj = oiEnsemble{1};
             psfData = psfEnsemble{1};

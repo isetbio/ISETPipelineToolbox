@@ -24,6 +24,7 @@ classdef ConeResponseCmosaic < ConeResponse
             p.addParameter('eccVaryingMacularPigmentDensityDynamic', false, @islogical);
             p.addParameter('anchorAllEccVaryingParamsToTheirFovealValues', false, @islogical);
             p.addParameter('zernikeDataBase', 'Polans2015', @ischar);
+            p.addParameter('noLCA',false,@islogical);
             parse(p, varargin{:});
 
             % Setting override to true here avoids older coneMosaicHex
@@ -40,7 +41,8 @@ classdef ConeResponseCmosaic < ConeResponse
                 'eccVaryingMacularPigmentDensity', p.Results.eccVaryingMacularPigmentDensity, ...
                 'eccVaryingMacularPigmentDensityDynamic', p.Results.eccVaryingMacularPigmentDensity, ...
                 'anchorAllEccVaryingParamsToTheirFovealValues', p.Results.anchorAllEccVaryingParamsToTheirFovealValues, ...
-                'zernikeDataBase',p.Results.zernikeDataBase);
+                'zernikeDataBase',p.Results.zernikeDataBase, ...
+                'noLCA',p.Results.noLCA);
             
             this.eccX = eccX;
             this.eccY = eccY;
