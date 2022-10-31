@@ -165,6 +165,7 @@ classdef PatchEstimator < handle
                 multistartStruct.runIndex = multistartStruct.runIndex + 1;
                 multistartStruct.initTypes{multistartStruct.runIndex} = 'pinkNoise';
                 multistartStruct.initImages{multistartStruct.runIndex} = spectrumSampler(this.Size);
+                multistartStruct.initImages{multistartStruct.runIndex}(multistartStruct.initImages{multistartStruct.runIndex} < 0) = 0;
                 multistartStruct.initImages{multistartStruct.runIndex}(multistartStruct.initImages{multistartStruct.runIndex} > 1) = 1;
 
                 [multistartStruct.reconImages{multistartStruct.runIndex},multistartStruct.initLosses(multistartStruct.runIndex),multistartStruct.reconLosses(multistartStruct.runIndex)] = this.runEstimate(coneVec, ...
@@ -202,6 +203,8 @@ classdef PatchEstimator < handle
                 multistartStruct.runIndex = multistartStruct.runIndex + 1;
                 multistartStruct.initTypes{multistartStruct.runIndex} = 'sparsePriorPatch';
                 multistartStruct.initImages{multistartStruct.runIndex} = sparseSampler(p.Results.sparsePrior,this.Size);
+                multistartStruct.initImages{multistartStruct.runIndex}(multistartStruct.initImages{multistartStruct.runIndex} < 0) = 0;
+                multistartStruct.initImages{multistartStruct.runIndex}(multistartStruct.initImages{multistartStruct.runIndex} > 1) = 1;
 
                 [multistartStruct.reconImages{multistartStruct.runIndex},multistartStruct.initLosses(multistartStruct.runIndex),multistartStruct.reconLosses(multistartStruct.runIndex)] = this.runEstimate(coneVec, ...
                     'init', multistartStruct.initImages{multistartStruct.runIndex}(:), ...
@@ -332,6 +335,10 @@ classdef PatchEstimator < handle
             this.LossFactor = 1;
             initLoss = loss(init);
             this.LossFactor = this.LossMultiplier/abs(initLoss);
+
+            % Make sure init is in bound
+            init(init < 0) = 0;
+            init(init > ub) = ub;
 
             if bounded
                     OptimalityTolerance = 1e-8;
