@@ -333,35 +333,35 @@ classdef PatchEstimator < handle
             initLoss = loss(init);
             this.LossFactor = this.LossMultiplier/abs(initLoss);
 
-            OptimalityTolerance = 1e-8;
-            InitBarrierParam = 1e-10;
-            options = optimoptions('fmincon', 'Display', disp, 'MaxIterations', maxIter, 'CheckGradients', false, ...
-            'Algorithm', 'interior-point', 'SpecifyObjectiveGradient', true, ...
-            'HessianApproximation', 'lbfgs','MaxFunctionEvaluations', floor(maxIter * 1.25));
-            if bounded
-                lb = 0*ones(size(init));
-                ub = ub*ones(size(init));
-            else
-                lb = 0*ones(size(init));
-                ub = [];
-            end
-            solution = fmincon(loss, init, [], [], [], [], lb, ub, [], options);
-
+%             OptimalityTolerance = 1e-8;
+%             InitBarrierParam = 1e-10;
+%             options = optimoptions('fmincon', 'Display', disp, 'MaxIterations', maxIter, 'CheckGradients', false, ...
+%             'Algorithm', 'interior-point', 'SpecifyObjectiveGradient', true, ...
+%             'HessianApproximation', 'lbfgs','MaxFunctionEvaluations', floor(maxIter * 1.25));
 %             if bounded
-%                     OptimalityTolerance = 1e-8;
-%                     InitBarrierParam = 1e-10;
-%                     options = optimoptions('fmincon', 'Display', disp, 'MaxIterations', maxIter, 'CheckGradients', false, ...
-%                     'Algorithm', 'interior-point', 'SpecifyObjectiveGradient', true, ...
-%                     'HessianApproximation', 'lbfgs','MaxFunctionEvaluations', floor(maxIter * 1.25));
-%                     % 'Algorithm', 'interior-point',
-%                     % 
 %                 lb = 0*ones(size(init));
 %                 ub = ub*ones(size(init));
 %             else
-%                 options  = optimset('GradObj', 'on', 'Display', disp, 'MaxIter', maxIter, 'MaxFunctionEvaluations', floor(maxIter * 1.25), ...
-%                     'OptimalityTolerance',OptimalityTolerance,'InitBarrierParam',InitBarrierParam);
-%                 solution = fminlbfgs(loss, init, options);
+%                 lb = 0*ones(size(init));
+%                 ub = [];
 %             end
+%             solution = fmincon(loss, init, [], [], [], [], lb, ub, [], options);
+
+            if bounded
+                    OptimalityTolerance = 1e-8;
+                    InitBarrierParam = 1e-10;
+                    options = optimoptions('fmincon', 'Display', disp, 'MaxIterations', maxIter, 'CheckGradients', false, ...
+                    'Algorithm', 'interior-point', 'SpecifyObjectiveGradient', true, ...
+                    'HessianApproximation', 'lbfgs','MaxFunctionEvaluations', floor(maxIter * 1.25));
+                    % 'Algorithm', 'interior-point',
+                    % 
+                lb = 0*ones(size(init));
+                ub = ub*ones(size(init));
+            else
+                options  = optimset('GradObj', 'on', 'Display', disp, 'MaxIter', maxIter, 'MaxFunctionEvaluations', floor(maxIter * 1.25), ...
+                    'OptimalityTolerance',OptimalityTolerance,'InitBarrierParam',InitBarrierParam);
+                solution = fminlbfgs(loss, init, options);
+            end
 
             % Compute returned loss unnormalized.
             this.LossFactor = 1;
