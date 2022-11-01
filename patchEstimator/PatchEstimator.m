@@ -165,6 +165,7 @@ classdef PatchEstimator < handle
                 multistartStruct.runIndex = multistartStruct.runIndex + 1;
                 multistartStruct.initTypes{multistartStruct.runIndex} = 'pinkNoise';
                 multistartStruct.initImages{multistartStruct.runIndex} = spectrumSampler(this.Size);
+                multistartStruct.initImages{multistartStruct.runIndex}(multistartStruct.initImages{multistartStruct.runIndex} < 0) = 0;
                 multistartStruct.initImages{multistartStruct.runIndex}(multistartStruct.initImages{multistartStruct.runIndex} > 1) = 1;
 
                 [multistartStruct.reconImages{multistartStruct.runIndex},multistartStruct.initLosses(multistartStruct.runIndex),multistartStruct.reconLosses(multistartStruct.runIndex)] = this.runEstimate(coneVec, ...
@@ -202,6 +203,8 @@ classdef PatchEstimator < handle
                 multistartStruct.runIndex = multistartStruct.runIndex + 1;
                 multistartStruct.initTypes{multistartStruct.runIndex} = 'sparsePriorPatch';
                 multistartStruct.initImages{multistartStruct.runIndex} = sparseSampler(p.Results.sparsePrior,this.Size);
+                multistartStruct.initImages{multistartStruct.runIndex}(multistartStruct.initImages{multistartStruct.runIndex} < 0) = 0;
+                multistartStruct.initImages{multistartStruct.runIndex}(multistartStruct.initImages{multistartStruct.runIndex} > 1) = 1;
 
                 [multistartStruct.reconImages{multistartStruct.runIndex},multistartStruct.initLosses(multistartStruct.runIndex),multistartStruct.reconLosses(multistartStruct.runIndex)] = this.runEstimate(coneVec, ...
                     'init', multistartStruct.initImages{multistartStruct.runIndex}(:), ...
@@ -333,19 +336,9 @@ classdef PatchEstimator < handle
             initLoss = loss(init);
             this.LossFactor = this.LossMultiplier/abs(initLoss);
 
-%             OptimalityTolerance = 1e-8;
-%             InitBarrierParam = 1e-10;
-%             options = optimoptions('fmincon', 'Display', disp, 'MaxIterations', maxIter, 'CheckGradients', false, ...
-%             'Algorithm', 'interior-point', 'SpecifyObjectiveGradient', true, ...
-%             'HessianApproximation', 'lbfgs','MaxFunctionEvaluations', floor(maxIter * 1.25));
-%             if bounded
-%                 lb = 0*ones(size(init));
-%                 ub = ub*ones(size(init));
-%             else
-%                 lb = 0*ones(size(init));
-%                 ub = [];
-%             end
-%             solution = fmincon(loss, init, [], [], [], [], lb, ub, [], options);
+            % Make sure init is in bound
+            init(init < 0) = 0;
+            init(init > ub) = ub;
 
             if bounded
                     OptimalityTolerance = 1e-8;
@@ -357,6 +350,7 @@ classdef PatchEstimator < handle
                     % 
                 lb = 0*ones(size(init));
                 ub = ub*ones(size(init));
+                solution = fmincon(loss, init, [], [], [], [], lb, ub, [], options);
             else
                 options  = optimset('GradObj', 'on', 'Display', disp, 'MaxIter', maxIter, 'MaxFunctionEvaluations', floor(maxIter * 1.25), ...
                     'OptimalityTolerance',OptimalityTolerance,'InitBarrierParam',InitBarrierParam);
