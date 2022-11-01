@@ -337,8 +337,8 @@ classdef PatchEstimator < handle
             this.LossFactor = this.LossMultiplier/abs(initLoss);
 
             % Make sure init is in bound
-            init(init < 0) = 0;
-            init(init > ub) = ub;
+            init(init < 0) = 0+eps;
+            init(init > ub) = ub-eps;
 
             if bounded
                     OptimalityTolerance = 1e-8;
