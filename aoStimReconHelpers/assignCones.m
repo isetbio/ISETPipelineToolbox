@@ -1,4 +1,4 @@
-function [replaceCones, startCones, newCones] = assignCones(chrom)
+function [replaceCones, startCones, newCones] = assignCones(chrom, varargin)
 % Syntax:
 %    [replaceCones, startCones, newCones] = assignCones(chrom);
 % Synopsis
@@ -61,7 +61,23 @@ elseif strcmp(chrom, 'chromNorm')
     replaceCones = false; 
     startCones = [];
     newCones = [];
+elseif startsWith(chrom, 'quadSeq')
+    % These are established in the buildRenderStruct file itself
+    replaceCones = true;
+    startCones = [];
+    newCones = [];
 else
     error('Unrecognized mosaic chromatic type')
 end
+
+
+
+
+
+
+
+% 
+% 
+
+
 

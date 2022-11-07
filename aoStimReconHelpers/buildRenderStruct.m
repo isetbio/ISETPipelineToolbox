@@ -2,7 +2,7 @@ function renderStructure = buildRenderStruct(aoReconDir, ...
     eccXDegs, eccYDegs, fieldSizeDegs, nPixels, pupilDiamMM, aoRender, ...
     defocusDiopters, overwriteDisplayGamma, displayName, displayFieldName, ...
     displayGammaBits, displayGammaGamma, randSeed, replaceCones, startCones, ...
-    newCones, eccVars, subjectID, zernikeDataBase)
+    newCones, eccVars, subjectID, zernikeDataBase, quads)
 % Synopsis:
 %    Build render matrix if desired/needed
 %
@@ -93,13 +93,55 @@ end
 % Option to replace cones in mosaic with another kind to simulate
 % dichromacy. 
 if (replaceCones)
-    for i=1:length(startCones)
-        coneInd = find(theConeMosaic.Mosaic.coneTypes == startCones(i));
-        theConeMosaic.Mosaic.reassignTypeOfCones(coneInd, newCones);
+    if (quads(1).value)
+        for q=2:5
+            quads(q).regionCount = length(quads(q).percentL);
+            quads(q).regionSpread = abs(0 - fieldSizeDegs / 2) / (quads(q).regionCount * 2 - 1);
+            for r=1:quads(q).regionCount
+                regionCones = find(...
+                theConeMosaic.Mosaic.coneRFpositionsDegs(:,1) > min(quads(q).xbounds) & ...
+                theConeMosaic.Mosaic.coneRFpositionsDegs(:,2) > min(quads(q).ybounds) & ...
+                theConeMosaic.Mosaic.coneRFpositionsDegs(:,1) < max(quads(q).xbounds) & ...
+                theConeMosaic.Mosaic.coneRFpositionsDegs(:,2) < max(quads(q).ybounds));
+                
+                indTracker = false(1,length(regionCones));
+                newLAmount = round(length(regionCones) * quads(q).percentL(r));
+                newLRegionInd = randperm(length(regionCones), newLAmount);
+                indTracker(newLRegionInd) = true;
+                
+                newLMosaicInd = regionCones(indTracker);
+                newMMosaicInd = regionCones(~indTracker);
+                
+                if ~isempty(newLMosaicInd)
+                    theConeMosaic.Mosaic.reassignTypeOfCones(newLMosaicInd, cMosaic.LCONE_ID)
+                end
+
+                if ~isempty(newMMosaicInd)
+                    theConeMosaic.Mosaic.reassignTypeOfCones(newMMosaicInd, cMosaic.MCONE_ID)
+                end
+
+                quads(q).xbounds = quads(q).xbounds + [quads(q).regionSpread -quads(q).regionSpread]; 
+                quads(q).ybounds = quads(q).ybounds + [quads(q).regionSpread -quads(q).regionSpread];
+            end
+        end
+    else
+        for i=1:length(startCones)
+            coneInd = find(theConeMosaic.Mosaic.coneTypes == startCones(i));
+            theConeMosaic.Mosaic.reassignTypeOfCones(coneInd, newCones);
+        end
     end
 end
 
+% lowerBound = -0.5; upperBound = 0; 
+% zjingle = find(forwardConeMosaic.Mosaic.coneRFpositionsDegs(:,1) > lowerBound & ...
+%     forwardConeMosaic.Mosaic.coneRFpositionsDegs(:,2) > lowerBound & ...
+%     forwardConeMosaic.Mosaic.coneRFpositionsDegs(:,1) < upperBound & ...
+%     forwardConeMosaic.Mosaic.coneRFpositionsDegs(:,2) < upperBound);
+% forwardConeMosaic.Mosaic.reassignTypeOfCones(zjingle, cMosaic.LCONE_ID)
+% figure
+% forwardConeMosaic.visualizeMosaic
 
+disp(['------------------------------------'])
 % Generate render matrix
 theConeMosaic.Display = theDisplay;
 renderMatrix = theConeMosaic.forwardRender([nPixels nPixels 3], ...
@@ -117,5 +159,6 @@ renderStructure.nPixels = nPixels;
 renderStructure.pupilDiamMM = pupilDiamMM;
 renderStructure.AORender = aoRender;
 renderStructure.defocusDiopters = defocusDiopters;
+renderStructure.quadSeqInfo = quads;
 end
     

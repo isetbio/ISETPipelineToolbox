@@ -108,3 +108,35 @@ for i=4:length(dirStruct)
     close all
 end
 
+%%
+
+
+
+
+
+figure; clf; imshow(stimulusImageRGB);
+
+
+figureHandle = figure(); axesHandle = [];
+forwardConeMosaic.Mosaic.visualize(...
+    'figureHandle', figureHandle, ...
+    'axesHandle', axesHandle, ...
+    'activation', reshape(forwardExcitationsToStimulusUse,1,1,length(forwardExcitationsToStimulusUse)), ...
+    'activationRange', [0 max(forwardExcitationsToStimulusUse)], ...
+    'plotTitle',  titleStr);
+set(gca, 'xtick', []); set(gca, 'ytick', []); set(gca, 'xlabel', []);
+set(gca, 'ylabel', []); set(gca, 'title', []);
+
+figure;  imshow(reconRGB{reconIndex});
+
+
+
+
+
+
+
+
+
+
+
+
