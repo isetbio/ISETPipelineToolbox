@@ -132,15 +132,6 @@ if (replaceCones)
     end
 end
 
-% lowerBound = -0.5; upperBound = 0; 
-% zjingle = find(forwardConeMosaic.Mosaic.coneRFpositionsDegs(:,1) > lowerBound & ...
-%     forwardConeMosaic.Mosaic.coneRFpositionsDegs(:,2) > lowerBound & ...
-%     forwardConeMosaic.Mosaic.coneRFpositionsDegs(:,1) < upperBound & ...
-%     forwardConeMosaic.Mosaic.coneRFpositionsDegs(:,2) < upperBound);
-% forwardConeMosaic.Mosaic.reassignTypeOfCones(zjingle, cMosaic.LCONE_ID)
-% figure
-% forwardConeMosaic.visualizeMosaic
-
 disp(['------------------------------------'])
 % Generate render matrix
 theConeMosaic.Display = theDisplay;
