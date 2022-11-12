@@ -95,36 +95,65 @@ end
 if (replaceCones)
     if (quads(1).value)
         for q=2:5
+            % Ensure input values are equivalent
+            if length(quads(q).percentL) ~= length(quads(q).percentS)
+                error(['Unequal number of regions across cone classes in ', ...
+                    quads(q).name])
+            end
+
+            % Collect the number of regions and equidistant sizes from
+            % number of L percentage values entered
             quads(q).regionCount = length(quads(q).percentL);
             quads(q).regionSpread = abs(0 - fieldSizeDegs / 2) / (quads(q).regionCount * 2 - 1);
             for r=1:quads(q).regionCount
+                % Capture the indices of cones that fall within each region
                 regionCones = find(...
                 theConeMosaic.Mosaic.coneRFpositionsDegs(:,1) > min(quads(q).xbounds) & ...
                 theConeMosaic.Mosaic.coneRFpositionsDegs(:,2) > min(quads(q).ybounds) & ...
                 theConeMosaic.Mosaic.coneRFpositionsDegs(:,1) < max(quads(q).xbounds) & ...
                 theConeMosaic.Mosaic.coneRFpositionsDegs(:,2) < max(quads(q).ybounds));
                 
+                % Initialize a index tracker using boolean vectors for
+                % efficiency in L/M random assignments
                 indTracker = false(1,length(regionCones));
+
+                % Convert the desired L percentage to a number of cones
                 newLAmount = round(length(regionCones) * quads(q).percentL(r));
+
+                % Select the desired number of cones from the region to be
+                % converted to L cones, represented as true in the tracker
                 newLRegionInd = randperm(length(regionCones), newLAmount);
                 indTracker(newLRegionInd) = true;
-                
+
+                % Convert the desired S percentage to a number of cones and
+                % apply this number to the mosaic regions
+                newSAmount = round(length(regionCones) * quads(q).percentS(r));
+                newSRegionInd = randperm(length(regionCones), newSAmount);
+
+                % Apply desired percentages to the L and S cones using the
+                % tracker. Then override all with aplied S cone values
                 newLMosaicInd = regionCones(indTracker);
                 newMMosaicInd = regionCones(~indTracker);
-                
+                newSMosaicInd = regionCones(newSRegionInd);
+
+                % If cone types should be present, complete the switch
                 if ~isempty(newLMosaicInd)
                     theConeMosaic.Mosaic.reassignTypeOfCones(newLMosaicInd, cMosaic.LCONE_ID)
                 end
-
                 if ~isempty(newMMosaicInd)
                     theConeMosaic.Mosaic.reassignTypeOfCones(newMMosaicInd, cMosaic.MCONE_ID)
                 end
-
+                if ~isempty(newSMosaicInd)
+                    theConeMosaic.Mosaic.reassignTypeOfCones(newSMosaicInd, cMosaic.SCONE_ID)
+                end
+                
+                % Update the region boundaries to move inward
                 quads(q).xbounds = quads(q).xbounds + [quads(q).regionSpread -quads(q).regionSpread]; 
                 quads(q).ybounds = quads(q).ybounds + [quads(q).regionSpread -quads(q).regionSpread];
             end
         end
     else
+        % Preset mosaics for more typical conversions. 
         for i=1:length(startCones)
             coneInd = find(theConeMosaic.Mosaic.coneTypes == startCones(i));
             theConeMosaic.Mosaic.reassignTypeOfCones(coneInd, newCones);
@@ -138,6 +167,8 @@ theConeMosaic.Display = theDisplay;
 renderMatrix = theConeMosaic.forwardRender([nPixels nPixels 3], ...
     true, true, 'useDoublePrecision', true);
 renderMatrix = double(renderMatrix);
+
+
 
 % Push new info back into structure and save
 renderStructure.theDisplay = theDisplay;
