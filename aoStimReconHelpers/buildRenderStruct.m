@@ -161,7 +161,6 @@ if (replaceCones)
     end
 end
 
-disp(['------------------------------------'])
 % Generate render matrix
 theConeMosaic.Display = theDisplay;
 renderMatrix = theConeMosaic.forwardRender([nPixels nPixels 3], ...
