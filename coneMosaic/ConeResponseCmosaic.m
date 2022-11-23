@@ -160,7 +160,13 @@ classdef ConeResponseCmosaic < ConeResponse
                 input = zeros(size(testLinear));
                 input(idx) = 1.0;
                 
-                [coneVec, chkLinear] = this.compute(input);
+                % Only throw the optical image resolution warning once if
+                % it is thrown for the current configuration.
+                if (idx == 1)
+                    [coneVec, chkLinear] = this.compute(input,lowOpticalImageRsolutionWarning,'true');
+                else
+                    [coneVec, chkLinear] = this.compute(input,lowOpticalImageRsolutionWarning,'false');
+                end
                 if (~p.Results.useDoublePrecision)
                     renderMtx(:, idx) = single(coneVec);
                 else
