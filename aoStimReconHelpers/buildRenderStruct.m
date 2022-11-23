@@ -167,8 +167,6 @@ renderMatrix = theConeMosaic.forwardRender([nPixels nPixels 3], ...
     true, true, 'useDoublePrecision', true);
 renderMatrix = double(renderMatrix);
 
-
-
 % Push new info back into structure and save
 renderStructure.theDisplay = theDisplay;
 renderStructure.renderMatrix = renderMatrix;
