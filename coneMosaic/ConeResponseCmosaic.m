@@ -102,7 +102,12 @@ classdef ConeResponseCmosaic < ConeResponse
         end
         
         % Compute cone response to image
-        function [allCone, linearStimulusImage] = compute(this, stimulusImageRGB)
+        function [allCone, linearStimulusImage] = compute(this, stimulusImageRGB, varargin)
+
+            p = inputParser;
+            p.addParameter('lowOpticalImageResolutionWarning', true, @islogical);
+            p.parse(varargin{:});
+
             % Create a visual scene from a display
             meanLuminanceCdPerM2 = [];
             [stimulusScene, ~, linearStimulusImage] = sceneFromFile(stimulusImageRGB, 'rgb', ...
@@ -116,7 +121,8 @@ classdef ConeResponseCmosaic < ConeResponse
             this.LastOI = theOI;
             
             % compute cone response
-            this.LastResponse = this.Mosaic.compute(theOI, 'opticalImagePositionDegs', 'mosaic-centered');
+            this.LastResponse = this.Mosaic.compute(theOI, 'opticalImagePositionDegs', 'mosaic-centered', ...
+                'lowOpticalImageResolutionWarning',p.Results.lowOpticalImageResolutionWarning);
             allCone = this.LastResponse(:);
         end
         
@@ -156,17 +162,16 @@ classdef ConeResponseCmosaic < ConeResponse
                 updateWaitbar = waitbarParfor(length(testLinear(:)), "Calculation in progress...");
             end
             
+            input = zeros(size(testLinear));
+                input(1) = 1.0;
+
             parfor idx = 1:length(testLinear(:))
                 input = zeros(size(testLinear));
                 input(idx) = 1.0;
                 
                 % Only throw the optical image resolution warning once if
                 % it is thrown for the current configuration.
-                if (idx == 1)
-                    [coneVec, chkLinear] = this.compute(input,lowOpticalImageRsolutionWarning,'true');
-                else
-                    [coneVec, chkLinear] = this.compute(input,lowOpticalImageRsolutionWarning,'false');
-                end
+                [coneVec, chkLinear] = this.compute(input,'lowOpticalImageResolutionWarning',false);
                 if (~p.Results.useDoublePrecision)
                     renderMtx(:, idx) = single(coneVec);
                 else
