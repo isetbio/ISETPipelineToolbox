@@ -93,7 +93,9 @@ end
 % Option to replace cones in mosaic with another kind to simulate
 % dichromacy. 
 if (replaceCones)
-    if (quads(1).value)
+    if (quads(6).value)
+        theConeMosaic = overrideQuads(theConeMosaic, eccXDegs, eccYDegs);
+    elseif (quads(1).value)
         for q=2:5
             % Ensure input values are equivalent
             if length(quads(q).percentL) ~= length(quads(q).percentS)
@@ -166,8 +168,6 @@ theConeMosaic.Display = theDisplay;
 renderMatrix = theConeMosaic.forwardRender([nPixels nPixels 3], ...
     true, true, 'useDoublePrecision', true);
 renderMatrix = double(renderMatrix);
-
-
 
 % Push new info back into structure and save
 renderStructure.theDisplay = theDisplay;
