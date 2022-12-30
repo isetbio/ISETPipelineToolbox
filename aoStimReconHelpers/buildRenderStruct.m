@@ -1,7 +1,7 @@
 function renderStructure = buildRenderStruct(aoReconDir, ...
     eccXDegs, eccYDegs, fieldSizeDegs, nPixels, pupilDiamMM, aoRender, ...
     defocusDiopters, overwriteDisplayGamma, displayName, displayFieldName, ...
-    displayGammaBits, displayGammaGamma, randSeed, replaceCones, startCones, ...
+    displayGammaBits, displayGammaGamma, displayScaleFactor, randSeed, replaceCones, startCones, ...
     newCones, eccVars, subjectID, zernikeDataBase, quads)
 % Synopsis:
 %    Build render matrix if desired/needed
@@ -33,6 +33,10 @@ clear theDisplayLoad;
 % will eventually use in the calculations.
 wls = (400:10:700)';
 theDisplay = displaySet(theDisplay,'wave',wls);
+
+% Scale display primaries
+theDisplay = displaySet(theDisplay,'spd primaries',displayGet(theDisplay,'spd primaries')*displayScaleFactor);
+theDisplay.ambient = displayGet(theDisplay,'black spd')*displayScaleFactor;
 
 % Create and setup cone mosaic
 % 
