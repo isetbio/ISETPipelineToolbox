@@ -131,11 +131,11 @@ newLIndices = [];
 
 % % Show it w/ numbers
 % if (indDisp)
-%     theConeMosaic.visualizeMosaic()
-%     for i=1:length(inputMosaic.coneTypes)
-%         txt = int2str(i);
-%         t = text((theConeMosaic.coneRFpositionsDegs(i,1)-0.005), theConeMosaic.Mosaic.coneRFpositionsDegs(i,2),txt);
-%         t.FontSize=11;
-%         hold on
-%     end
+    theConeMosaic.visualizeMosaic()
+    for i=1:length(theConeMosaic.Mosaic.coneTypes)
+        txt = int2str(i);
+        t = text((theConeMosaic.Mosaic.coneRFpositionsDegs(i,1)-0.005), theConeMosaic.Mosaic.coneRFpositionsDegs(i,2),txt);
+        t.FontSize=11;
+        hold on
+    end
 % end
