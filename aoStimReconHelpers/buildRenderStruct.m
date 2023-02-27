@@ -1,8 +1,6 @@
-function renderStructure = buildRenderStruct(aoReconDir, ...
-    eccXDegs, eccYDegs, fieldSizeDegs, nPixels, pupilDiamMM, aoRender, noLCA, ...
-    defocusDiopters, overwriteDisplayGamma, displayName, displayFieldName, ...
-    displayGammaBits, displayGammaGamma, randSeed, replaceCones, startCones, ...
-    newCones, eccVars, subjectID, zernikeDataBase, quads)
+function renderStructure = buildRenderStruct(pr, cnv, pupilDiamMM, ...
+    aoRender, noLCA, defocusDiopters, randSeed, replaceCones, startCones, ...
+    newCones, eccVars, subjectID, zernikeDataBase, chrom)
 % Synopsis:
 %    Build render matrix if desired/needed
 %
@@ -20,11 +18,11 @@ function renderStructure = buildRenderStruct(aoReconDir, ...
 %   08/26/22  dhb, chr  Convert to main file, edit cone mosaic options
 
 % Get display
-theDisplayLoad = load(fullfile(aoReconDir, 'displays', [displayName 'Display.mat']));
-eval(['theDisplay = theDisplayLoad.' displayFieldName ';']);
-if (overwriteDisplayGamma)
-    gammaInput = linspace(0,1,2^displayGammaBits)';
-    gammaOutput = gammaInput.^displayGammaGamma;
+theDisplayLoad = load(fullfile(pr.aoReconDir, 'displays', [pr.displayName 'Display.mat']));
+eval(['theDisplay = theDisplayLoad.' cnv.displayFieldName ';']);
+if (cnv.overwriteDisplayGamma)
+    gammaInput = linspace(0,1,2^pr.displayGammaBits)';
+    gammaOutput = gammaInput.^pr.displayGammaGamma;
     theDisplay.gamma = gammaOutput(:,[1 1 1]);
 end
 clear theDisplayLoad;
@@ -34,20 +32,23 @@ clear theDisplayLoad;
 wls = (400:10:700)';
 theDisplay = displaySet(theDisplay,'wave',wls);
 
+
+fieldSizeDegs = pr.fieldSizeMinutes/60;
+
 % Create and setup cone mosaic
 % 
 % For AO, we put in subjectID == 0 which causes the zcoeffs to be all zero
 % except for any specified defocus.
 if (aoRender)
     if (eccVars)
-        theConeMosaic = ConeResponseCmosaic(eccXDegs, eccYDegs, ...
+        theConeMosaic = ConeResponseCmosaic(pr.eccXDegs, pr.eccYDegs, ...
             'fovealDegree', fieldSizeDegs, 'pupilSize', pupilDiamMM, 'useRandomSeed', randSeed, ...
             'defocusDiopters',defocusDiopters, 'wave', wls, ... 
             'subjectID', 0, ...
             'noLCA', noLCA, ...
             'zernikeDataBase', zernikeDataBase);
     else
-        theConeMosaic = ConeResponseCmosaic(eccXDegs, eccYDegs, ...
+        theConeMosaic = ConeResponseCmosaic(pr.eccXDegs, pr.eccYDegs, ...
             'fovealDegree', fieldSizeDegs, 'pupilSize', pupilDiamMM, 'useRandomSeed', randSeed, ...
             'defocusDiopters',defocusDiopters, 'wave', wls, ... 
             'rodIntrusionAdjustedConeAperture', false, ...
@@ -66,14 +67,14 @@ if (aoRender)
 else
     if (eccVars)
         % Build normal optics structure. 
-        theConeMosaic = ConeResponseCmosaic(eccXDegs, eccYDegs, ...
+        theConeMosaic = ConeResponseCmosaic(pr.eccXDegs, pr.eccYDegs, ...
             'fovealDegree', fieldSizeDegs, 'pupilSize', pupilDiamMM, 'useRandomSeed', randSeed, ...
             'defocusDiopters',defocusDiopters, 'wave', wls, ... 
             'subjectID', subjectID, ...
             'noLCA', noLCA, ...
             'zernikeDataBase', zernikeDataBase);
     else
-       theConeMosaic = ConeResponseCmosaic(eccXDegs, eccYDegs, ...
+       theConeMosaic = ConeResponseCmosaic(pr.eccXDegs, pr.eccYDegs, ...
             'fovealDegree', fieldSizeDegs, 'pupilSize', pupilDiamMM, 'useRandomSeed', randSeed, ...
             'defocusDiopters',defocusDiopters, 'wave', wls, ... 
             'rodIntrusionAdjustedConeAperture', false, ...
@@ -92,34 +93,34 @@ end
 % Option to replace cones in mosaic with another kind to simulate
 % dichromacy. 
 if (replaceCones)
-    if (quads(6).value)
-        theConeMosaic = overrideQuads(theConeMosaic, eccXDegs, eccYDegs);
-    elseif (quads(1).value)
+    if (pr.quads(6).value)
+        theConeMosaic = overrideQuads(theConeMosaic, pr.eccXDegs, pr.eccYDegs, chrom);
+    elseif (pr.quads(1).value)
         for q=2:5
             % Ensure input values are equivalent
-            if length(quads(q).percentL) ~= length(quads(q).percentS)
+            if length(pr.quads(q).percentL) ~= length(pr.quads(q).percentS)
                 error(['Unequal number of regions across cone classes in ', ...
-                    quads(q).name])
+                    pr.quads(q).name])
             end
 
             % Collect the number of regions and equidistant sizes from
             % number of L percentage values entered
-            quads(q).regionCount = length(quads(q).percentL);
-            quads(q).regionSpread = abs(0 - fieldSizeDegs / 2) / (quads(q).regionCount * 2 - 1);
-            for r=1:quads(q).regionCount
+            pr.quads(q).regionCount = length(pr.quads(q).percentL);
+            pr.quads(q).regionSpread = abs(0 - fieldSizeDegs / 2) / (pr.quads(q).regionCount * 2 - 1);
+            for r=1:pr.quads(q).regionCount
                 % Capture the indices of cones that fall within each region
                 regionCones = find(...
-                theConeMosaic.Mosaic.coneRFpositionsDegs(:,1) > min(quads(q).xbounds) & ...
-                theConeMosaic.Mosaic.coneRFpositionsDegs(:,2) > min(quads(q).ybounds) & ...
-                theConeMosaic.Mosaic.coneRFpositionsDegs(:,1) < max(quads(q).xbounds) & ...
-                theConeMosaic.Mosaic.coneRFpositionsDegs(:,2) < max(quads(q).ybounds));
+                theConeMosaic.Mosaic.coneRFpositionsDegs(:,1) > min(pr.quads(q).xbounds) & ...
+                theConeMosaic.Mosaic.coneRFpositionsDegs(:,2) > min(pr.quads(q).ybounds) & ...
+                theConeMosaic.Mosaic.coneRFpositionsDegs(:,1) < max(pr.quads(q).xbounds) & ...
+                theConeMosaic.Mosaic.coneRFpositionsDegs(:,2) < max(pr.quads(q).ybounds));
                 
                 % Initialize a index tracker using boolean vectors for
                 % efficiency in L/M random assignments
                 indTracker = false(1,length(regionCones));
 
                 % Convert the desired L percentage to a number of cones
-                newLAmount = round(length(regionCones) * quads(q).percentL(r));
+                newLAmount = round(length(regionCones) * pr.quads(q).percentL(r));
 
                 % Select the desired number of cones from the region to be
                 % converted to L cones, represented as true in the tracker
@@ -128,7 +129,7 @@ if (replaceCones)
 
                 % Convert the desired S percentage to a number of cones and
                 % apply this number to the mosaic regions
-                newSAmount = round(length(regionCones) * quads(q).percentS(r));
+                newSAmount = round(length(regionCones) * pr.quads(q).percentS(r));
                 newSRegionInd = randperm(length(regionCones), newSAmount);
 
                 % Apply desired percentages to the L and S cones using the
@@ -149,8 +150,8 @@ if (replaceCones)
                 end
                 
                 % Update the region boundaries to move inward
-                quads(q).xbounds = quads(q).xbounds + [quads(q).regionSpread -quads(q).regionSpread]; 
-                quads(q).ybounds = quads(q).ybounds + [quads(q).regionSpread -quads(q).regionSpread];
+                pr.quads(q).xbounds = pr.quads(q).xbounds + [pr.quads(q).regionSpread -pr.quads(q).regionSpread]; 
+                pr.quads(q).ybounds = pr.quads(q).ybounds + [pr.quads(q).regionSpread -pr.quads(q).regionSpread];
             end
         end
     else
@@ -164,7 +165,7 @@ end
 
 % Generate render matrix
 theConeMosaic.Display = theDisplay;
-renderMatrix = theConeMosaic.forwardRender([nPixels nPixels 3], ...
+renderMatrix = theConeMosaic.forwardRender([pr.nPixels pr.nPixels 3], ...
     true, true, 'useDoublePrecision', true);
 renderMatrix = double(renderMatrix);
 
@@ -173,12 +174,12 @@ renderStructure.theDisplay = theDisplay;
 renderStructure.renderMatrix = renderMatrix;
 renderStructure.theConeMosaic = theConeMosaic;
 renderStructure.fieldSizeDegs = fieldSizeDegs;
-renderStructure.eccX = eccXDegs;
-renderStructure.eccY = eccYDegs;
-renderStructure.nPixels = nPixels;
+renderStructure.eccX = pr.eccXDegs;
+renderStructure.eccY = pr.eccYDegs;
+renderStructure.pr.nPixels = pr.nPixels;
 renderStructure.pupilDiamMM = pupilDiamMM;
 renderStructure.AORender = aoRender;
 renderStructure.defocusDiopters = defocusDiopters;
-renderStructure.quadSeqInfo = quads;
+renderStructure.quadSeqInfo = pr.quads;
 end
     
