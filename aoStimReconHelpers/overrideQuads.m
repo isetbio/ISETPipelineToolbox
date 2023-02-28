@@ -138,7 +138,24 @@ if strcmp(chrom, 'quadSeq5')
 elseif strcmp(chrom, 'quadSeq8')
     newLIndices = find(theConeMosaic.Mosaic.coneRFpositionsDegs(:,1));
     theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID);
+
+% Quad Seq 9 - 30 arcmin
+elseif strcmp(chrom, 'quadSeq9')
+    newLIndices = find(theConeMosaic.Mosaic.coneRFpositionsDegs(:,1));
+    theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID);
+
+    newMIndices = [390];
+    theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID);
+
+
+
+
+
+
+
 end
+end
+
 
 %
 % Show the mosaic with index numbers superimposed when
@@ -151,5 +168,3 @@ end
 %     t.FontSize=11;
 %     hold on
 % end
-% 
-% apple = 'berry'
