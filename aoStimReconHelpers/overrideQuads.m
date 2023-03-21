@@ -338,7 +338,7 @@ elseif strcmp(chrom, 'quadSeq29')
 % Before closing must capture the updated index list for each cone class and
 % copy/paste those values to match the form above, then comment out the GUI
 % portion. This step is necessary to avoid having to reset the cones every
-% time. 
+% time. Prone to crashing so if switching a lot of cones do so in chunks 
  
 
 % Quad Seq 30 - 30 arcmin (QS 8 repeat with 3 S cones)
@@ -358,14 +358,14 @@ elseif strcmp(chrom, 'quadSeq31')
     newMIndices = [390 414 379 431 371 415];
     theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID);
 
+    newSIndices = [404	361	370];
+    theConeMosaic.Mosaic.reassignTypeOfCones(newSIndices, cMosaic.SCONE_ID);   
+    theConeMosaic.visualizeMosaic()
+
 %     theConeMosaic.visualizeMosaic(); hold on;
 %     g = @(x, y) mouseClick(x, y, theConeMosaic);
 %     set(gcf, 'WindowButtonDownFcn', g)
 %     keyboard
-
-    newSIndices = [404	361	370];
-    theConeMosaic.Mosaic.reassignTypeOfCones(newSIndices, cMosaic.SCONE_ID);   
-    theConeMosaic.visualizeMosaic()
 
 % Quad Seq 32 - 30 arcmin (QS 29 repeat with 3 S cones)
 elseif strcmp(chrom, 'quadSeq32')
@@ -379,13 +379,6 @@ elseif strcmp(chrom, 'quadSeq32')
     newSIndices = [404	361	370];
     theConeMosaic.Mosaic.reassignTypeOfCones(newSIndices, cMosaic.SCONE_ID);   
     theConeMosaic.visualizeMosaic()
-
-
-
-
-
-
-
 
 % Quad Seq 33 - 30 arcmin (QS 29 but doubled M)
 elseif strcmp(chrom, 'quadSeq33')
@@ -410,7 +403,7 @@ elseif strcmp(chrom, 'quadSeq33')
         theConeMosaic.Mosaic.coneRFpositionsDegs(:,2) >  eccY - pad);
     theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID);
     theConeMosaic.visualizeMosaic()
-    keyboard
+    
 
 % Quad Seq 34 - 30 arcmin (QS 29 but surround alternate L/S)
 elseif strcmp(chrom, 'quadSeq34')
@@ -421,14 +414,174 @@ elseif strcmp(chrom, 'quadSeq34')
         350 459 429 349 469 416 369 351];
     theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID);
 
-    theConeMosaic.visualizeMosaic(); hold on;
-    g = @(x, y) mouseClick(x, y, theConeMosaic);
-    set(gcf, 'WindowButtonDownFcn', g)
-    keyboard
+    newSIndices = [3	4	7	8	10	11	16	25	33	39	42	43	45	48	53	54	61	64	65	67	69	74	80	86	87	88	90	95 ...
+    	102	104	106	107	109	111	113	117	119	122	129	132	142	151	152	154	155	157	165	173	174	178	179	181	183	184	188	193	194	200	203	...
+        210	212	213	219	221	223	225	231	242	247	254	256	257	260	263	266	270	272	275	276	277	279	281	293	295	296	298	299	305	306	308	...
+        310	313	320	321	325	331	337	339	343	345	348	352	356	363	364	388	397	398	399	402	405	406	407	409	418	425	427	433	436	440	442	...
+        444	460	461	463	464	473	475	477	489	490	491	493	495	497	498	506	510	520	524	526	528	531	539	544	551	554	557	560	564	571	573	...
+        575	579	589	592	597	600	602	605	610	611	624	629	631	633	640	644	646	647	654	656	660	666	671	673	674	675	680	695	697	698	699	...
+        712	717	718	720	722	727	728	730	731	733	736	739	748	749	750	751	752	754	759	767	770	772	777	780	782	785	789	791	792	794	795	...
+        807	814	817	825	827	828	830	831	834	836	357	358	160	435	534	487	548	616	648	756	826];
 
-    newMIndices = [newMIndices];
-    theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID);   
+    theConeMosaic.Mosaic.reassignTypeOfCones(newSIndices, cMosaic.SCONE_ID);   
     theConeMosaic.visualizeMosaic()
+
+    
+%     theConeMosaic.visualizeMosaic(); hold on;
+%     g = @(x, y) mouseClick(x, y, theConeMosaic);
+%     set(gcf, 'WindowButtonDownFcn', g)
+%     keyboard
+
+    
+
+
+
+
+
+
+
+% Quad Seq 8 - 30 arcmin
+elseif strcmp(chrom, 'quadSeq35')
+    newLIndices = find(theConeMosaic.Mosaic.coneRFpositionsDegs(:,1));
+    theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID);
+
+    newSIndices = [404	361];
+    theConeMosaic.Mosaic.reassignTypeOfCones(newSIndices, cMosaic.SCONE_ID);   
+    theConeMosaic.visualizeMosaic()
+
+
+% Quad Seq 10 - 30 arcmin
+elseif strcmp(chrom, 'quadSeq36')
+    newLIndices = find(theConeMosaic.Mosaic.coneRFpositionsDegs(:,1));
+    theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID);
+
+    newMIndices = [390 414];
+    theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID);
+
+    newSIndices = [404	361];
+    theConeMosaic.Mosaic.reassignTypeOfCones(newSIndices, cMosaic.SCONE_ID);   
+    theConeMosaic.visualizeMosaic()
+
+elseif strcmp(chrom, 'quadSeq37')
+    newLIndices = find(theConeMosaic.Mosaic.coneRFpositionsDegs(:,1));
+    theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID);
+
+    newMIndices = [390 414 379 431];
+    theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID);
+
+    newSIndices = [404	361];
+    theConeMosaic.Mosaic.reassignTypeOfCones(newSIndices, cMosaic.SCONE_ID);   
+    theConeMosaic.visualizeMosaic()
+
+elseif strcmp(chrom, 'quadSeq38')
+    newLIndices = find(theConeMosaic.Mosaic.coneRFpositionsDegs(:,1));
+    theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID);
+
+    newMIndices = [390 414 379 431 371 415];
+    theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID);
+
+    newSIndices = [404	361];
+    theConeMosaic.Mosaic.reassignTypeOfCones(newSIndices, cMosaic.SCONE_ID);   
+    theConeMosaic.visualizeMosaic()
+
+elseif strcmp(chrom, 'quadSeq39')
+    newLIndices = find(theConeMosaic.Mosaic.coneRFpositionsDegs(:,1));
+    theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID);
+
+    newMIndices = [390 414 379 431 371 415 403 362];
+    theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID);
+
+    newSIndices = [404	361];
+    theConeMosaic.Mosaic.reassignTypeOfCones(newSIndices, cMosaic.SCONE_ID);   
+    theConeMosaic.visualizeMosaic()
+    
+elseif strcmp(chrom, 'quadSeq40')
+    newLIndices = find(theConeMosaic.Mosaic.coneRFpositionsDegs(:,1));
+    theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID);
+
+    newMIndices = [390 414 379 431 371 415 403 362 445 404];
+    theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID);
+
+    newSIndices = [404	361];
+    theConeMosaic.Mosaic.reassignTypeOfCones(newSIndices, cMosaic.SCONE_ID);   
+    theConeMosaic.visualizeMosaic()
+    
+elseif strcmp(chrom, 'quadSeq41')
+    newLIndices = find(theConeMosaic.Mosaic.coneRFpositionsDegs(:,1));
+    theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID);
+
+    newMIndices = [390 414 379 431 371 415 403 362 445 404 361 370];
+    theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID);
+
+    newSIndices = [404	361];
+    theConeMosaic.Mosaic.reassignTypeOfCones(newSIndices, cMosaic.SCONE_ID);   
+    theConeMosaic.visualizeMosaic()
+    
+elseif strcmp(chrom, 'quadSeq42')
+    newLIndices = find(theConeMosaic.Mosaic.coneRFpositionsDegs(:,1));
+    theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID);
+
+    newMIndices = [390 414 379 431 371 415 403 362 445 404 361 370 430 ...
+        350];
+    theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID);
+
+    newSIndices = [404	361];
+    theConeMosaic.Mosaic.reassignTypeOfCones(newSIndices, cMosaic.SCONE_ID);   
+    theConeMosaic.visualizeMosaic()
+
+elseif strcmp(chrom, 'quadSeq43')
+    newLIndices = find(theConeMosaic.Mosaic.coneRFpositionsDegs(:,1));
+    theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID);
+
+    newMIndices = [390 414 379 431 371 415 403 362 445 404 361 370 430 ...
+        350 459 429];
+    theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID);
+
+    newSIndices = [404	361];
+    theConeMosaic.Mosaic.reassignTypeOfCones(newSIndices, cMosaic.SCONE_ID);   
+    theConeMosaic.visualizeMosaic()
+    
+elseif strcmp(chrom, 'quadSeq44')
+    newLIndices = find(theConeMosaic.Mosaic.coneRFpositionsDegs(:,1));
+    theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID);
+
+    newMIndices = [390 414 379 431 371 415 403 362 445 404 361 370 430 ...
+        350 459 429 349 469];
+    theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID);
+
+    newSIndices = [404	361];
+    theConeMosaic.Mosaic.reassignTypeOfCones(newSIndices, cMosaic.SCONE_ID);   
+    theConeMosaic.visualizeMosaic()
+    
+elseif strcmp(chrom, 'quadSeq45')
+    newLIndices = find(theConeMosaic.Mosaic.coneRFpositionsDegs(:,1));
+    theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID);
+
+    newMIndices = [390 414 379 431 371 415 403 362 445 404 361 370 430 ...
+        350 459 429 349 469 416 369 351];
+    theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID);
+
+    newSIndices = [404	361];
+    theConeMosaic.Mosaic.reassignTypeOfCones(newSIndices, cMosaic.SCONE_ID);   
+    theConeMosaic.visualizeMosaic()
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
