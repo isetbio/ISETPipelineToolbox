@@ -1,4 +1,5 @@
-function [outputImageRGB, sumBounds] = correctDispImage(inputImageRGB, trueDisplayName, ...
+function [outputImageRGB, sumBounds, outputImageRGBBoost] = ...
+    correctDispImage(inputImageRGB, trueDisplayName, ...
     viewingDisplayName, viewingDisplayScaleFactor, aoReconDir, ...
     displayGammaBits, displayGammaGamma, fieldSizeDegs, inputImageScaleFactor)
 % Synopsis:
@@ -117,6 +118,11 @@ theViewingImagergbTruncated(theViewingImagergbTruncated > 1) = 1;
 sumBounds = [minr ming minb; maxr maxg maxb];
 
 outputImageRGB = gammaCorrection(theViewingImagergbTruncated, viewingDisplay);
+
+boostScale = 1/max(theViewingImagergbTruncated, [], 'all');
+outputImageRGBBoost = gammaCorrection(...
+    (theViewingImagergbTruncated .* boostScale),viewingDisplay); 
+
 % figure; clf; imshow(outputImageRGB);
 % title(['Viewing Image'])
 % keyboard
