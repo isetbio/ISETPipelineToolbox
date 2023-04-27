@@ -38,6 +38,4 @@ if allDone
     bookKeep(1) = {theConeMosaic.Mosaic.lConeIndices'};
     bookKeep(2) = {theConeMosaic.Mosaic.mConeIndices'};
     bookKeep(3) = {theConeMosaic.Mosaic.sConeIndices'};
-    openvar('bookKeep')
-    disp(["Don't forget to copy the new indices into overrideQuads and comment out the GUI portion"])
 end

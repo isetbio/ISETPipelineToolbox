@@ -94,7 +94,8 @@ end
 % dichromacy. 
 if (replaceCones)
     if (pr.quads(6).value)
-        theConeMosaic = overrideQuads(theConeMosaic, pr.eccXDegs, pr.eccYDegs, chrom);
+        storedDir = fullfile(pr.aoReconDir, pr.versEditor);
+        theConeMosaic = overrideQuads(theConeMosaic, pr.eccXDegs, pr.eccYDegs, chrom, storedDir);
     elseif (pr.quads(1).value)
         for q=2:5
             % Ensure input values are equivalent
