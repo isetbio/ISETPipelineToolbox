@@ -1,7 +1,8 @@
-function [outputImageRGB, sumBounds, outputImageRGBBoost] = ...
+function [outputImageRGB, sumBounds, outputImageRGBBoost, rgbStats] = ...
     correctDispImage(inputImageRGB, trueDisplayName, ...
     viewingDisplayName, viewingDisplayScaleFactor, aoReconDir, ...
-    displayGammaBits, displayGammaGamma, fieldSizeDegs, inputImageScaleFactor)
+    displayGammaBits, displayGammaGamma, fieldSizeDegs, ...
+    inputImageScaleFactor, idxXRange, idxYRange)
 % Synopsis:
 %    Correct input image to a form that better approximates how it would be
 %    displayed on the true Display Monitor
@@ -122,6 +123,33 @@ outputImageRGB = gammaCorrection(theViewingImagergbTruncated, viewingDisplay);
 boostScale = 1/max(theViewingImagergbTruncated, [], 'all');
 outputImageRGBBoost = gammaCorrection(...
     (theViewingImagergbTruncated .* boostScale),viewingDisplay); 
+
+
+
+rgbStats = cell(3,4);
+rgbStats(1,1) = {theViewingImagergbTruncated(idxYRange,idxXRange, 1)};
+rgbStats(2,1) = {theViewingImagergbTruncated(idxYRange,idxXRange, 2)};
+rgbStats(3,1) = {theViewingImagergbTruncated(idxYRange,idxXRange, 3)};
+
+rgbStats(1,2) = {mean(rgbStats{1,1}(:))};
+rgbStats(2,2) = {mean(rgbStats{2,1}(:))};
+rgbStats(3,2) = {mean(rgbStats{3,1}(:))};
+
+rgbStats(1,3) = {std(rgbStats{1,1}(:))};
+rgbStats(2,3) = {std(rgbStats{2,1}(:))};
+rgbStats(3,3) = {std(rgbStats{3,1}(:))};
+
+rgbStats(1,4) = {ones(size(rgbStats{1,1})) * rgbStats{1,2}};
+rgbStats(2,4) = {ones(size(rgbStats{2,1})) * rgbStats{2,2}};
+rgbStats(3,4) = {ones(size(rgbStats{3,1})) * rgbStats{3,2}};
+
+rgbStats(1,5) = {rgbStats{1,2} / (rgbStats{1,2} + rgbStats{2,2})};
+
+% test(:,:,1) = rgbStats{1,4};
+% test(:,:,2) = rgbStats{2,4};
+% test(:,:,3) = rgbStats{3,4};
+% imshow(test)
+
 
 % figure; clf; imshow(outputImageRGB);
 % title(['Viewing Image'])
