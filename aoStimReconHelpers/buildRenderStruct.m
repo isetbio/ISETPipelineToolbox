@@ -93,8 +93,8 @@ end
 % Option to replace cones in mosaic with another kind to simulate
 % dichromacy. 
 if (replaceCones)
+    storedDir = fullfile(pr.aoReconDir, pr.versEditor);
     if (pr.quads(6).value)
-        storedDir = fullfile(pr.aoReconDir, pr.versEditor);
         theConeMosaic = overrideQuads(theConeMosaic, pr.eccXDegs, pr.eccYDegs, chrom, storedDir);
     elseif (pr.quads(1).value)
         for q=2:5
