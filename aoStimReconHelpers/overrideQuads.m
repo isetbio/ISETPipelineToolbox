@@ -1209,7 +1209,7 @@ switch chrom
 
 
 
-% 77-87 Surround 30% L 
+% 77-87 Repeat of 57-67 with surround 30% L 
     case 'quadSeq77'
         seqNum = str2double(chrom(8:end));
 
@@ -1346,17 +1346,7 @@ switch chrom
 
 
 
-
-
-
-
-
-
-
-
-
-
-% 88 - 98 Surround 70%L
+% 88 - 98 Repeat of 57-67 with surround 70%L
     case 'quadSeq88'
         seqNum = str2double(chrom(8:end));
 
@@ -1372,10 +1362,10 @@ switch chrom
     case 'quadSeq89'
         seqNum = str2double(chrom(8:end));
 
-        newLIndices = storedQuadIndices{1,seqNum}{1}; % [390 414 379 431 371 415 403 362 445 404 361 370 430 350 459 429 349 469 416 369 351];
+        newLIndices = storedQuadIndices{1,seqNum}{1}; % [379 431 371 415 403 362 445 404 361 370 430 350 459 429 349 469 416 369 351];
         theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID);
 
-        newMIndices = storedQuadIndices{1,seqNum}{2}; %
+        newMIndices = storedQuadIndices{1,seqNum}{2}; % [390 414]
         theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID);
 
         newSIndices = storedQuadIndices{1,seqNum}{3}; % [404	361];
@@ -1384,10 +1374,10 @@ switch chrom
     case 'quadSeq90'
         seqNum = str2double(chrom(8:end));
 
-        newLIndices = storedQuadIndices{1,seqNum}{1}; % [390 414 379 431 371 415 403 362 445 404 361 370 430 350 459 429 349 469 416 369 351];
+        newLIndices = storedQuadIndices{1,seqNum}{1}; % [371 415 403 362 445 404 361 370 430 350 459 429 349 469 416 369 351];
         theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID);
 
-        newMIndices = storedQuadIndices{1,seqNum}{2}; %
+        newMIndices = storedQuadIndices{1,seqNum}{2}; % [390 414 379 431]
         theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID);
 
         newSIndices = storedQuadIndices{1,seqNum}{3}; % [404	361];
@@ -1396,10 +1386,10 @@ switch chrom
     case 'quadSeq91'
         seqNum = str2double(chrom(8:end));
 
-        newLIndices = storedQuadIndices{1,seqNum}{1}; % [390 414 379 431 371 415 403 362 445 404 361 370 430 350 459 429 349 469 416 369 351];
+        newLIndices = storedQuadIndices{1,seqNum}{1}; % [403 362 445 404 361 370 430 350 459 429 349 469 416 369 351];
         theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID);
 
-        newMIndices = storedQuadIndices{1,seqNum}{2}; %
+        newMIndices = storedQuadIndices{1,seqNum}{2}; % [390 414 379 431 371 415]
         theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID);
 
         newSIndices = storedQuadIndices{1,seqNum}{3}; % [404	361];
@@ -1408,10 +1398,10 @@ switch chrom
     case 'quadSeq92'
         seqNum = str2double(chrom(8:end));
 
-        newLIndices = storedQuadIndices{1,seqNum}{1}; % [390 414 379 431 371 415 403 362 445 404 361 370 430 350 459 429 349 469 416 369 351];
+        newLIndices = storedQuadIndices{1,seqNum}{1}; % [445 404 361 370 430 350 459 429 349 469 416 369 351];
         theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID);
 
-        newMIndices = storedQuadIndices{1,seqNum}{2}; %
+        newMIndices = storedQuadIndices{1,seqNum}{2}; % [390 414 379 431 371 415 403 362]
         theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID);
 
         newSIndices = storedQuadIndices{1,seqNum}{3}; % [404	361];
@@ -1420,10 +1410,10 @@ switch chrom
     case 'quadSeq93'
         seqNum = str2double(chrom(8:end));
 
-        newLIndices = storedQuadIndices{1,seqNum}{1}; % [390 414 379 431 371 415 403 362 445 404 361 370 430 350 459 429 349 469 416 369 351];
+        newLIndices = storedQuadIndices{1,seqNum}{1}; % [361 370 430 350 459 429 349 469 416 369 351];
         theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID);
 
-        newMIndices = storedQuadIndices{1,seqNum}{2}; %
+        newMIndices = storedQuadIndices{1,seqNum}{2}; % [390 414 379 431 371 415 403 362 445 404]
         theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID);
 
         newSIndices = storedQuadIndices{1,seqNum}{3}; % [404	361];
@@ -1432,10 +1422,10 @@ switch chrom
     case 'quadSeq94'
         seqNum = str2double(chrom(8:end));
 
-        newLIndices = storedQuadIndices{1,seqNum}{1}; % [390 414 379 431 371 415 403 362 445 404 361 370 430 350 459 429 349 469 416 369 351];
+        newLIndices = storedQuadIndices{1,seqNum}{1}; % [430 350 459 429 349 469 416 369 351];
         theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID);
 
-        newMIndices = storedQuadIndices{1,seqNum}{2}; %
+        newMIndices = storedQuadIndices{1,seqNum}{2}; % [390 414 379 431 371 415 403 362 445 404 361 370]
         theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID);
 
         newSIndices = storedQuadIndices{1,seqNum}{3}; % [404	361];
@@ -1444,10 +1434,10 @@ switch chrom
     case 'quadSeq95'
         seqNum = str2double(chrom(8:end));
 
-        newLIndices = storedQuadIndices{1,seqNum}{1}; % [390 414 379 431 371 415 403 362 445 404 361 370 430 350 459 429 349 469 416 369 351];
+        newLIndices = storedQuadIndices{1,seqNum}{1}; % [459 429 349 469 416 369 351];
         theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID);
 
-        newMIndices = storedQuadIndices{1,seqNum}{2}; %
+        newMIndices = storedQuadIndices{1,seqNum}{2}; % [390 414 379 431 371 415 403 362 445 404 361 370 430 350]
         theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID);
 
         newSIndices = storedQuadIndices{1,seqNum}{3}; % [404	361];
@@ -1456,10 +1446,10 @@ switch chrom
     case 'quadSeq96'
         seqNum = str2double(chrom(8:end));
 
-        newLIndices = storedQuadIndices{1,seqNum}{1}; % [390 414 379 431 371 415 403 362 445 404 361 370 430 350 459 429 349 469 416 369 351];
+        newLIndices = storedQuadIndices{1,seqNum}{1}; % [349 469 416 369 351];
         theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID);
 
-        newMIndices = storedQuadIndices{1,seqNum}{2}; %
+        newMIndices = storedQuadIndices{1,seqNum}{2}; % [390 414 379 431 371 415 403 362 445 404 361 370 430 350 459 429]
         theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID);
 
         newSIndices = storedQuadIndices{1,seqNum}{3}; % [404	361];
@@ -1468,10 +1458,10 @@ switch chrom
     case 'quadSeq97'
         seqNum = str2double(chrom(8:end));
 
-        newLIndices = storedQuadIndices{1,seqNum}{1}; % [390 414 379 431 371 415 403 362 445 404 361 370 430 350 459 429 349 469 416 369 351];
+        newLIndices = storedQuadIndices{1,seqNum}{1}; % [416 369 351];
         theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID);
 
-        newMIndices = storedQuadIndices{1,seqNum}{2}; %
+        newMIndices = storedQuadIndices{1,seqNum}{2}; % [390 414 379 431 371 415 403 362 445 404 361 370 430 350 459 429 349 469]
         theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID);
 
         newSIndices = storedQuadIndices{1,seqNum}{3}; % [404	361];
@@ -1480,10 +1470,10 @@ switch chrom
     case 'quadSeq98'
         seqNum = str2double(chrom(8:end));
 
-        newLIndices = storedQuadIndices{1,seqNum}{1}; % [390 414 379 431 371 415 403 362 445 404 361 370 430 350 459 429 349 469 416 369 351];
+        newLIndices = storedQuadIndices{1,seqNum}{1}; % 
         theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID);
 
-        newMIndices = storedQuadIndices{1,seqNum}{2}; %
+        newMIndices = storedQuadIndices{1,seqNum}{2}; % [390 414 379 431 371 415 403 362 445 404 361 370 430 350 459 429 349 469 416 369 351];
         theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID);
 
         newSIndices = storedQuadIndices{1,seqNum}{3}; % [404	361];
