@@ -1,4 +1,4 @@
-function [outputImageRGB, sumBounds, outputImageRGBBoost, rgbStats] = ...
+function [outputImageRGB, sumBounds, outputImageRGBBoost, rgbStats, rgbStatsOld, rgbStatsNS] = ...
     correctDispImage(inputImageRGB, trueDisplayName, ...
     viewingDisplayName, viewingDisplayScaleFactor, aoReconDir, ...
     displayGammaBits, displayGammaGamma, fieldSizeDegs, ...
@@ -126,10 +126,13 @@ outputImageRGBBoost = gammaCorrection(...
 
 
 
+
+% Pull out the information for summary statistics using the INPUT
+% uncorrected values
 rgbStats = cell(3,4);
-rgbStats(1,1) = {theViewingImagergbTruncated(idxYRange,idxXRange, 1)};
-rgbStats(2,1) = {theViewingImagergbTruncated(idxYRange,idxXRange, 2)};
-rgbStats(3,1) = {theViewingImagergbTruncated(idxYRange,idxXRange, 3)};
+rgbStats(1,1) = {trueImageLinear(idxYRange,idxXRange, 1)};
+rgbStats(2,1) = {trueImageLinear(idxYRange,idxXRange, 2)};
+rgbStats(3,1) = {trueImageLinear(idxYRange,idxXRange, 3)};
 
 rgbStats(1,2) = {mean(rgbStats{1,1}(:))};
 rgbStats(2,2) = {mean(rgbStats{2,1}(:))};
@@ -144,6 +147,59 @@ rgbStats(2,4) = {ones(size(rgbStats{2,1})) * rgbStats{2,2}};
 rgbStats(3,4) = {ones(size(rgbStats{3,1})) * rgbStats{3,2}};
 
 rgbStats(1,5) = {rgbStats{1,2} / (rgbStats{1,2} + rgbStats{2,2})};
+
+
+
+
+% Pull out the information for summary statistics using the INPUT
+% uncorrected values with No Scaling in case that's important
+trueImageLinearScaled = trueImageLinear * inputImageScaleFactor;
+rgbStatsNS = cell(3,4);
+rgbStatsNS(1,1) = {trueImageLinearScaled(idxYRange,idxXRange, 1)};
+rgbStatsNS(2,1) = {trueImageLinearScaled(idxYRange,idxXRange, 2)};
+rgbStatsNS(3,1) = {trueImageLinearScaled(idxYRange,idxXRange, 3)};
+
+rgbStatsNS(1,2) = {mean(rgbStatsNS{1,1}(:))};
+rgbStatsNS(2,2) = {mean(rgbStatsNS{2,1}(:))};
+rgbStatsNS(3,2) = {mean(rgbStatsNS{3,1}(:))};
+
+rgbStatsNS(1,3) = {std(rgbStatsNS{1,1}(:))};
+rgbStatsNS(2,3) = {std(rgbStatsNS{2,1}(:))};
+rgbStatsNS(3,3) = {std(rgbStatsNS{3,1}(:))};
+
+rgbStatsNS(1,4) = {ones(size(rgbStatsNS{1,1})) * rgbStatsNS{1,2}};
+rgbStatsNS(2,4) = {ones(size(rgbStatsNS{2,1})) * rgbStatsNS{2,2}};
+rgbStatsNS(3,4) = {ones(size(rgbStatsNS{3,1})) * rgbStatsNS{3,2}};
+
+rgbStatsNS(1,5) = {rgbStatsNS{1,2} / (rgbStatsNS{1,2} + rgbStatsNS{2,2})};
+
+
+
+
+
+% Storing the old incorrect way of capturing post-correction just for now. 
+rgbStatsOld = cell(3,4);
+rgbStatsOld(1,1) = {theViewingImagergbTruncated(idxYRange,idxXRange, 1)};
+rgbStatsOld(2,1) = {theViewingImagergbTruncated(idxYRange,idxXRange, 2)};
+rgbStatsOld(3,1) = {theViewingImagergbTruncated(idxYRange,idxXRange, 3)};
+
+rgbStatsOld(1,2) = {mean(rgbStatsOld{1,1}(:))};
+rgbStatsOld(2,2) = {mean(rgbStatsOld{2,1}(:))};
+rgbStatsOld(3,2) = {mean(rgbStatsOld{3,1}(:))};
+
+rgbStatsOld(1,3) = {std(rgbStatsOld{1,1}(:))};
+rgbStatsOld(2,3) = {std(rgbStatsOld{2,1}(:))};
+rgbStatsOld(3,3) = {std(rgbStatsOld{3,1}(:))};
+
+rgbStatsOld(1,4) = {ones(size(rgbStatsOld{1,1})) * rgbStatsOld{1,2}};
+rgbStatsOld(2,4) = {ones(size(rgbStatsOld{2,1})) * rgbStatsOld{2,2}};
+rgbStatsOld(3,4) = {ones(size(rgbStatsOld{3,1})) * rgbStatsOld{3,2}};
+
+rgbStatsOld(1,5) = {rgbStatsOld{1,2} / (rgbStatsOld{1,2} + rgbStatsOld{2,2})};
+
+
+
+
 
 % test(:,:,1) = rgbStats{1,4};
 % test(:,:,2) = rgbStats{2,4};
