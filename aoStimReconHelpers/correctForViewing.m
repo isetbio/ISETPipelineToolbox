@@ -116,15 +116,22 @@ maxr = max(max(theViewingImagergb(:,:,1)));
 maxg = max(max(theViewingImagergb(:,:,2)));
 maxb = max(max(theViewingImagergb(:,:,3)));
 theViewingImagergbTruncated = theViewingImagergb;
-% theViewingImagergbTruncated(theViewingImagergbTruncated < 0) = 0;
-% theViewingImagergbTruncated(theViewingImagergbTruncated > 1) = 1;
+theViewingImagergbTruncated(theViewingImagergbTruncated < 0) = 0;
+theViewingImagergbTruncated(theViewingImagergbTruncated > 1) = 1;
 sumBounds = [minr ming minb; maxr maxg maxb];
 
 outputImageRGB = gammaCorrection(theViewingImagergbTruncated, viewingDisplay);
 
-boostScale = 1/max(theViewingImagergbTruncated, [], 'all');
-outputImageRGBBoost = gammaCorrection(...
-    (theViewingImagergbTruncated .* boostScale),viewingDisplay); 
+
+% boostScale = 1/max(theViewingImagergbTruncated, [], 'all');
+% Boost the values based on the stimulus region (avoids being affected by
+% random bright spots in the outer fringes)
+boostScale = 1/max(theViewingImagergbTruncated(idxYRange, idxXRange, :), [], 'all');
+theViewingImageBoosted = theViewingImagergbTruncated .* boostScale;
+
+theViewingImageBoosted(theViewingImageBoosted < 0) = 0;
+theViewingImageBoosted(theViewingImageBoosted > 1) = 1;
+outputImageRGBBoost = gammaCorrection(theViewingImageBoosted,viewingDisplay); 
 
 
 % Pull out the information for summary statistics using the INPUT
