@@ -158,12 +158,13 @@ rgbStats(1,5) = {rgbStats{1,2} / (rgbStats{1,2} + rgbStats{2,2})};
 
 cfv.imageRGB             = outputImageRGB;
 cfv.imageRGBBoost        = outputImageRGBBoost;
-
-cfv.imageRGBNoGamma      = theViewingImagergbTruncated;
 cfv.imageRGBBoostNoGamma = (theViewingImagergbTruncated .* boostScale);
 
+
+cfv.imageRGBNoGamma      = theViewingImagergbTruncated;
 cfv.bounds               = sumBounds;
 cfv.rgbStats             = rgbStats;
+cfv.viewingDisplay       = viewingDisplay; 
 
 
 end
