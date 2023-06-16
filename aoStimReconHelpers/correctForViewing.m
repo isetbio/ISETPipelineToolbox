@@ -26,9 +26,10 @@ function cfv = correctForViewing(inputImageRGB, startDisplayName, ...
 % startDisplayName = 'mono';
 % viewingDisplayName = 'conventional';
 
+% Initialize the struct for holding cfv
 cfv = struct; 
 
-% Set up display specific fields
+% Specify variables depending on the starting display 
 switch (startDisplayName)
     case 'conventional'
         startDisplayFieldName = 'CRT12BitDisplay';
@@ -39,6 +40,8 @@ switch (startDisplayName)
     otherwise
         error('Unknown recon display specified');
 end
+
+% Specify variables depending on the viewing display
 switch (viewingDisplayName)
     case 'conventional'
         viewingDisplayFieldName = 'CRT12BitDisplay';
@@ -58,13 +61,14 @@ viewingDisplayLoad = load(fullfile(aoReconDir, 'displays', [viewingDisplayName '
 eval(['viewingDisplay = viewingDisplayLoad.' viewingDisplayFieldName ';']);
 clear startDisplayLoad viewingDisplayLoad
 
-% Fix up gamma and wavelengths sampling
+% Fix up gamma and wavelengths sampling if needed for starting display 
 if (startOverwriteDisplayGamma)
     startGammaInput = linspace(0,1,2^displayGammaBits)';
     startGammaOutput = startGammaInput.^displayGammaGamma;
     startDisplay.gamma = startGammaOutput(:,[1 1 1]);
 end
 
+% Fix up gamma and wavelengths sampling if needed for viewing display
 if (viewingOverwriteDisplayGamma)
     viewingGammaInput = linspace(0,1,2^displayGammaBits)';
     viewingGammaOutput = viewingGammaInput.^displayGammaGamma;
@@ -108,7 +112,7 @@ thestartImageXYZCalFormat = Mstart_rgbToXYZ*thestartImagergbCalFormat;
 theViewingImagergbCalFormat = Mviewing_XYZTorgb*thestartImageXYZCalFormat;
 theViewingImagergb = CalFormatToImage(theViewingImagergbCalFormat,m,n);
 
-% Truncate
+% Truncate to keep within bounds 
 minr = min(min(theViewingImagergb(:,:,1)));
 ming = min(min(theViewingImagergb(:,:,2)));
 minb = min(min(theViewingImagergb(:,:,3)));
