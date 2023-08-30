@@ -1,4 +1,4 @@
-function theConeMosaic = overrideQuads(theConeMosaic, eccX, eccY, chrom, storedDir)
+function theConeMosaic = overrideQuads(theConeMosaic, eccX, eccY, chrom, storedDir, pr, cnv)
 % Manually establish conditions to create a custom-formatted mosaic.
 % Uses actual index position along the cone mosaic so may not generalize
 % between FOV. Establish new elseif argument with new quadSeq and include
@@ -1623,12 +1623,134 @@ switch chrom
 
 
 
+        % OVERHAUL, RESET SO AT NEW 10 ARCMIN PROPORTIONS 
+
+    case 'quadSeq110'
+        seqNum = str2double(chrom(8:end)); 
+   
+        newLIndices = storedQuadIndices{1,seqNum}{1};
+        theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID); 
+
+        newMIndices = storedQuadIndices{1,seqNum}{2};
+        theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID); 
+
+        newSIndices = storedQuadIndices{1,seqNum}{3};         
+        theConeMosaic.Mosaic.reassignTypeOfCones(newSIndices, cMosaic.SCONE_ID);         
+        
+        
+    case 'quadSeq111'
+        seqNum = str2double(chrom(8:end)); 
+   
+        newLIndices = storedQuadIndices{1,seqNum}{1};
+        theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID); 
+
+        newMIndices = storedQuadIndices{1,seqNum}{2};
+        theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID); 
+
+        newSIndices = storedQuadIndices{1,seqNum}{3};         
+        theConeMosaic.Mosaic.reassignTypeOfCones(newSIndices, cMosaic.SCONE_ID);       
+
+
+    case 'quadSeq112'
+        seqNum = str2double(chrom(8:end)); 
+   
+        newLIndices = storedQuadIndices{1,seqNum}{1};
+        theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID); 
+
+        newMIndices = storedQuadIndices{1,seqNum}{2};
+        theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID); 
+
+        newSIndices = storedQuadIndices{1,seqNum}{3};         
+        theConeMosaic.Mosaic.reassignTypeOfCones(newSIndices, cMosaic.SCONE_ID);       
+
+
+    case 'quadSeq113'
+        seqNum = str2double(chrom(8:end)); 
+   
+        newLIndices = storedQuadIndices{1,seqNum}{1};
+        theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID); 
+
+        newMIndices = storedQuadIndices{1,seqNum}{2};
+        theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID); 
+
+        newSIndices = storedQuadIndices{1,seqNum}{3};         
+        theConeMosaic.Mosaic.reassignTypeOfCones(newSIndices, cMosaic.SCONE_ID);       
+
+
+    case 'quadSeq114'
+        seqNum = str2double(chrom(8:end)); 
+   
+        newLIndices = storedQuadIndices{1,seqNum}{1};
+        theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID); 
+
+        newMIndices = storedQuadIndices{1,seqNum}{2};
+        theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID); 
+
+        newSIndices = storedQuadIndices{1,seqNum}{3};         
+        theConeMosaic.Mosaic.reassignTypeOfCones(newSIndices, cMosaic.SCONE_ID);       
+
+
+    case 'quadSeq115'
+        seqNum = str2double(chrom(8:end)); 
+   
+        newLIndices = storedQuadIndices{1,seqNum}{1};
+        theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID); 
+
+        newMIndices = storedQuadIndices{1,seqNum}{2};
+        theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID); 
+
+        newSIndices = storedQuadIndices{1,seqNum}{3};         
+        theConeMosaic.Mosaic.reassignTypeOfCones(newSIndices, cMosaic.SCONE_ID);       
+
+
+    case 'quadSeq116'
+        seqNum = str2double(chrom(8:end)); 
+   
+        newLIndices = storedQuadIndices{1,seqNum}{1};
+        theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID); 
+
+        newMIndices = storedQuadIndices{1,seqNum}{2};
+        theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID); 
+
+        newSIndices = storedQuadIndices{1,seqNum}{3};         
+        theConeMosaic.Mosaic.reassignTypeOfCones(newSIndices, cMosaic.SCONE_ID);       
+
+    case 'quadSeq117'
+        seqNum = str2double(chrom(8:end)); 
+   
+        newLIndices = storedQuadIndices{1,seqNum}{1};
+        theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID); 
+
+        newMIndices = storedQuadIndices{1,seqNum}{2};
+        theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID); 
+
+        newSIndices = storedQuadIndices{1,seqNum}{3};         
+        theConeMosaic.Mosaic.reassignTypeOfCones(newSIndices, cMosaic.SCONE_ID);       
+
+    case 'quadSeq118'
+        seqNum = str2double(chrom(8:end)); 
+   
+        newLIndices = storedQuadIndices{1,seqNum}{1};
+        theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID); 
+
+        newMIndices = storedQuadIndices{1,seqNum}{2};
+        theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID); 
+
+        newSIndices = storedQuadIndices{1,seqNum}{3};         
+        theConeMosaic.Mosaic.reassignTypeOfCones(newSIndices, cMosaic.SCONE_ID);       
+
+
+
+
+
+
+
+
+
 
         
-        
-        
-        
-        
+    case 'quadSeqNew'
+        keyboard()
     otherwise
         error(['Entered chrom has no alloted override sequence']);
 end
@@ -1664,5 +1786,5 @@ end
 % bookKeep(2) = {theConeMosaic.Mosaic.mConeIndices'};
 % bookKeep(3) = {theConeMosaic.Mosaic.sConeIndices'};
 % storedQuadIndices(1,(seqNum)) = {bookKeep};
-% 
+
 

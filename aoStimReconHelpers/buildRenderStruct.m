@@ -95,7 +95,7 @@ end
 if (replaceCones)
     storedDir = fullfile(pr.aoReconDir, pr.versEditor);
     if (pr.quads(6).value)
-        theConeMosaic = overrideQuads(theConeMosaic, pr.eccXDegs, pr.eccYDegs, chrom, storedDir);
+        theConeMosaic = overrideQuads(theConeMosaic, pr.eccXDegs, pr.eccYDegs, chrom, storedDir, pr, cnv);
     elseif (pr.quads(1).value)
         for q=2:5
             % Ensure input values are equivalent
