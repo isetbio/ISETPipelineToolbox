@@ -4,11 +4,11 @@
 
 annWidthArc = [1; 2];
 visualizeAnnuli = true;
-pr.stimSizeDegs = 10/60;
+pr.stimSizeDegs = 3.5/60;
 setProps = false;
 
 if setProps
-    seqNum = 118;
+    seqNum = 127;
     percentL = [0.1];
     percentS = [0.1];
 end
