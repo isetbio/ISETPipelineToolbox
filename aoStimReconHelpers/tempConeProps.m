@@ -4,15 +4,32 @@
 
 annWidthArc = [1; 2];
 visualizeAnnuli = true;
-pr.stimSizeDegs = 3.5/60;
+pr.stimSizeDegs = 10/60;
+
+seqNum = 118;
 setProps = false;
+justView = true;
+
+fixedS = true;
+posS = [404 361];
+
+
 
 if setProps
-    seqNum = 127;
-    percentL = [0.1];
-    percentS = [0.1];
+    percentL = [0.2];
+    percentS = [0.0];
 end
 
+if justView
+    newLIndices = storedQuadIndices{1,seqNum}{1};
+    theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID);
+
+    newMIndices = storedQuadIndices{1,seqNum}{2};
+    theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID);
+
+    newSIndices = storedQuadIndices{1,seqNum}{3};
+    theConeMosaic.Mosaic.reassignTypeOfCones(newSIndices, cMosaic.SCONE_ID);
+end
 
 
 % Initialize the structure to hold the information
@@ -108,6 +125,11 @@ for j = 1:size(annWidthArc, 1)
                 newLMosaicInd = regionCones(indTracker);
                 newMMosaicInd = regionCones(~indTracker);
                 newSMosaicInd = regionCones(newSRegionInd);
+
+                % Apply if want the S cones to stay fixed in place. 
+                if fixedS
+                    newSMosaicInd = posS;
+                end
 
                 % If cone types should be present, complete the switch
                 if ~isempty(newLMosaicInd)
