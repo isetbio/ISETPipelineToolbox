@@ -1,14 +1,18 @@
+% Not a function, moreso an executable script while calling a greater
+% function to create mosaics. Should be done by clicking the "Run Section"
+% button up above 
 
 
 
 
-annWidthArc = [1; 2];
+annWidthArc = [2; 2];
 visualizeAnnuli = true;
-pr.stimSizeDegs = 10/60;
+pr.stimSizeDegs = 3.5/60;
 
-seqNum = 118;
+seqNum = 142;
 setProps = false;
 justView = true;
+setPropsAnn = false;
 
 fixedS = true;
 posS = [404 361];
@@ -16,8 +20,13 @@ posS = [404 361];
 
 
 if setProps
-    percentL = [0.2];
+    percentL = [0.5];
     percentS = [0.0];
+end
+
+if setPropsAnn
+    annulusL = [1.0];
+    annulusS = [0.0];
 end
 
 if justView
@@ -126,7 +135,7 @@ for j = 1:size(annWidthArc, 1)
                 newMMosaicInd = regionCones(~indTracker);
                 newSMosaicInd = regionCones(newSRegionInd);
 
-                % Apply if want the S cones to stay fixed in place. 
+                % Apply if want the S cones to stay fixed in place.
                 if fixedS
                     newSMosaicInd = posS;
                 end
@@ -148,6 +157,62 @@ for j = 1:size(annWidthArc, 1)
 
             end
         end
+
+
+
+
+
+
+
+
+
+
+
+        if setPropsAnn
+            if i == 2
+                % Initialize a index tracker using boolean vectors for
+                % efficiency in L/M random assignments
+                indTracker = false(1,length(regionCones));
+
+                % Convert the desired L percentage to a number of cones
+                newLAmount = round(length(regionCones) * annulusL);
+
+                % Select the desired number of cones from the region to be
+                % converted to L cones, represented as true in the tracker
+                newLRegionInd = randperm(length(regionCones), newLAmount);
+                indTracker(newLRegionInd) = true;
+
+                % Convert the desired S percentage to a number of cones and
+                % apply this number to the mosaic regions
+                newSAmount = round(length(regionCones) * annulusS);
+                newSRegionInd = randperm(length(regionCones), newSAmount);
+
+                % Apply desired percentages to the L and S cones using the
+                % tracker. Then override all with aplied S cone values
+                newLMosaicInd = regionCones(indTracker);
+                newMMosaicInd = regionCones(~indTracker);
+                newSMosaicInd = regionCones(newSRegionInd);
+
+
+                % If cone types should be present, complete the switch
+                if ~isempty(newLMosaicInd)
+                    theConeMosaic.Mosaic.reassignTypeOfCones(newLMosaicInd, cMosaic.LCONE_ID)
+                end
+                if ~isempty(newMMosaicInd)
+                    theConeMosaic.Mosaic.reassignTypeOfCones(newMMosaicInd, cMosaic.MCONE_ID)
+                end
+                if ~isempty(newSMosaicInd)
+                    theConeMosaic.Mosaic.reassignTypeOfCones(newSMosaicInd, cMosaic.SCONE_ID)
+                end
+
+
+
+
+
+            end
+        end
+
+
 
 
 
@@ -192,9 +257,14 @@ coneProp.series1
 coneProp.series2
 
 
-if setProps
+if setProps | setPropsAnn
     bookKeep(1) = {theConeMosaic.Mosaic.lConeIndices'};
     bookKeep(2) = {theConeMosaic.Mosaic.mConeIndices'};
     bookKeep(3) = {theConeMosaic.Mosaic.sConeIndices'};
     storedQuadIndices(1,(seqNum)) = {bookKeep};
 end
+
+
+
+
+% save(fullfile(storedDir, "storedQuadIndices.mat"), "storedQuadIndices")

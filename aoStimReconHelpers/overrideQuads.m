@@ -1623,7 +1623,7 @@ switch chrom
 
 
 
-    % OVERHAUL, RESET SO AT NEW 10 ARCMIN PROPORTIONS
+        % OVERHAUL, RESET SO AT NEW 10 ARCMIN PROPORTIONS
 
     case 'quadSeq110'
         seqNum = str2double(chrom(8:end));
@@ -1745,7 +1745,7 @@ switch chrom
 
 
 
-    % 3.5 with proper prop no fixed S
+        % 3.5 with proper prop no fixed S
     case 'quadSeq119'
         seqNum = str2double(chrom(8:end));
 
@@ -1866,7 +1866,7 @@ switch chrom
 
 
 
-    % 3.5 proper prop with fixes S
+        % 3.5 proper prop with fixes S
     case 'quadSeq128'
         seqNum = str2double(chrom(8:end));
 
@@ -1919,7 +1919,7 @@ switch chrom
         theConeMosaic.Mosaic.reassignTypeOfCones(newSIndices, cMosaic.SCONE_ID);
 
 
-    case 'quadSeq132'
+    case 'quadSeq132' % The 50% case
         seqNum = str2double(chrom(8:end));
 
         newLIndices = storedQuadIndices{1,seqNum}{1};
@@ -1988,7 +1988,94 @@ switch chrom
 
 
 
+
+    case 'quadSeq137'    % 3.5 position sanity checks
+        seqNum = str2double(chrom(8:end));
+
+        newLIndices = storedQuadIndices{1,seqNum}{1};
+        theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID);
+
+        newMIndices = storedQuadIndices{1,seqNum}{2};
+        theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID);
+
+        newSIndices = storedQuadIndices{1,seqNum}{3};
+        theConeMosaic.Mosaic.reassignTypeOfCones(newSIndices, cMosaic.SCONE_ID);
+
+    case 'quadSeq138'
+        seqNum = str2double(chrom(8:end));
+
+        newLIndices = storedQuadIndices{1,seqNum}{1};
+        theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID);
+
+        newMIndices = storedQuadIndices{1,seqNum}{2};
+        theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID);
+
+        newSIndices = storedQuadIndices{1,seqNum}{3};
+        theConeMosaic.Mosaic.reassignTypeOfCones(newSIndices, cMosaic.SCONE_ID);
+
+    case 'quadSeq139'
+        seqNum = str2double(chrom(8:end));
+
+        newLIndices = storedQuadIndices{1,seqNum}{1};
+        theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID);
+
+        newMIndices = storedQuadIndices{1,seqNum}{2};
+        theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID);
+
+        newSIndices = storedQuadIndices{1,seqNum}{3};
+        theConeMosaic.Mosaic.reassignTypeOfCones(newSIndices, cMosaic.SCONE_ID);
+
+    case 'quadSeq140'
+        seqNum = str2double(chrom(8:end));
+
+        newLIndices = storedQuadIndices{1,seqNum}{1};
+        theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID);
+
+        newMIndices = storedQuadIndices{1,seqNum}{2};
+        theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID);
+
+        newSIndices = storedQuadIndices{1,seqNum}{3};
+        theConeMosaic.Mosaic.reassignTypeOfCones(newSIndices, cMosaic.SCONE_ID);
+
+    case 'quadSeq141'    % 3.5 all L annulus surround
+        seqNum = str2double(chrom(8:end));
+
+        newLIndices = storedQuadIndices{1,seqNum}{1};
+        theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID);
+
+        newMIndices = storedQuadIndices{1,seqNum}{2};
+        theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID);
+
+        newSIndices = storedQuadIndices{1,seqNum}{3};
+        theConeMosaic.Mosaic.reassignTypeOfCones(newSIndices, cMosaic.SCONE_ID);
+
+    case 'quadSeq142'   % 3.5 all M annulus surround
+        seqNum = str2double(chrom(8:end));
+
+        newLIndices = storedQuadIndices{1,seqNum}{1};
+        theConeMosaic.Mosaic.reassignTypeOfCones(newLIndices, cMosaic.LCONE_ID);
+
+        newMIndices = storedQuadIndices{1,seqNum}{2};
+        theConeMosaic.Mosaic.reassignTypeOfCones(newMIndices, cMosaic.MCONE_ID);
+
+        newSIndices = storedQuadIndices{1,seqNum}{3};
+        theConeMosaic.Mosaic.reassignTypeOfCones(newSIndices, cMosaic.SCONE_ID);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     case 'quadSeqNew'
+        open tempConeProps.m
         keyboard()
     otherwise
         error(['Entered chrom has no alloted override sequence']);
