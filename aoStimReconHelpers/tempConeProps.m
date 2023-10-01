@@ -17,6 +17,7 @@ setPropsAnn = false;
 fixedS = true;
 posS = [404 361];
 
+imageExp = true; 
 
 
 if setProps
@@ -265,6 +266,9 @@ if setProps | setPropsAnn
 end
 
 
-
+if imageExp
+    f = gcf;
+    exportgraphics(f, [num2str(seqNum) '.png'], 'Resolution', 600);
+end
 
 % save(fullfile(storedDir, "storedQuadIndices.mat"), "storedQuadIndices")
