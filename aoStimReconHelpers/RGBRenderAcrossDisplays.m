@@ -41,8 +41,8 @@ function [outputImageRGB,outputImagergb] = RGBRenderAcrossDisplays(inputImageRGB
 % Optional key/value pairs
 %    'linearInput'               - Input linear rather than gamma corrected
 %                                  image. Default false.
-%    'viewingDisplayScaleFactor' - Multiply viewing display primaries by
-%                                  this.  Default 1.
+%    'viewingDisplayScaleFactor' - Multiply viewing display primaries by this.  Default 1.
+%                                  Currently no effect for sRGB
 %    'wls'                       - Spectral wavelength sampling, column
 %                                  vector.  Default (400:10:700)'
 %    'verbose'                   - Print out diagnostic info. Default false.
