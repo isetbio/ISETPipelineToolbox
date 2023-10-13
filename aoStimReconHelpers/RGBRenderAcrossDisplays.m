@@ -1,4 +1,4 @@
-function [outputImageRGB,outputImagergb] = RGBRenderAcrossDisplays(inputImageRGB, startDisplay, viewingDisplay, varargin)
+function [outputImageRGB,outputImagergb,outputImagergbNotTruncated] = RGBRenderAcrossDisplays(inputImageRGB, startDisplay, viewingDisplay, varargin)
 % Correct image from one display for viewing on another
 %
 % Synopsis:
@@ -36,7 +36,8 @@ function [outputImageRGB,outputImagergb] = RGBRenderAcrossDisplays(inputImageRGB
 %
 % Outputs:
 %    outputImageRGB - Gamma corrected output image
-%    outputImagergb - Linear output image
+%    outputImagergb - Linear output image. Truncated to be all positive.
+%    outputImagergbNotTruncated - Linear output image before truncation.
 %
 % Optional key/value pairs
 %    'linearInput'               - Input linear rather than gamma corrected
@@ -114,18 +115,18 @@ end
 [theStartImagergbCalFormat,m,n] = ImageToCalFormat(startImageLinear);
 theStartImageXYZCalFormat = Mstart_rgbToXYZ*theStartImagergbCalFormat;
 if (p.Results.SRGB)
-    theViewingImagergbCalFormat = XYZToSRGBPrimary(theStartImageXYZCalFormat);
+    toutputImagergbNotTruncatedCalFormat = XYZToSRGBPrimary(theStartImageXYZCalFormat);
 else
-    theViewingImagergbCalFormat = Mviewing_XYZTorgb*theStartImageXYZCalFormat;
+    toutputImagergbNotTruncatedCalFormat = Mviewing_XYZTorgb*theStartImageXYZCalFormat;
 end
-theViewingImagergb = CalFormatToImage(theViewingImagergbCalFormat,m,n);
+outputImagergbNotTruncated = CalFormatToImage(toutputImagergbNotTruncatedCalFormat,m,n);
 if (p.Results.verbose)
-    minr = min(min(theViewingImagergb(:,:,1)));
-    ming = min(min(theViewingImagergb(:,:,2)));
-    minb = min(min(theViewingImagergb(:,:,3)));
-    maxr = max(max(theViewingImagergb(:,:,1)));
-    maxg = max(max(theViewingImagergb(:,:,2)));
-    maxb = max(max(theViewingImagergb(:,:,3)));
+    minr = min(min(outputImagergbNotTruncated(:,:,1)));
+    ming = min(min(outputImagergbNotTruncated(:,:,2)));
+    minb = min(min(outputImagergbNotTruncated(:,:,3)));
+    maxr = max(max(outputImagergbNotTruncated(:,:,1)));
+    maxg = max(max(outputImagergbNotTruncated(:,:,2)));
+    maxb = max(max(outputImagergbNotTruncated(:,:,3)));
     fprintf('\trgb2aoDisplay: min output linear: %0.2f, %0.2f, %0.2f\n',minr,ming,minb);
     fprintf('\trgb2aoDisplay: max output linear: %0.2f, %0.2f, %0.2f\n',maxr,maxg,maxb);
 end
@@ -136,11 +137,11 @@ end
 % may still be larger than 1, though.
 truncate = true;
 if truncate
-    theViewingImagergbTruncated = theViewingImagergb;
+    theViewingImagergbTruncated = outputImagergbNotTruncated;
     theViewingImagergbTruncated(theViewingImagergbTruncated < 0) = 0;
     outputImagergb = theViewingImagergbTruncated;
 else
-    outputImagergb = theViewingImagergb;
+    outputImagergb = outputImagergbNotTruncated;
 end
 
 % Scale to max if specified

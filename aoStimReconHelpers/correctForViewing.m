@@ -88,10 +88,19 @@ end
 
 % Call underlying function to do the work. Can use SRGB or not
 SRGB = true;
-[outputImageRGB,theViewingImagergbTruncated] = RGBRenderAcrossDisplays(theImagergb, startDisplay, [], ...
+[outputImageRGB,theViewingImagergbTruncated,theViewingImagergb] = RGBRenderAcrossDisplays(theImagergb, startDisplay, [], ...
             'viewingDisplayScaleFactor',viewingDisplayScaleFactor, ...
             'linearInput',true,'wls',wls,'verbose',false, ...
             'scaleToMax',false,'SRGB',SRGB);
+
+% Collect stats on the untruncted version
+minr = min(min(theViewingImagergb(:,:,1)));
+ming = min(min(theViewingImagergb(:,:,2)));
+minb = min(min(theViewingImagergb(:,:,3)));
+maxr = max(max(theViewingImagergb(:,:,1)));
+maxg = max(max(theViewingImagergb(:,:,2)));
+maxb = max(max(theViewingImagergb(:,:,3)));
+sumBounds = [minr ming minb; maxr maxg maxb];
 
 % Scale the values based on the stimulus region (avoids being affected by
 % random bright spots in the outer fringes)
