@@ -77,7 +77,7 @@ viewingDisplay = displaySet(viewingDisplay,'wave',wls);
 
 % Convert input to gamma corrected RGB?
 if (p.Results.linearInput)
-    inputImageRGB = gammaCorrection(inputImageRGB,forwardDisplay);
+    inputImageRGB = gammaCorrection(inputImageRGB,startDisplay);
 end
 
 % Scale recon display primaries to try to keep things in range

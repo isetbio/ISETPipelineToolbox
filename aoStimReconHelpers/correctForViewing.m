@@ -88,9 +88,9 @@ end
 
 % Call underlying function to do the work. Can use SRGB or not
 SRGB = true;
-[outputImageRGB,theViewingImagergbTruncated] = RGBRenderAcrossDisplays(theImagergb, startDisplay, [], ...
+[outputImageRGB,theViewingImagergbTruncated] = RGBRenderAcrossDisplays(inputImagergb, startDisplay, [], ...
             'viewingDisplayScaleFactor',viewingDisplayScaleFactor, ...
-            'linearInput',true,'wls',wls,'verbose',false, ...
+            'linearInput',true,'verbose',false, ...
             'scaleToMax',false,'SRGB',SRGB);
 
 % Scale the values based on the stimulus region (avoids being affected by
@@ -99,17 +99,17 @@ boostScale = 1/max(theViewingImagergbTruncated(idxYRange, idxXRange, :), [], 'al
 theViewingImagergbBoosted = theViewingImagergbTruncated .* boostScale;
 theViewingImagergbBoosted(theViewingImagergbBoosted > 1) = 1;
 if (SRGB)
-    outputImageRGB  = double(SRGBGammaCorrect(theViewingImagergbBoosted,0))/255;
+    outputImageRGBBoost  = double(SRGBGammaCorrect(theViewingImagergbBoosted,0))/255;
 else
-    outputImageRGB = gammaCorrection(theViewingImagergbBoosted, viewingDisplay);
+    outputImageRGBBoost = gammaCorrection(theViewingImagergbBoosted, viewingDisplay);
 end
 
 % Pull out the information for summary statistics using the input
 % uncorrected linear rgb values
 rgbStats = cell(3,5);
-rgbStats(1,1) = {startImageLinear(idxYRange,idxXRange, 1)};
-rgbStats(2,1) = {startImageLinear(idxYRange,idxXRange, 2)};
-rgbStats(3,1) = {startImageLinear(idxYRange,idxXRange, 3)};
+rgbStats(1,1) = {inputImagergb(idxYRange,idxXRange, 1)};
+rgbStats(2,1) = {inputImagergb(idxYRange,idxXRange, 2)};
+rgbStats(3,1) = {inputImagergb(idxYRange,idxXRange, 3)};
 
 rgbStats(1,2) = {mean(rgbStats{1,1}(:))};
 rgbStats(2,2) = {mean(rgbStats{2,1}(:))};
