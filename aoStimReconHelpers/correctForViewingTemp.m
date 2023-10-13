@@ -88,10 +88,19 @@ end
 
 % Call underlying function to do the work. Can use SRGB or not
 SRGB = true;
-[outputImageRGB,theViewingImagergbTruncated] = RGBRenderAcrossDisplays(inputImagergb, startDisplay, [], ...
+[outputImageRGB,theViewingImagergbTruncated,theViewingImagergb] = RGBRenderAcrossDisplays(theImagergb, startDisplay, [], ...
             'viewingDisplayScaleFactor',viewingDisplayScaleFactor, ...
-            'linearInput',true,'verbose',false, ...
+            'linearInput',true,'wls',wls,'verbose',false, ...
             'scaleToMax',false,'SRGB',SRGB);
+
+% Collect stats on the untruncted version
+minr = min(min(theViewingImagergb(:,:,1)));
+ming = min(min(theViewingImagergb(:,:,2)));
+minb = min(min(theViewingImagergb(:,:,3)));
+maxr = max(max(theViewingImagergb(:,:,1)));
+maxg = max(max(theViewingImagergb(:,:,2)));
+maxb = max(max(theViewingImagergb(:,:,3)));
+sumBounds = [minr ming minb; maxr maxg maxb];
 
 % Scale the values based on the stimulus region (avoids being affected by
 % random bright spots in the outer fringes)
@@ -99,17 +108,17 @@ boostScale = 1/max(theViewingImagergbTruncated(idxYRange, idxXRange, :), [], 'al
 theViewingImagergbBoosted = theViewingImagergbTruncated .* boostScale;
 theViewingImagergbBoosted(theViewingImagergbBoosted > 1) = 1;
 if (SRGB)
-    outputImageRGBBoost  = double(SRGBGammaCorrect(theViewingImagergbBoosted,0))/255;
+    outputImageRGB  = double(SRGBGammaCorrect(theViewingImagergbBoosted,0))/255;
 else
-    outputImageRGBBoost = gammaCorrection(theViewingImagergbBoosted, viewingDisplay);
+    outputImageRGB = gammaCorrection(theViewingImagergbBoosted, viewingDisplay);
 end
 
 % Pull out the information for summary statistics using the input
 % uncorrected linear rgb values
 rgbStats = cell(3,5);
-rgbStats(1,1) = {inputImagergb(idxYRange,idxXRange, 1)};
-rgbStats(2,1) = {inputImagergb(idxYRange,idxXRange, 2)};
-rgbStats(3,1) = {inputImagergb(idxYRange,idxXRange, 3)};
+rgbStats(1,1) = {startImageLinear(idxYRange,idxXRange, 1)};
+rgbStats(2,1) = {startImageLinear(idxYRange,idxXRange, 2)};
+rgbStats(3,1) = {startImageLinear(idxYRange,idxXRange, 3)};
 
 rgbStats(1,2) = {mean(rgbStats{1,1}(:))};
 rgbStats(2,2) = {mean(rgbStats{2,1}(:))};
