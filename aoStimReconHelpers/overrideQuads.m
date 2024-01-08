@@ -2088,6 +2088,9 @@ end
 
 
 %% Useful tools for building QuadSeqs
+% * Of Note: There is/may be a point at which the code below must be manually
+% uncommented and run. If that is the case, should find a way to automate
+% that or parameterize it such that it is a natural case of the script. 
 
 % % Visaulize index numbers over each cone in the mosaic
 %

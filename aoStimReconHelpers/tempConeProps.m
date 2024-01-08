@@ -2,14 +2,18 @@
 % function to create mosaics. Should be done by clicking the "Run Section"
 % button up above 
 
-
-
+% This is the script that actually sets up what cones go where when trying
+% to make a new mosiac, paired w/ overrideQuads.m script. Builds off of an
+% existing mosaic and can be used to maintain main proportionalities while
+% changing only a few cells at a time. Also has an option for just viewing
+% premade mosaic without alterations. Also also has options to take image
+% of new mosaic with proportionality squares and export for presentation. 
 
 annWidthArc = [2; 2];
 visualizeAnnuli = true;
 pr.stimSizeDegs = 3.5/60;
 
-seqNum = 142;
+seqNum = 135;
 setProps = false;
 justView = true;
 setPropsAnn = false;
@@ -17,7 +21,7 @@ setPropsAnn = false;
 fixedS = true;
 posS = [404 361];
 
-imageExp = true; 
+imageExp = false; 
 
 
 if setProps
@@ -107,8 +111,6 @@ for j = 1:size(annWidthArc, 1)
         end
 
 
-
-
         % THIS IS THE PART OF THE CODE THAT DOES THE WHOLE CHANGE TO THIS PERCENTAGE INSTEAD.
 
         if setProps
@@ -158,15 +160,6 @@ for j = 1:size(annWidthArc, 1)
 
             end
         end
-
-
-
-
-
-
-
-
-
 
 
         if setPropsAnn
@@ -253,11 +246,11 @@ for j = 1:size(annWidthArc, 1)
 end
 
 
+% 
+% coneProp.series1
+% coneProp.series2
 
-coneProp.series1
-coneProp.series2
-
-
+% Store the created mosaic as a new quadSeq if true
 if setProps | setPropsAnn
     bookKeep(1) = {theConeMosaic.Mosaic.lConeIndices'};
     bookKeep(2) = {theConeMosaic.Mosaic.mConeIndices'};
@@ -265,7 +258,7 @@ if setProps | setPropsAnn
     storedQuadIndices(1,(seqNum)) = {bookKeep};
 end
 
-
+% Capture an image of the created quadSeq and export for presentation 
 if imageExp
     f = gcf;
     exportgraphics(f, [num2str(seqNum) '.png'], 'Resolution', 600);

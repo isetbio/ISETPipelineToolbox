@@ -1,7 +1,7 @@
 function cfv = correctForViewing(inputImageRGB, startDisplayName, ...
     viewingDisplayName, viewingDisplayScaleFactor, aoReconDir, ...
     displayGammaBits, displayGammaGamma, fieldSizeDegs, ...
-    inputImageScaleFactor, idxXRange, idxYRange)
+    inputImageScaleFactor, idxXRange, idxYRange, startScene)
 % Synopsis:
 %    Correct input image to a form that better approximates how it would be
 %    displayed on the start Display Monitor
@@ -84,9 +84,13 @@ viewingDisplay = displaySet(viewingDisplay,'wave',wls);
 viewingDisplay = displaySet(viewingDisplay,'spd primaries',displayGet(viewingDisplay,'spd primaries')*viewingDisplayScaleFactor);
 
 
+% This step right here might be the issue, you're linearizing a stimulus
+% that's already in linear form. Would also need to rename the
+% inputImageRGB such that it's rgb since giving linear forms. 
 meanLuminanceCdPerM2 = [];
-[startScene, ~, startImageLinear] = sceneFromFile(inputImageRGB, 'rgb', ...
-    meanLuminanceCdPerM2, startDisplay);
+startImageLinear = inputImageRGB; 
+% [startScene, ~, startImageLinear] = sceneFromFile(inputImageRGB, 'rgb', ...
+%     meanLuminanceCdPerM2, startDisplay);
 
 %%%%%%%%
 startImageRGB = gammaCorrection(startImageLinear * inputImageScaleFactor, startDisplay);
@@ -164,7 +168,8 @@ cfv.imageRGB             = outputImageRGB;
 cfv.imageRGBBoost        = outputImageRGBBoost;
 cfv.imageRGBBoostNoGamma = (theViewingImagergbTruncated .* boostScale);
 
-
+% This is the linear version of what will be visualized after scaling and
+% gamma correction, the result to be viewed on a conventional display
 cfv.imageRGBNoGamma      = theViewingImagergbTruncated;
 cfv.bounds               = sumBounds;
 cfv.rgbStats             = rgbStats;
