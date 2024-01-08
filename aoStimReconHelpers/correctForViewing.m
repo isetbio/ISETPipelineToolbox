@@ -1,30 +1,42 @@
-function cfv = correctForViewing(inputImageRGB, startDisplayName, ...
+function cfv = correctForViewing(inputImagergb, startDisplayName, ...
     viewingDisplayName, viewingDisplayScaleFactor, aoReconDir, ...
     displayGammaBits, displayGammaGamma, fieldSizeDegs, ...
-    inputImageScaleFactor, idxXRange, idxYRange, startScene)
+    inputImageScaleFactor, idxXRange, idxYRange)
+% Correct input image for better display
+%
 % Synopsis:
-%    Correct input image to a form that better approximates how it would be
-%    displayed on the start Display Monitor
-%    inputImageRGB: RGB image matrix prior to gamma correction 
-%    startDisplayName: 'mono' or 'conventional'
-%    viewingDisplayName: 'mono' or 'conventional'
-%    viewingDisplayScaleFactor: Some convenience scaling, value = 3 works
-%    aoReconDir, displayGammaBits, displayGammaGamma: Params from pr struct
+%     cfv = correctForViewing(inputImagergb, startDisplayName, ...
+%         viewingDisplayName, viewingDisplayScaleFactor, aoReconDir, ...
+%         displayGammaBits, displayGammaGamma, fieldSizeDegs, ...
+%         inputImageScaleFactor, idxXRange, idxYRange)
 %
 % Description:
 %    Input a linear image specifying which monitor the image is being viewed under
 %    (ViewingDisp) and apply adjustments based on which monitor the 
 %    calculations were run under (startDisp). Ex: [1 1 0] RGB image appears
-%    yellow under mono monitor for calculations but orangish under conventional. 
+%    yellow under mono monitor for calculations but orangish under conventional.
 %
-% See also: t_renderMonoDisplayImage, aoStimRecon, aoStimReconRunMany
+% Inputs:
+%    inputImagergb:             RGB image matrix prior to gamma correction 
+%    startDisplayName:          'mono' or 'conventional'
+%    viewingDisplayName:        'mono' or 'conventional'
+%    viewingDisplayScaleFactor: Some convenience scaling, value = 3 works
+%    aoReconDir:
+%    displayGammaBits:
+%    displayGammaGamma:
+%    fieldSizeDegs:             Does not appear to be used
+%    inputImageScaleFactor:     Does not appear to be used
+%    idxXRange:                 Used to define region under stimulus in input image
+%    idxYRange:                 Used to define region under stimulus in input image
+%
+% Outputs:
+%   cfv:                        A structure that Carlos understands                   
+%
+% See also: t_renderMonoDisplayImage, RGBRenderAcrossDisplays, aoStimRecon, aoStimReconRunMany
 
 % History:
 %   04/04/23  chr  Made callable function from t_renderMonoDisplayImage
-
-% 
-% startDisplayName = 'mono';
-% viewingDisplayName = 'conventional';
+%   10/12/23  dhb  Call through RGBRenderAcrossDisplays
 
 % Initialize the struct for holding cfv
 cfv = struct; 
@@ -53,7 +65,6 @@ switch (viewingDisplayName)
         error('Unknown forward display specified');
 end
 
-
 % Get displays
 startDisplayLoad = load(fullfile(aoReconDir, 'displays', [startDisplayName 'Display.mat']));
 eval(['startDisplay = startDisplayLoad.' startDisplayFieldName ';']);
@@ -61,93 +72,53 @@ viewingDisplayLoad = load(fullfile(aoReconDir, 'displays', [viewingDisplayName '
 eval(['viewingDisplay = viewingDisplayLoad.' viewingDisplayFieldName ';']);
 clear startDisplayLoad viewingDisplayLoad
 
-% Fix up gamma and wavelengths sampling if needed for starting display 
+% Fix up gamma and wavelength sampling if needed for starting display 
 if (startOverwriteDisplayGamma)
     startGammaInput = linspace(0,1,2^displayGammaBits)';
     startGammaOutput = startGammaInput.^displayGammaGamma;
     startDisplay.gamma = startGammaOutput(:,[1 1 1]);
 end
 
-% Fix up gamma and wavelengths sampling if needed for viewing display
+% Fix up gamma and wavelength sampling if needed for viewing display
 if (viewingOverwriteDisplayGamma)
     viewingGammaInput = linspace(0,1,2^displayGammaBits)';
     viewingGammaOutput = viewingGammaInput.^displayGammaGamma;
     viewingDisplay.gamma = viewingGammaOutput(:,[1 1 1]);
 end
 
-% Convenience assumption that all displays operate on the same wave structure
-wls = (400:10:700)';
-startDisplay = displaySet(startDisplay,'wave',wls);
-viewingDisplay = displaySet(viewingDisplay,'wave',wls);
+% Call underlying function to do the work. Can use SRGB or not
+SRGB = true;
+[outputImageRGB,theViewingImagergbTruncated,theViewingImagergb] = RGBRenderAcrossDisplays(inputImagergb, startDisplay, [], ...
+            'viewingDisplayScaleFactor',viewingDisplayScaleFactor, ...
+            'linearInput',true,'verbose',false, ...
+            'scaleToMax',false,'SRGB',SRGB);
 
-% Scale recon display primaries to try to keep things in range
-viewingDisplay = displaySet(viewingDisplay,'spd primaries',displayGet(viewingDisplay,'spd primaries')*viewingDisplayScaleFactor);
-
-
-% This step right here might be the issue, you're linearizing a stimulus
-% that's already in linear form. Would also need to rename the
-% inputImageRGB such that it's rgb since giving linear forms. 
-meanLuminanceCdPerM2 = [];
-startImageLinear = inputImageRGB; 
-% [startScene, ~, startImageLinear] = sceneFromFile(inputImageRGB, 'rgb', ...
-%     meanLuminanceCdPerM2, startDisplay);
-
-%%%%%%%%
-startImageRGB = gammaCorrection(startImageLinear * inputImageScaleFactor, startDisplay);
-startScene = sceneSet(startScene, 'fov', fieldSizeDegs);
-% [startScene, ~, startImageLinear] = sceneFromFile(startImageRGB, 'rgb', ...
-%     meanLuminanceCdPerM2, startDisplay);
-%%%%%%%%
-
-
-% Get information we need to render scenes from their spectra through
-% the recin display.
-theXYZStruct = load('T_xyz1931');
-T_XYZ = SplineCmf(theXYZStruct.S_xyz1931,683*theXYZStruct.T_xyz1931,wls);
-Mstart_rgbToXYZ = T_XYZ*displayGet(startDisplay,'spd primaries')*(wls(2)-wls(1));
-Mstart_XYZTorgb = inv(Mstart_rgbToXYZ);
-Mviewing_rgbToXYZ = T_XYZ*displayGet(viewingDisplay,'spd primaries')*(wls(2)-wls(1));
-Mviewing_XYZTorgb = inv(Mviewing_rgbToXYZ);
-
-% Render the scene from the forward display on the recon display, to try to
-% match XYZ.
-[thestartImagergbCalFormat,m,n] = ImageToCalFormat(startImageLinear);
-thestartImageXYZCalFormat = Mstart_rgbToXYZ*thestartImagergbCalFormat;
-theViewingImagergbCalFormat = Mviewing_XYZTorgb*thestartImageXYZCalFormat;
-theViewingImagergb = CalFormatToImage(theViewingImagergbCalFormat,m,n);
-
-% Truncate to keep within bounds 
+% Collect stats on the untruncted version
 minr = min(min(theViewingImagergb(:,:,1)));
 ming = min(min(theViewingImagergb(:,:,2)));
 minb = min(min(theViewingImagergb(:,:,3)));
 maxr = max(max(theViewingImagergb(:,:,1)));
 maxg = max(max(theViewingImagergb(:,:,2)));
 maxb = max(max(theViewingImagergb(:,:,3)));
-theViewingImagergbTruncated = theViewingImagergb;
-theViewingImagergbTruncated(theViewingImagergbTruncated < 0) = 0;
-theViewingImagergbTruncated(theViewingImagergbTruncated > 1) = 1;
 sumBounds = [minr ming minb; maxr maxg maxb];
 
-outputImageRGB = gammaCorrection(theViewingImagergbTruncated, viewingDisplay);
-
-
-% boostScale = 1/max(theViewingImagergbTruncated, [], 'all');
-% Boost the values based on the stimulus region (avoids being affected by
+% Scale the values based on the stimulus region (avoids being affected by
 % random bright spots in the outer fringes)
 boostScale = 1/max(theViewingImagergbTruncated(idxYRange, idxXRange, :), [], 'all');
-theViewingImageBoosted = theViewingImagergbTruncated .* boostScale;
+theViewingImagergbBoosted = theViewingImagergbTruncated .* boostScale;
+theViewingImagergbBoosted(theViewingImagergbBoosted > 1) = 1;
+if (SRGB)
+    outputImageRGBBoost  = double(SRGBGammaCorrect(theViewingImagergbBoosted,0))/255;
+else
+    outputImageRGBBoost = gammaCorrection(theViewingImagergbBoosted, viewingDisplay);
+end
 
-theViewingImageBoosted(theViewingImageBoosted < 0) = 0;
-theViewingImageBoosted(theViewingImageBoosted > 1) = 1;
-outputImageRGBBoost = gammaCorrection(theViewingImageBoosted,viewingDisplay); 
-
-
-% Pull out the information for summary statistics using the INPUT
-% uncorrected values
-rgbStats = cell(3,4);
-rgbStats(1,1) = {startImageLinear(idxYRange,idxXRange, 1)};
-rgbStats(2,1) = {startImageLinear(idxYRange,idxXRange, 2)};
-rgbStats(3,1) = {startImageLinear(idxYRange,idxXRange, 3)};
+% Pull out the information for summary statistics using the input
+% uncorrected linear rgb values
+rgbStats = cell(3,5);
+rgbStats(1,1) = {inputImagergb(idxYRange,idxXRange, 1)};
+rgbStats(2,1) = {inputImagergb(idxYRange,idxXRange, 2)};
+rgbStats(3,1) = {inputImagergb(idxYRange,idxXRange, 3)};
 
 rgbStats(1,2) = {mean(rgbStats{1,1}(:))};
 rgbStats(2,2) = {mean(rgbStats{2,1}(:))};
@@ -163,17 +134,13 @@ rgbStats(3,4) = {ones(size(rgbStats{3,1})) * rgbStats{3,2}};
 
 rgbStats(1,5) = {rgbStats{1,2} / (rgbStats{1,2} + rgbStats{2,2})};
 
-
+% Set up return structure
 cfv.imageRGB             = outputImageRGB;
 cfv.imageRGBBoost        = outputImageRGBBoost;
 cfv.imageRGBBoostNoGamma = (theViewingImagergbTruncated .* boostScale);
-
-% This is the linear version of what will be visualized after scaling and
-% gamma correction, the result to be viewed on a conventional display
 cfv.imageRGBNoGamma      = theViewingImagergbTruncated;
 cfv.bounds               = sumBounds;
 cfv.rgbStats             = rgbStats;
 cfv.viewingDisplay       = viewingDisplay; 
-
 
 end
