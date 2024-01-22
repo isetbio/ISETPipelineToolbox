@@ -25,38 +25,37 @@ idxXRange, varargin)
 %   10/19/23  dhb  Wrote from chr program.
 %   01/21/24  chr  Set up this script for processing of wavelength values
 
+%Random 
+
 
 % Parse key value pairs
-% p = inputParser;
-% p.addParameter('showFigs', false, @islogical);
-% p.addParameter('inwardMove', 0, @isnumeric)
-% p.addParameter('linearInput', false, @islogical);
-% p.addParameter('viewingDisplayScaleFactor',1,@isnumeric);
-% p.addParameter('wls',(400:10:700)',@isnumeric);
-% p.addParameter('verbose',false,@islogical);
-% p.addParameter('SRGB',false,@islogical);
-% p.addParameter('scaleToMax',false,@islogical)
-% parse(p, varargin{:});
+p = inputParser;
+p.addParameter('showFigs', false, @islogical);
+p.addParameter('inwardMove', 0, @isnumeric)
+p.addParameter('linearInput', false, @islogical);
+p.addParameter('viewingDisplayScaleFactor',1,@isnumeric);
+p.addParameter('wls',(400:10:700)',@isnumeric);
+p.addParameter('verbose',false,@islogical);
+p.addParameter('SRGB',false,@islogical);
+p.addParameter('scaleToMax',false,@islogical)
+parse(p, varargin{:});
 
 % Establish a struct for the EW output values to then be analyzed
 imageEW = struct;
 
-inwardMove = 1;
-showFigs = true; 
-
 % Pull the stimulus and recon image used in the montages, note the stimulus
 % has already been corrected from mono to conventional dislay based on the
 % approach previously taken by the code
-stimImageRGBFormer = cfvStim.stimulusRGBScaled{1};
-reconImageRGBFormer = cfvRecon.reconScaledRGB{1};
+% stimImageRGBFormer = cfvStim.stimulusRGBScaled{1};
+% reconImageRGBFormer = cfvRecon.reconScaledRGB{1};
 
 % Want to overhaul since still feel like missing the point at some instance
 % prior
 % inputImageRGB = stimulusImageRGB;
-startDisplayName = rrf.startDisplayName;
-viewingDisplayName = rrf.viewingDisplayName;
-viewingDisplayScaleFactor = rrf.stimDispScale;
-SRGB = false;
+% startDisplayName = rrf.startDisplayName;
+% viewingDisplayName = rrf.viewingDisplayName;
+% viewingDisplayScaleFactor = rrf.stimDispScale;
+% SRGB = false;
 
 
 % Specify variables depending on the start display
@@ -98,23 +97,23 @@ clear startDisplayLoad viewingDisplayLoad
 % Sanity check by redoing the display correction based on the updates,
 % utilizes the RenderAcrossDisplay functionality and ideally should be the
 % same as before
-stimImageRGBUncorrected = gammaCorrection(stimulusImageLinear,startDisplay);
+stimImageRGBUncorrected = gammaCorrection(stimImagergbLinear,startDisplay);
 [stimImageRGBCurrent,stimImagergbTruncated,stimImagergb] = RGBRenderAcrossDisplays(stimImageRGBUncorrected, startDisplay, viewingDisplay, ...
-    'viewingDisplayScaleFactor',viewingDisplayScaleFactor, ...
-    'linearInput',false,'verbose',false, ...
-    'scaleToMax',false,'SRGB',SRGB);
+    'viewingDisplayScaleFactor',p.Results.viewingDisplayScaleFactor, ...
+    'linearInput',p.Results.linearInput,'verbose',p.Results.verbose, ...
+    'scaleToMax',p.Results.scaleToMax,'SRGB',p.Results.SRGB);
 
-reconImageRGBUncorrected = gammaCorrection(reconImageLinear,startDisplay);
+reconImageRGBUncorrected = gammaCorrection(reconImagergbLinear,startDisplay);
 [reconImageRGBCurrent,reconImagergbTruncated,reconImagergb] = RGBRenderAcrossDisplays(reconImageRGBUncorrected, startDisplay, viewingDisplay, ...
-    'viewingDisplayScaleFactor',viewingDisplayScaleFactor, ...
-    'linearInput',false,'verbose',false, ...
-    'scaleToMax',false,'SRGB',SRGB);
+    'viewingDisplayScaleFactor',p.Results.viewingDisplayScaleFactor, ...
+    'linearInput',p.Results.linearInput,'verbose',p.Results.verbose, ...
+    'scaleToMax',p.Results.scaleToMax,'SRGB',p.Results.SRGB);
 
 
 
 % Adjust bounds inward in an attempt to avoid skewing by edge artifacts
 % seen in reconstructions. Could pose issues if image is too small. 
-idxXRangeNew = (idxXRange(1) + inwardMove) : (idxXRange(end) - inwardMove);
+idxXRangeNew = (idxXRange(1) + p.Results.inwardMove) : (idxXRange(end) - p.Results.inwardMove);
 
 
 
@@ -153,13 +152,7 @@ reconImageRGBforEWUncorrected = (reconImageRGBUncorrected(idxXRangeNew, idxXRang
 
 
 
-
-
-
-
-
-
-if showFigs
+if p.Results.showFigs
     figure()
     subplot(3,2,1)
     imshow(stimImageRGBforEW1)
