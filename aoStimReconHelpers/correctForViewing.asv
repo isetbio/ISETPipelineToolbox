@@ -87,8 +87,6 @@ if (viewingOverwriteDisplayGamma)
 end
 
 % Call underlying function to do the work. Can use SRGB or not
-% !!! Note, as it is written now, will not work because passing in a linear
-% rgb value when fxn requires gamma corrected RGB value. 
 SRGB = true;
 [outputImageRGB,theViewingImagergbTruncated,theViewingImagergb] = RGBRenderAcrossDisplays(inputImagergb, startDisplay, [], ...
             'viewingDisplayScaleFactor',viewingDisplayScaleFactor, ...
