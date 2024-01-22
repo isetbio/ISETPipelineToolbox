@@ -25,9 +25,6 @@ idxXRange, varargin)
 %   10/19/23  dhb  Wrote from chr program.
 %   01/21/24  chr  Set up this script for processing of wavelength values
 
-%Random 
-
-
 % Parse key value pairs
 p = inputParser;
 p.addParameter('showFigs', false, @islogical);
