@@ -212,15 +212,15 @@ imageEW.stimImageRGB = stimImageRGBCurrent; % Post Disp Correction
 imageEW.reconImageRGB = reconImageRGBCurrent; % Post Disp Correction
 
 
-
-% Scale to max if specified
-if (p.Results.scaleToMax)
-    stimImagergbLinearScaled = stimImagergbLinear / max(stimImagergbLinear(:));
-    stimImageRGBUncorrected = gammaCorrection(stimImagergbLinearScaled,startDisplay);
-
-    reconImagergbLinearScaled = reconImagergbLinear / max(reconImagergbLinear(:));
-    reconImageRGBUncorrected = gammaCorrection(reconImagergbLinearScaled,startDisplay);
-end
-
-imageEW.stimImageRGBTest = stimImageRGBUncorrected; % Prior to Disp Correction
-imageEW.reconImageRGBTest = reconImageRGBUncorrected; % Prior to Disp Correction
+% 
+% % Scale to max if specified
+% if (p.Results.scaleToMax)
+%     stimImagergbLinearScaled = stimImagergbLinear / max(stimImagergbLinear(:));
+%     stimImageRGBUncorrected = gammaCorrection(stimImagergbLinearScaled,startDisplay);
+% 
+%     reconImagergbLinearScaled = reconImagergbLinear / max(reconImagergbLinear(:));
+%     reconImageRGBUncorrected = gammaCorrection(reconImagergbLinearScaled,startDisplay);
+% end
+% 
+% imageEW.stimImageRGBTest = stimImageRGBUncorrected; % Prior to Disp Correction
+% imageEW.reconImageRGBTest = reconImageRGBUncorrected; % Prior to Disp Correction
