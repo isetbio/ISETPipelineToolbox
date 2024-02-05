@@ -27,7 +27,7 @@ p.addParameter('showFigs', false, @islogical);
 p.addParameter('inwardMove', 0, @isnumeric)
 p.addParameter('linearInput', false, @islogical);
 p.addParameter('viewingDisplayScaleFactor',1,@isnumeric);
-p.addParameter('wls',(400:10:700)',@isnumeric);
+p.addParameter('wls',(400:1:700)',@isnumeric);
 p.addParameter('verbose',false,@islogical);
 p.addParameter('SRGB',false,@islogical);
 p.addParameter('scaleToMax',false,@islogical)
@@ -50,6 +50,11 @@ parse(p, varargin{:});
 
 % Establish a struct for the EW output values to then be analyzed
 imageEW = struct;
+aoReconDir = getpref('ISETImagePipeline','aoReconDir');
+displayGammaBits = 12;
+displayGammaGamma = 2;
+% overwriteDisplayGamma = true;
+viewingDisplayScaleFactor = 1;
 
 
 % Specify variables depending on the start display
@@ -80,12 +85,32 @@ end
 
 
 % Load in the display information
-aoReconDir = getpref('ISETImagePipeline','aoReconDir');
+% aoReconDir = getpref('ISETImagePipeline','aoReconDir');
 startDisplayLoad = load(fullfile(aoReconDir, 'displays', [startDisplayName 'Display.mat']));
 eval(['startDisplay = startDisplayLoad.' startDisplayFieldName ';']);
 viewingDisplayLoad = load(fullfile(aoReconDir, 'displays', [viewingDisplayName 'Display.mat']));
 eval(['viewingDisplay = viewingDisplayLoad.' viewingDisplayFieldName ';']);
 clear startDisplayLoad viewingDisplayLoad
+
+% Fix up gamma and wavelengths sampling
+if (startOverwriteDisplayGamma)
+    gammaInput = linspace(0,1,2^displayGammaBits)';
+    gammaOutput = gammaInput.^displayGammaGamma;
+    startDisplay.gamma = gammaOutput(:,[1 1 1]);
+end
+
+if (viewingOverwriteDisplayGamma)
+    gammaInput = linspace(0,1,2^displayGammaBits)';
+    gammaOutput = gammaInput.^displayGammaGamma;
+    viewingDisplay.gamma = gammaOutput(:,[1 1 1]);
+end
+    
+
+
+% wls = (400:1:700)';
+startDisplay = displaySet(startDisplay,'wave',p.Results.wls);
+viewingDisplay = displaySet(viewingDisplay,'wave',p.Results.wls);
+viewingDisplay = displaySet(viewingDisplay,'spd primaries',displayGet(viewingDisplay,'spd primaries')*viewingDisplayScaleFactor);
 
 
 % Sanity check by redoing the display correction based on the updates,
@@ -95,13 +120,15 @@ stimImageRGBUncorrected = gammaCorrection(stimImagergbLinear,startDisplay);
 [stimImageRGBCurrent,stimImagergbTruncated,stimImagergb] = RGBRenderAcrossDisplays(stimImageRGBUncorrected, startDisplay, viewingDisplay, ...
     'viewingDisplayScaleFactor',p.Results.viewingDisplayScaleFactor, ...
     'linearInput',p.Results.linearInput,'verbose',p.Results.verbose, ...
-    'scaleToMax',p.Results.scaleToMax,'SRGB',p.Results.SRGB);
+    'scaleToMax',p.Results.scaleToMax,'SRGB',p.Results.SRGB, ...
+    'wls', p.Results.wls);
 
 reconImageRGBUncorrected = gammaCorrection(reconImagergbLinear,startDisplay);
 [reconImageRGBCurrent,reconImagergbTruncated,reconImagergb] = RGBRenderAcrossDisplays(reconImageRGBUncorrected, startDisplay, viewingDisplay, ...
     'viewingDisplayScaleFactor',p.Results.viewingDisplayScaleFactor, ...
     'linearInput',p.Results.linearInput,'verbose',p.Results.verbose, ...
-    'scaleToMax',p.Results.scaleToMax,'SRGB',p.Results.SRGB);
+    'scaleToMax',p.Results.scaleToMax,'SRGB',p.Results.SRGB, ...
+    'wls', p.Results.wls);
 
 
 
