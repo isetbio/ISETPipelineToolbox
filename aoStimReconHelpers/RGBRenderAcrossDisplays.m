@@ -146,7 +146,7 @@ end
 
 % Scale to max if specified
 if (p.Results.scaleToMax)
-    outputImagergb = outputImageRGB/max(outputImagergb(:));
+    outputImagergb = outputImagergb/max(outputImagergb(:));
 end
 
 % Truncate prior to gamma correction

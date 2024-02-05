@@ -7,9 +7,7 @@ idxXRange, varargin)
 % has become the RenderRecons document.
 %
 % Description:
-%    Collect up a set of reconstructions and render/analyze.
-%
-%    Patterned after aoStimReconRerunFigs, but simplifying.
+%    Fed into aoStimReconRerunFigs for comparison across EW calculations
 %
 % See also: aoStimRecon, aoStimReconRunMany, correctForViewing
 
@@ -21,12 +19,7 @@ idxXRange, varargin)
 %    in same proportionality, 141 is all L surround, 142 is all M surround
 
 % History:
-%   06/01/23  chr  Organize into its own file
-%   10/19/23  dhb  Wrote from chr program.
 %   01/21/24  chr  Set up this script for processing of wavelength values
-
-%Random 
-
 
 % Parse key value pairs
 p = inputParser;
@@ -39,9 +32,6 @@ p.addParameter('verbose',false,@islogical);
 p.addParameter('SRGB',false,@islogical);
 p.addParameter('scaleToMax',false,@islogical)
 parse(p, varargin{:});
-
-% Establish a struct for the EW output values to then be analyzed
-imageEW = struct;
 
 % Pull the stimulus and recon image used in the montages, note the stimulus
 % has already been corrected from mono to conventional dislay based on the
@@ -56,6 +46,10 @@ imageEW = struct;
 % viewingDisplayName = rrf.viewingDisplayName;
 % viewingDisplayScaleFactor = rrf.stimDispScale;
 % SRGB = false;
+
+
+% Establish a struct for the EW output values to then be analyzed
+imageEW = struct;
 
 
 % Specify variables depending on the start display
@@ -155,95 +149,51 @@ reconImageRGBforEWUncorrected = (reconImageRGBUncorrected(idxXRangeNew, idxXRang
 if p.Results.showFigs
     figure()
     subplot(3,2,1)
-    imshow(stimImageRGBforEW1)
+    imshow(stimImageRGBFormer)
     title(sprintf('Mono Stim EW Corrected 1: %d', ...
         int64(mean(imageEW.stimEWFormer, 'all'))));
 
     subplot(3,2,2)
-    imshow(reconImageRGBforEW1)
+    imshow(reconImageRGBFormer)
     title(sprintf('Mono Recon EW Corrected 1: %d', ...
         int64(mean(imageEW.reconEWFormer, 'all'))));
 
     subplot(3,2,3)
-    imshow(stimImageRGBforEW2)
-    title(sprintf('Mono Stim EW Corrected 2: %d', ...
+    imshow(stimImageRGBCurrent)
+    title(sprintf('RenderAcrossDisplays Conv Stim: %d', ...
         int64(mean(imageEW.stimEWCurrent, 'all'))));
 
     subplot(3,2,4)
-    imshow(reconImageRGBforEW2)
-    title(sprintf('Mono Recon EW Corrected 2: %d', ...
+    imshow(reconImageRGBCurrent)
+    title(sprintf('RenderAcrossDisplays Conv Recon: %d', ...
         int64(mean(imageEW.reconEWCurrent, 'all'))));
 
     subplot(3,2,5)
-    imshow(stimImageRGBforEWUncorrected)
-    title(sprintf('Conv Stim EW Uncorrected 2: %d', ...
+    imshow(stimImageRGBUncorrected)
+    title(sprintf('Mono Stim: %d', ...
         int64(mean(imageEW.stimEWUncorrected, 'all'))));
 
     subplot(3,2,6)
-    imshow(reconImageRGBforEWUncorrected)
-    title(sprintf('Conv Recon EW Uncorrected 2: %d', ...
+    imshow(reconImageRGBUncorrected)
+    title(sprintf('Mono Recon: %d', ...
         int64(mean(imageEW.reconEWUncorrected, 'all'))));
 end
 
 
 
-%
-%
-% % Pull the stimulus and recon image used in the montages, note the stimulus
-% % has already been corrected from mono to conventional display
-% inputImageRGB = cfvStim.stimulusRGBScaled{1};
-% reconImageRGB = cfvRecon.reconScaledRGB{1};
-%
-% % Want to overhaul since still feel like missing the point at some instance
-% % prior
-% % inputImageRGB = stimulusImageRGB;
-% startDisplayName = rrf.startDisplayName;
-% viewingDisplayName = rrf.viewingDisplayName;
-% viewingDisplayScaleFactor = rrf.stimDispScale;
-% SRGB = false;
-%
-% % Specify variables depending on the start display
-% switch (startDisplayName)
-%     case 'conventional'
-%         startDisplayFieldName = 'CRT12BitDisplay';
-%         startOverwriteDisplayGamma = false;
-%     case 'mono'
-%         startDisplayFieldName = 'monoDisplay';
-%         startOverwriteDisplayGamma = true;
-%     otherwise
-%         error('Unknown recon display specified');
-% end
-%
-% % Specify variables depending on the viewing display
-% switch (viewingDisplayName)
-%     case 'conventional'
-%         viewingDisplayFieldName = 'CRT12BitDisplay';
-%         viewingOverwriteDisplayGamma = false;
-%     case 'mono'
-%         viewingDisplayFieldName = 'monoDisplay';
-%         viewingOverwriteDisplayGamma = true;
-%     otherwise
-%         error('Unknown forward display specified');
-% end
-%
-%
-% % Load in the display information
-% aoReconDir = getpref('ISETImagePipeline','aoReconDir');
-% viewingDisplayLoad = load(fullfile(aoReconDir, 'displays', [viewingDisplayName 'Display.mat']));
-% eval(['viewingDisplay = viewingDisplayLoad.' viewingDisplayFieldName ';']);
-% clear startDisplayLoad viewingDisplayLoad
-%
-% idxLBN = idxLB + 3;
-% idxUBN = idxUB - 3;
-%
-% % Calculate equivalent wavelength for the forward/recon pair and the
-% % mono/conventional pair
-% inputImageRGBforEW = (inputImageRGB(idxLBN:idxUBN, idxLBN:idxUBN, :));
-% reconImageRGBforEW = (reconImageRGB(idxLBN:idxUBN, idxLBN:idxUBN, :));
-%
-% % Calculate the EW on the stim/recon pair already corrected to viewing
-% % display
-% [equivWavelengthInput] = ...
-%     RGBToEquivWavelength(inputImageRGBforEW, viewingDisplay);
-% [equivWavelengthRecon] = ...
-%     RGBToEquivWavelength(reconImageRGBforEW, viewingDisplay);
+imageEW.stimImageRGB = stimImageRGBCurrent; % Post Disp Correction
+imageEW.reconImageRGB = reconImageRGBCurrent; % Post Disp Correction
+
+
+
+% Scale to max if specified
+if (p.Results.scaleToMax)
+    stimImagergbLinearScaled = stimImagergbLinear / max(stimImagergbLinear(:));
+    stimImageRGBUncorrected = gammaCorrection(stimImagergbLinearScaled,startDisplay);
+
+    reconImagergbLinearScaled = reconImagergbLinear / max(reconImagergbLinear(:));
+    reconImageRGBUncorrected = gammaCorrection(reconImagergbLinearScaled,startDisplay);
+end
+
+imageEW.stimImageRGBTest = stimImageRGBUncorrected; % Prior to Disp Correction
+imageEW.reconImageRGBTest = reconImageRGBUncorrected; % Prior to Disp Correction

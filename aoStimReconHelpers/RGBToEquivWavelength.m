@@ -29,7 +29,7 @@ function [equivWavelength,equivWavelengthCal] = RGBToEquivWavelength(inputImageR
 %    For cases where the stimuli are in the Rayleigh region and on the spectrum locus,
 %    using different methods will make very little difference.  For other cases, the
 %    chromaticity space and method used will matter some, but for those situations equivalent
-%    wavelength itself becomes a more approximate concept and it is not really clear one 
+%    wavelength itself becomes a more approximate concept and it is not really clear one
 %    wants to fuss too much.
 %
 %    The specification of min and max wavelength enforces that we only look
@@ -38,7 +38,7 @@ function [equivWavelength,equivWavelengthCal] = RGBToEquivWavelength(inputImageR
 % Inputs:
 %    inputImageRGB     - Gamma corrected RGB input image, for theDisplay.
 %                        Should be m by n by 3.
-%    theDisplay        - ISETBio display structure corresponding to the input image 
+%    theDisplay        - ISETBio display structure corresponding to the input image
 %
 % Outputs:
 %    equivWavelength   - Equivalent wavelength corresponding to each pixel
@@ -60,7 +60,7 @@ function [equivWavelength,equivWavelengthCal] = RGBToEquivWavelength(inputImageR
 
 % History:
 %   10/12/23  dhb  Wrote it as separate function.
-      
+
 % Parse key value pairs
 p = inputParser;
 p.addParameter('linearInput', false, @islogical);
@@ -108,7 +108,7 @@ highIndex = find(wls == highWl);
 % Convert input into an ISETBio scene.  This gives us the spectrum
 % at each location, although in the end we are really only using this
 % routine to ungamma correct as we reconstruct the spectrum at each
-% pixel below.  
+% pixel below.
 meanLuminanceCdPerM2 = [];
 [~, ~, inputImagergb] = sceneFromFile(inputImageRGB, 'rgb', ...
     meanLuminanceCdPerM2, theDisplay);
@@ -134,7 +134,7 @@ equivWavelengthCal = zeros(1,nValues);
 for rr = 1:nValues
     % Spectrum is weighted sum of display primaries.
     theSpd = inputImagergbCal(1,rr)*displayPrimaries(:,1) + inputImagergbCal(2,rr)*displayPrimaries(:,2) +inputImagergbCal(3,rr)*displayPrimaries(:,3);
-    
+
     % LM cone cooordinates
     theLM = T_cones(1:2,:)*theSpd;
     theLMChrom = theLM/(theLM(1)+theLM(2));
@@ -156,7 +156,9 @@ for rr = 1:nValues
 
     % Get equivalent wavelength as that which had smallest distance.
     equivWavelengthCal(rr) = wls(nearestWl);
-    fprintf('Equivalent wavelength for rgb = %0.2f,%0.2f,%0.2f: %d\n',inputImagergbCal(1,rr),inputImagergbCal(2,rr),inputImagergbCal(3,rr),equivWavelengthCal(rr));
+    if p.Results.verbose
+        fprintf('Equivalent wavelength for rgb = %0.2f,%0.2f,%0.2f: %d\n',inputImagergbCal(1,rr),inputImagergbCal(2,rr),inputImagergbCal(3,rr),equivWavelengthCal(rr));
+    end
 end
 
 % Convert to image format
