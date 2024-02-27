@@ -47,7 +47,7 @@ p.addParameter('showFigs', false, @islogical);
 p.addParameter('inwardMove', true, @islogical)
 p.addParameter('linearInput', false, @islogical);
 p.addParameter('viewingDisplayScaleFactor',1,@isnumeric);
-p.addParameter('wls',(400:1:700)',@isnumeric);
+p.addParameter('wls',(400:1:700)',@isnumeric); %%%%%
 p.addParameter('verbose',false,@islogical);
 p.addParameter('SRGB',false,@islogical);
 p.addParameter('scaleToMax',false,@islogical)
