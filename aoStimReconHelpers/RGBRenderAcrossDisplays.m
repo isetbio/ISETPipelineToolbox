@@ -139,15 +139,15 @@ end
 % may still be larger than 1, though.
 truncate = true;
 if truncate
-
-% Scale to max if specified
-if (p.Results.scaleToMax)
     theViewingImagergbTruncated = outputImagergbNotTruncated;
     theViewingImagergbTruncated(theViewingImagergbTruncated < 0) = 0;
     outputImagergb = theViewingImagergbTruncated;
 else
     outputImagergb = outputImagergbNotTruncated;
 end
+
+% Scale to max if specified
+if (p.Results.scaleToMax)
     outputImagergb = outputImagergb/max(outputImagergb(:));
 end
 
