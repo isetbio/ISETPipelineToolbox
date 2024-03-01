@@ -141,6 +141,8 @@ if p.Results.inwardMove
         centerSpread = floor(length(idxXRange) / 4);stimEWFormer
         idxXRangeNew = idxXRange(centerPoint - centerSpread + 1: centerPoint + centerSpread);
     end
+else
+    idxXRangeNew = idxXRange;
 end
 
 % Apply the new central patch to the stimulus and reconstruction
