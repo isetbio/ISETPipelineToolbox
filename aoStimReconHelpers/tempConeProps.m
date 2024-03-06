@@ -14,9 +14,9 @@ visualizeAnnuli = true;
 pr.stimSizeDegs = 3.5/60;
 
 seqNum = 135;
-setProps = false;
+setProps = true;
 justView = true;
-setPropsAnn = false;
+setPropsAnn = true;
 
 fixedS = true;
 posS = [404 361];
@@ -25,7 +25,7 @@ imageExp = false;
 
 
 if setProps
-    percentL = [0.5];
+    percentL = [0.7];
     percentS = [0.0];
 end
 

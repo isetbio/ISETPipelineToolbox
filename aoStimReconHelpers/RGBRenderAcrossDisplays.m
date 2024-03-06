@@ -67,7 +67,7 @@ p.addParameter('linearInput', false, @islogical);
 p.addParameter('viewingDisplayScaleFactor',1,@isnumeric);
 % Should note this was originally set to interval of 10 but we've been
 % transitioning to 1 so maybe should reset this. 
-p.addParameter('wls',(400:10:700)',@isnumeric);
+p.addParameter('wls',(400:1:700)',@isnumeric);
 p.addParameter('verbose',false,@islogical);
 p.addParameter('SRGB',false,@islogical);
 p.addParameter('scaleToMax',false,@islogical)
