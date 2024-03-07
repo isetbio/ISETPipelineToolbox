@@ -13,10 +13,10 @@ annWidthArc = [2; 2];
 visualizeAnnuli = true;
 pr.stimSizeDegs = 3.5/60;
 
-seqNum = 135;
-setProps = true;
+seqNum = 136;
+setProps = false;
 justView = true;
-setPropsAnn = true;
+setPropsAnn = false;
 
 fixedS = true;
 posS = [404 361];
