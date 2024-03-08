@@ -1,9 +1,9 @@
 function imageEW = compareRenderingEW(stimImageRGBFormer, reconImageRGBFormer, ...
-stimImagergbLinear, reconImagergbLinear, startDisplayName, viewingDisplayName, ...
-idxXRange, varargin)
+    stimImagergbLinear, reconImagergbLinear, startDisplayName, viewingDisplayName, ...
+    idxXRange, varargin)
 % Facilitate image display correction and Equivalent Wavelength calculation
 %
-% imageEW = compareRenderingEW[stimImageRGBFormer, reconImageRGBFormer, 
+% imageEW = compareRenderingEW[stimImageRGBFormer, reconImageRGBFormer,
 % stimImagergbLinear, reconImagergbLinear, startDisplayName, viewingDisplayName,
 % idxXRange, varagin]
 %
@@ -13,19 +13,19 @@ idxXRange, varargin)
 %    conventional). The first two arguments are image inputs from previous
 %    iterations incorporated in here as a sanity check. However, going
 %    forward will be conducting the correction here post-simulation
-%    instead. 
-% 
+%    instead.
+%
 %    Also facilitates the calculation of equivalent wavelength for
 %    stim/recon pairs. Should emphasize that this calculation should be
 %    conducted using the numerical values prior to any display correction
-%    (i.e. if correcting from mono to conventional, use the mono values to 
+%    (i.e. if correcting from mono to conventional, use the mono values to
 %    get EW). Various other methods are used to calculate EW in the script
 %    below but this is purely to regain intuition about values, the only
 %    one of actual concern is that saved to the final imageEW output struct
-% 
+%
 %    This function is called within the larger wrapper script
 %    aoStimReconRerunFigs_chr.m which applies applies this to an entire
-%    directory of simulation output files. 
+%    directory of simulation output files.
 %
 %
 % See also: RGBRenderAcrossDisplays, RGBToEquivalentWavelength
@@ -104,7 +104,7 @@ if (viewingOverwriteDisplayGamma)
     gammaOutput = gammaInput.^displayGammaGamma;
     viewingDisplay.gamma = gammaOutput(:,[1 1 1]);
 end
-    
+
 % wls = (400:1:700)';
 startDisplay = displaySet(startDisplay,'wave',p.Results.wls);
 viewingDisplay = displaySet(viewingDisplay,'wave',p.Results.wls);
@@ -131,7 +131,7 @@ reconImageRGBGamma = gammaCorrection(reconImagergbLinear,startDisplay);
 
 % If inwardMove set to true, establish a central patch for calculation
 % of the Equivalent Wavelength to avoid edge artifact impacting data
-if p.Results.inwardMove 
+if p.Results.inwardMove
     if isodd(length(idxXRange))
         centerPoint = ceil(length(idxXRange)/2);
         centerSpread = floor(length(idxXRange) / 4);
@@ -155,7 +155,7 @@ reconImageRGBforEWDisplay = (reconImageRGBGammaDisplay(idxXRangeNew, idxXRangeNe
 stimImageRGBforEW = (stimImageRGBGamma(idxXRangeNew, idxXRangeNew, :));
 reconImageRGBforEW = (reconImageRGBGamma(idxXRangeNew, idxXRangeNew, :));
 
-% Calculate the EW for the old version of stim/recon, after display 
+% Calculate the EW for the old version of stim/recon, after display
 % correction but prior to overhaul
 [stimEWOldVersion] = ...
     RGBToEquivWavelength(stimImageRGBforEWOldVersion, viewingDisplay);
@@ -178,7 +178,7 @@ reconImageRGBforEW = (reconImageRGBGamma(idxXRangeNew, idxXRangeNew, :));
     RGBToEquivWavelength(reconImageRGBforEW, startDisplay);
 
 % Summary figure as a sanity check just to regain intuition about certain
-% aspects of the calculations. 
+% aspects of the calculations.
 if p.Results.showFigs
     figure()
     subplot(3,2,1)
@@ -213,5 +213,5 @@ if p.Results.showFigs
 end
 
 % Output a version of the images after rendering across Displays
-imageEW.stimImageRGB = stimImageRGBGammaDisplay; 
-imageEW.reconImageRGB = reconImageRGBGammaDisplay; 
+imageEW.stimImageRGB = stimImageRGBGammaDisplay;
+imageEW.reconImageRGB = reconImageRGBGammaDisplay;
