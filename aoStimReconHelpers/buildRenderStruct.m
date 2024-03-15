@@ -29,7 +29,7 @@ parse(p, varargin{:});
 % if ~isempty(prVarsMissing)
 %     error('Missing variables from pr struct')
 % end
-% 
+%
 % cnvVars = (["one" "two" "three" "four"]);
 % cnvVarsCheck = isfield(cnv, cnvVars);
 % cnvVarsMissing = cnvVars(~cnvVarsCheck);
@@ -56,7 +56,7 @@ clear theDisplayLoad;
 wls = (400:1:700)';
 theDisplay = displaySet(theDisplay,'wave',wls);
 
-fieldSizeDegs = pr.fieldSizeMinutes / 60; 
+fieldSizeDegs = pr.fieldSizeMinutes / 60;
 
 % Create and setup cone mosaic
 %
@@ -131,15 +131,8 @@ end
 allRows = length(pr.stimSizeDegsDomain) * length(pr.focalRegionDomain);
 allColms = length(pr.focalPropLListDomain);
 
-%% Build render matrix or view mosaic montage
-if pr.setProps
+%% Build render matrix or view mosaic monpr.useBaseMosaic
     for h = 1:length(pr.focalVariantDomain)
-
-        if pr.viewMosaicMontage
-            theFig = figure;
-            t = tiledlayout(allRows, allColms, 'TileSpacing','none');
-        end
-
         for i = 1:length(pr.stimSizeDegsDomain)
             for j = 1:length(pr.focalRegionDomain)
                 for k = 1:length(pr.focalPropLListDomain)
@@ -148,158 +141,34 @@ if pr.setProps
                         pr.focalPropLListDomain(k), pr.focalVariantDomain(h), theConeMosaic, pr.eccXDegs, pr.eccYDegs, ...
                         pr.stimSizeDegsDomain(i), pr.fieldSizeMinutes);
 
-                    if pr.viewMosaicMontage
-                        % Plot the mosaic in the montage
-                        theAxes = nexttile;
-                        figureHandle = theFig;
-                        theConeMosaic.visualizeMosaic(figureHandle,theAxes);
-                        set(gca, 'xticklabel', [], 'yticklabel', []);
-                        set(gca, 'xlabel', [], 'ylabel', []);
+                    % Build the Render Struct for the created Mosaic
+                    theConeMosaic.Display = theDisplay;
+                    renderMatrix = theConeMosaic.forwardRender([pr.nPixels pr.nPixels 3], ...
+                        true, true, 'useDoublePrecision', true);
+                    renderMatrix = double(renderMatrix);
 
-                        hold on;
+                    % Push new info back into structure and save
+                    renderStructure.theDisplay = theDisplay;
+                    renderStructure.renderMatrix = renderMatrix;
+                    renderStructure.theConeMosaic = theConeMosaic;
+                    renderStructure.fieldSizeDegs = fieldSizeDegs;
+                    renderStructure.eccX = pr.eccXDegs;
+                    renderStructure.eccY = pr.eccYDegs;
+                    renderStructure.nPixels = pr.nPixels;
+                    renderStructure.pupilDiamMM = pupilDiamMM;
+                    renderStructure.AORender = aoRender;
+                    renderStructure.defocusDiopters = defocusDiopters;
+                    renderStructure.mosaicConeInfo = mosaicConeInfo;
+                    % renderStructure.quadSeqInfo = pr.quads;
 
-                        if p.Results.viewBounds
-                            % Pull region boundary info
-                            xBounds = mosaicConeInfo.xBounds;
-                            yBounds = mosaicConeInfo.yBounds;
-
-                            % Superimpose the boundaries
-                            for w = length(xBounds)
-                                rectangle('Position', ...
-                                    [xBounds(w,1) yBounds(w,1) ...
-                                    (xBounds(w,2) - xBounds(w,1)) ...
-                                    (yBounds(w,2) - yBounds(w,1))], ...
-                                    'LineWidth', 3)
-                            end
-                        end
-
-                        % Set plot figure information
-                        if i == 1 & j == 1
-                            title([num2str(pr.focalPropLListDomain(k)) 'L'])
-                        end
-
-                        if k == 1
-                            ylabel({focalRegionPlot(j); [num2str(pr.stimSizeDegsDomain(i)*60) ' Stim'] }, 'FontWeight', 'bold')
-                        end
-
-                        renderStructure = [];
-
-                    else
-                        % Build the Render Struct for the created Mosaic
-                        theConeMosaic.Display = theDisplay;
-                        renderMatrix = theConeMosaic.forwardRender([pr.nPixels pr.nPixels 3], ...
-                            true, true, 'useDoublePrecision', true);
-                        renderMatrix = double(renderMatrix);
-
-                        % Push new info back into structure and save
-                        renderStructure.theDisplay = theDisplay;
-                        renderStructure.renderMatrix = renderMatrix;
-                        renderStructure.theConeMosaic = theConeMosaic;
-                        renderStructure.fieldSizeDegs = fieldSizeDegs;
-                        renderStructure.eccX = pr.eccXDegs;
-                        renderStructure.eccY = pr.eccYDegs;
-                        renderStructure.nPixels = pr.nPixels;
-                        renderStructure.pupilDiamMM = pupilDiamMM;
-                        renderStructure.AORender = aoRender;
-                        renderStructure.defocusDiopters = defocusDiopters;
-                        renderStructure.mosaicConeInfo = mosaicConeInfo;
-                        % renderStructure.quadSeqInfo = pr.quads;
-
-                        save(fullfile(cnv.renderDir, 'xRenderStructures', cnv.forwardRenderStructureName),'renderStructure','-v7.3');
-                    end
-
-
+                    save(fullfile(cnv.renderDir, 'xRenderStructures', cnv.forwardRenderStructureName),'renderStructure','-v7.3');
                 end
-            end
-        end
 
-        if pr.viewMosaicMontage
-            set(gcf, 'Position', [595 5 1361 972]);
-            title(t, ['Mosaic Montage, Variant ' num2str(pr.focalVariantDomain)], 'FontSize', 40)
+
+            end
         end
     end
 end
 end
 
-
-
-
-
-
-
-% %% QuadSeq Stuff
-% % Option to replace cones in mosaic with another kind to simulate
-% % dichromacy.
-% if (replaceCones)
-%     storedDir = fullfile(pr.aoReconDir, pr.versEditor);
-%     if (pr.quads(6).value)
-%         theConeMosaic = overrideQuads(theConeMosaic, pr.eccXDegs, pr.eccYDegs, chrom, storedDir, pr, cnv);
-%     elseif (pr.quads(1).value)
-%         for q=2:5
-%             % Ensure input values are equivalent
-%             if length(pr.quads(q).percentL) ~= length(pr.quads(q).percentS)
-%                 error(['Unequal number of regions across cone classes in ', ...
-%                     pr.quads(q).name])
-%             end
-%
-%             % Collect the number of regions and equidistant sizes from
-%             % number of L percentage values entered
-%             pr.quads(q).regionCount = length(pr.quads(q).percentL);
-%             pr.quads(q).regionSpread = abs(0 - fieldSizeDegs / 2) / (pr.quads(q).regionCount * 2 - 1);
-%             for r=1:pr.quads(q).regionCount
-%                 % Capture the indices of cones that fall within each region
-%                 regionCones = find(...
-%                 theConeMosaic.Mosaic.coneRFpositionsDegs(:,1) > min(pr.quads(q).xbounds) & ...
-%                 theConeMosaic.Mosaic.coneRFpositionsDegs(:,2) > min(pr.quads(q).ybounds) & ...
-%                 theConeMosaic.Mosaic.coneRFpositionsDegs(:,1) < max(pr.quads(q).xbounds) & ...
-%                 theConeMosaic.Mosaic.coneRFpositionsDegs(:,2) < max(pr.quads(q).ybounds));
-%
-%                 % Initialize a index tracker using boolean vectors for
-%                 % efficiency in L/M random assignments
-%                 indTracker = false(1,length(regionCones));
-%
-%                 % Convert the desired L percentage to a number of cones
-%                 newLAmount = round(length(regionCones) * pr.quads(q).percentL(r));
-%
-%                 % Select the desired number of cones from the region to be
-%                 % converted to L cones, represented as true in the tracker
-%                 newLRegionInd = randperm(length(regionCones), newLAmount);
-%                 indTracker(newLRegionInd) = true;
-%
-%                 % Convert the desired S percentage to a number of cones and
-%                 % apply this number to the mosaic regions
-%                 newSAmount = round(length(regionCones) * pr.quads(q).percentS(r));
-%                 newSRegionInd = randperm(length(regionCones), newSAmount);
-%
-%                 % Apply desired percentages to the L and S cones using the
-%                 % tracker. Then override all with aplied S cone values
-%                 newLMosaicInd = regionCones(indTracker);
-%                 newMMosaicInd = regionCones(~indTracker);
-%                 newSMosaicInd = regionCones(newSRegionInd);
-%
-%                 % If cone types should be present, complete the switch
-%                 if ~isempty(newLMosaicInd)
-%                     theConeMosaic.Mosaic.reassignTypeOfCones(newLMosaicInd, cMosaic.LCONE_ID)
-%                 end
-%                 if ~isempty(newMMosaicInd)
-%                     theConeMosaic.Mosaic.reassignTypeOfCones(newMMosaicInd, cMosaic.MCONE_ID)
-%                 end
-%                 if ~isempty(newSMosaicInd)
-%                     theConeMosaic.Mosaic.reassignTypeOfCones(newSMosaicInd, cMosaic.SCONE_ID)
-%                 end
-%
-%                 % Update the region boundaries to move inward
-%                 pr.quads(q).xbounds = pr.quads(q).xbounds + [pr.quads(q).regionSpread -pr.quads(q).regionSpread];
-%                 pr.quads(q).ybounds = pr.quads(q).ybounds + [pr.quads(q).regionSpread -pr.quads(q).regionSpread];
-%             end
-%         end
-%     else
-%         % Preset mosaics for more typical conversions.
-%         for i=1:length(startCones)
-%             coneInd = find(theConeMosaic.Mosaic.coneTypes == startCones(i));
-%             theConeMosaic.Mosaic.reassignTypeOfCones(coneInd, newCones);
-%         end
-%     end
-% end
-%
 
