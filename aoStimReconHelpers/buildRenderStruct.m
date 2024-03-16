@@ -133,7 +133,7 @@ else
                     % Build the custom mosaics using setConeProportions
                     [theConeMosaic, mosaicConeInfo] = setConeProportions(pr.focalRegionDomain(j), ...
                         pr.focalPropLListDomain(k), pr.focalVariantDomain(h), theConeMosaic, pr.eccXDegs, pr.eccYDegs, ...
-                        pr.stimSizeDegsDomain(i), pr.fieldSizeMinutes);
+                        pr.stimSizeDegsDomain(i), pr.fieldSizeMinutes, pr.regionVariant, pr.propL, pr.propS);
 
                     % Build th render structure for the custom mosaic 
                     theConeMosaic.Display = theDisplay;

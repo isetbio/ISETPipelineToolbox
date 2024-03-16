@@ -1,6 +1,6 @@
 function [theConeMosaic, mosaicConeInfo] = setConeProportions(focalRegion, ...
     focalPropL, focalVariant, theConeMosaic, eccXDegs, eccYDegs, ...
-    stimSizeDegs, fieldSizeMinutes, varargin)
+    stimSizeDegs, fieldSizeMinutes, regionVariant, propL, propS, varargin)
 % Assign cone proportions and permutation variants for each region
 %
 % Description:
@@ -18,7 +18,6 @@ function [theConeMosaic, mosaicConeInfo] = setConeProportions(focalRegion, ...
 p = inputParser;
 p.addParameter('viewMosaic', false, @islogical);
 p.addParameter('annulusWidthArc', 2, @isnumeric);
-p.addParameter('propS', [0.10 0.10 0.10], @isnumeric);
 p.addParameter('stimCenter', true, @islogical)
 p.addParameter('centerSizeDegs', [], @isnumeric);
 parse(p, varargin{:});
@@ -32,10 +31,6 @@ innerCones = [];
 regionCones = [];
 xBounds = [];
 yBounds = [];
-
-% Set default proportion L (0.5) and variant (1)
-propL = ones(1,3) * 0.5;
-regionVariant = ones(1,3);
 
 % Establish the innermost bound as the FOV center
 xBounds(1,:) = [eccXDegs eccXDegs];
@@ -70,7 +65,7 @@ end
 % Establish boundaries for each focal region unless making global changes
 switch focalRegion
     case 'global'
-        fieldSizeDegs = fieldSizeMintues/60;
+        fieldSizeDegs = fieldSizeMinutes/60;
         regionWidths = fieldSizeDegs/2;
     otherwise
         if p.Results.stimCenter
@@ -105,30 +100,32 @@ for i = 1:length(regionWidths)
     % Select for cones that do not also occupy a previous region
     regionCones = regionCones(~ismember(regionCones, innerCones));
 
-    % Initialize a index tracker using boolean vectors for
-    % efficiency in L/M random assignments
-    indTracker = false(1,length(regionCones));
-
-    % Convert the desired L percentage to a number of cones
-    % Select the desired number of cones from the region to be
-    % converted to L cones, represented as true in the tracker
-    randState = rng(regionVariant(i));
-    newLAmount = round(length(regionCones) * propL(i));
-    newLRegionInd = randperm(length(regionCones), newLAmount);
-    indTracker(newLRegionInd) = true;
+    % Initialize a index tracker 
+%     indTracker = false(1,length(regionCones));
+    indTrackerAll = 1:length(regionCones);
 
     % Convert the desired S percentage to a number of cones and
     % apply this number to the mosaic regions. Assign the random generator
     % to ensure consistency
     randState = rng(regionVariant(i));
-    newSAmount = round(length(regionCones) * p.Results.propS(i));
-    newSRegionInd = randperm(length(regionCones), newSAmount);
+    newSAmount = round(length(indTrackerAll) * propS(i));
+    newSMosaicInd = randperm(length(indTrackerAll), newSAmount);
+    
+    % With the remaining cones, assign the desired L percentage, again
+    % assigning the rng. Any cones left unselected will be converted to M
+    indTrackerRemaining = indTrackerAll(~ismember(indTrackerAll, newSMosaicInd));
+    randState = rng(regionVariant(i));
+    newLAmount = round(length(indTrackerRemaining) * propL(i));
+    newLRegionRemaining = randperm(length(indTrackerRemaining), newLAmount);
+    newLMosaicInd = indTrackerRemaining(newLRegionRemaining);
+    newMMosaicInd = indTrackerRemaining(~ismember(indTrackerRemaining, newLMosaicInd));
+%     indTrackerAll(newLRegionRemaining) = true;
 
-    % Apply desired percentages to the L and S cones using the
-    % tracker. Then override all with aplied S cone values
-    newLMosaicInd = regionCones(indTracker);
-    newMMosaicInd = regionCones(~indTracker);
-    newSMosaicInd = regionCones(newSRegionInd);
+%     % Apply desired percentages to the L and S cones using the
+%     % tracker. Then override all with aplied S cone values
+%     newLMosaicInd = regionCones(indTrackerAll);
+%     newMMosaicInd = regionCones(~indTrackerAll);
+%     newSMosaicInd = regionCones(newSRegionInd);
 
     % If cone types should be present, complete the switch
     if ~isempty(newLMosaicInd)
@@ -146,8 +143,8 @@ for i = 1:length(regionWidths)
 
     % Store relevant info in a structure
     mosaicConeInfo.targetPropsL(i) = propL(i);
-    mosaicConeInfo.targetPropsM(i) = 1 - propL(i) - p.Results.propS(i);
-    mosaicConeInfo.targetPropsS(i) = p.Results.propS(i);
+    mosaicConeInfo.targetPropsM(i) = 1 - propL(i) - propS(i);
+    mosaicConeInfo.targetPropsS(i) = propS(i);
 
     mosaicConeInfo.regionVariant(i) = 1; %%%%%%%%%%;
     mosaicConeInfo.regionWidths(i) = regionWidths(i) * 60;

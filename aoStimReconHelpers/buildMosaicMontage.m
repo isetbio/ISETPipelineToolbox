@@ -114,13 +114,13 @@ end
 % Establish dimensions of the full montage
 allRows = length(pr.stimSizeDegsDomain) * length(pr.focalRegionDomain);
 allColms = length(pr.focalPropLListDomain);
+viewBounds = false; %%%%%%%%%%%%%
 if pr.useCustomMosaic
     for h = 1:length(pr.focalVariantDomain)
 
-        if pr.viewMosaicMontage
-            theFig = figure;
-            t = tiledlayout(allRows, allColms, 'TileSpacing','none');
-        end
+        theFig = figure;
+        t = tiledlayout(allRows, allColms, 'TileSpacing','none');
+
 
         for i = 1:length(pr.stimSizeDegsDomain)
             for j = 1:length(pr.focalRegionDomain)
@@ -128,7 +128,7 @@ if pr.useCustomMosaic
 
                     [theConeMosaic, mosaicConeInfo] = setConeProportions(pr.focalRegionDomain(j), ...
                         pr.focalPropLListDomain(k), pr.focalVariantDomain(h), theConeMosaic, pr.eccXDegs, pr.eccYDegs, ...
-                        pr.stimSizeDegsDomain(i), pr.fieldSizeMinutes);
+                        pr.stimSizeDegsDomain(i), pr.fieldSizeMinutes, pr.regionVariant, pr.propL, pr.propS);
 
                     % Plot the mosaic in the montage
                     theAxes = nexttile;
@@ -139,7 +139,7 @@ if pr.useCustomMosaic
 
                     hold on;
 
-                    if p.Results.viewBounds
+                    if viewBounds
                         % Pull region boundary info
                         xBounds = mosaicConeInfo.xBounds;
                         yBounds = mosaicConeInfo.yBounds;
@@ -160,7 +160,7 @@ if pr.useCustomMosaic
                     end
 
                     if k == 1
-                        ylabel({focalRegionPlot(j); [num2str(pr.stimSizeDegsDomain(i)*60) ' Stim'] }, 'FontWeight', 'bold')
+                        ylabel({regionAxesNames(j); [num2str(pr.stimSizeDegsDomain(i)*60) ' Stim'] }, 'FontWeight', 'bold')
                     end
                 end
             end
