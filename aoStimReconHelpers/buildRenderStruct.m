@@ -37,7 +37,7 @@ wls = (400:1:700)';
 theDisplay = displaySet(theDisplay,'wave',wls);
 fieldSizeDegs = pr.fieldSizeMinutes / 60;
 
-% Create and setup cone mosaic
+% Create and setup base cone mosaic
 %
 % For AO, we put in subjectID == 0 which causes the zcoeffs to be all zero
 % except for any specified defocus.
@@ -135,7 +135,14 @@ else
                         pr.focalPropLListDomain(k), pr.focalVariantDomain(h), theConeMosaic, pr.eccXDegs, pr.eccYDegs, ...
                         pr.stimSizeDegsDomain(i), pr.fieldSizeMinutes, pr.regionVariant, pr.propL, pr.propS);
 
-                    % Build th render structure for the custom mosaic 
+                    % Build the render structure for the custom mosaic.
+                    %
+                    % Note that the "forwardRender" method is a generic
+                    % method that builds the render matrix for forward
+                    % computations. This use of the word "forward" is
+                    % separate from the distinction we make between
+                    % "forward" and "recon" matrices.  A little unfortunate
+                    % but we'll live with the potential confusion.
                     theConeMosaic.Display = theDisplay;
                     renderMatrix = theConeMosaic.forwardRender([pr.nPixels pr.nPixels 3], ...
                         true, true, 'useDoublePrecision', true);

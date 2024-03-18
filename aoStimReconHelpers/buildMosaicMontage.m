@@ -15,30 +15,32 @@ function buildMosaicMontage(pr, cnv, stage, varargin)
 %   08/25/22  chr  Included portion for dichromacy
 %   08/26/22  dhb, chr  Convert to main file, edit cone mosaic options
 %   03/13/24  chr  Split from buildRenderStruct
+
 %% Set the stage
 %
 % Unpack the variables that change dependent on whether building a forward
 % mosaic or recon mosaic
 st = unpackStage(pr, cnv, stage);
 
+%% DAVID THINKS THIS DISPLAY STUFF IS NOT NEEDED HERE
 %% Build base mosaic using input parameters
 %
 % Get display
-theDisplayLoad = load(fullfile(pr.aoReconDir, 'displays', [pr.displayName 'Display.mat']));
-eval(['theDisplay = theDisplayLoad.' cnv.displayFieldName ';']);
-if (cnv.overwriteDisplayGamma)
-    gammaInput = linspace(0,1,2^pr.displayGammaBits)';
-    gammaOutput = gammaInput.^pr.displayGammaGamma;
-    theDisplay.gamma = gammaOutput(:,[1 1 1]);
-end
-clear theDisplayLoad;
-
-% Set some pertinent variables
-wls = (400:1:700)';
-theDisplay = displaySet(theDisplay,'wave',wls);
+% theDisplayLoad = load(fullfile(pr.aoReconDir, 'displays', [pr.displayName 'Display.mat']));
+% eval(['theDisplay = theDisplayLoad.' cnv.displayFieldName ';']);
+% if (cnv.overwriteDisplayGamma)
+%     gammaInput = linspace(0,1,2^pr.displayGammaBits)';
+%     gammaOutput = gammaInput.^pr.displayGammaGamma;
+%     theDisplay.gamma = gammaOutput(:,[1 1 1]);
+% end
+% clear theDisplayLoad;
+% 
+% % Set some pertinent variables
+% wls = (400:1:700)';
+% theDisplay = displaySet(theDisplay,'wave',wls);
 fieldSizeDegs = pr.fieldSizeMinutes / 60;
 
-% Create and setup cone mosaic
+% Create and setup base cone mosaic
 %
 % For AO, we put in subjectID == 0 which causes the zcoeffs to be all zero
 % except for any specified defocus.
@@ -66,7 +68,7 @@ if (st.aoRender)
             'zernikeDataBase', st.zernikeDataBase);
     end
 
-    % We build a normal optics structure. Allow specified defocus.
+% We build a normal optics structure. Allow specified defocus.
 else
     if (st.eccVars)
         % Build normal optics structure.
@@ -181,5 +183,6 @@ if pr.useCustomMosaic
         end
     end
 end
+
 end
 
