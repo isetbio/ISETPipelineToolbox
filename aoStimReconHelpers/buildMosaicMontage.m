@@ -93,7 +93,9 @@ else
     end
 end
 
-%% Organize Variables
+%% Axes Naming
+% 
+% Adjust how variables are presented to make montage prettier
 for w = 1:length(pr.focalRegionDomain)
     switch pr.focalRegionDomain(w)
         case "center"
@@ -107,6 +109,13 @@ for w = 1:length(pr.focalRegionDomain)
         case "global"
             regionAxesNames(w) = "Global";
     end
+end
+
+switch stage
+    case "forward"
+        stageTitle = "Forward";
+    case "recon"
+        stageTitle = "Recon";
 end
 
 %% Build mosaic montage based on edited mosaic
@@ -168,7 +177,7 @@ if pr.useCustomMosaic
 
         if pr.viewMosaicMontage
             set(gcf, 'Position', [595 5 1361 972]);
-            title(t, ['Mosaic Montage, Variant ' num2str(pr.focalVariantDomain)], 'FontSize', 40)
+            title(t, [stageTitle ' Mosaic Montage, Variant ' num2str(pr.focalVariantDomain)], 'FontSize', 40)
         end
     end
 end

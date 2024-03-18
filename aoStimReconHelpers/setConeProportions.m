@@ -37,7 +37,7 @@ xBounds(1,:) = [eccXDegs eccXDegs];
 yBounds(1,:) = [eccYDegs eccYDegs];
 
 %% Adjust focal region
-% Input desired proportion and variant values based on region of interest
+% Override default values with desired region proportion and variant 
 switch focalRegion
     case 'center'
         propL(1) = focalPropL;
@@ -100,32 +100,20 @@ for i = 1:length(regionWidths)
     % Select for cones that do not also occupy a previous region
     regionCones = regionCones(~ismember(regionCones, innerCones));
 
-    % Initialize a index tracker 
-%     indTracker = false(1,length(regionCones));
-    indTrackerAll = 1:length(regionCones);
-
     % Convert the desired S percentage to a number of cones and
     % apply this number to the mosaic regions. Assign the random generator
-    % to ensure consistency
+    % to ensure consistency and ID unused remaining cones
     randState = rng(regionVariant(i));
-    newSAmount = round(length(indTrackerAll) * propS(i));
-    newSMosaicInd = randperm(length(indTrackerAll), newSAmount);
-    
+    newSAmount = round(length(regionCones) * propS(i));
+    newSMosaicInd = randsample(regionCones, newSAmount)';
+    conesRemaining = regionCones(~ismember(regionCones, newSMosaicInd));
+
     % With the remaining cones, assign the desired L percentage, again
     % assigning the rng. Any cones left unselected will be converted to M
-    indTrackerRemaining = indTrackerAll(~ismember(indTrackerAll, newSMosaicInd));
     randState = rng(regionVariant(i));
-    newLAmount = round(length(indTrackerRemaining) * propL(i));
-    newLRegionRemaining = randperm(length(indTrackerRemaining), newLAmount);
-    newLMosaicInd = indTrackerRemaining(newLRegionRemaining);
-    newMMosaicInd = indTrackerRemaining(~ismember(indTrackerRemaining, newLMosaicInd));
-%     indTrackerAll(newLRegionRemaining) = true;
-
-%     % Apply desired percentages to the L and S cones using the
-%     % tracker. Then override all with aplied S cone values
-%     newLMosaicInd = regionCones(indTrackerAll);
-%     newMMosaicInd = regionCones(~indTrackerAll);
-%     newSMosaicInd = regionCones(newSRegionInd);
+    newLAmount = round(length(conesRemaining) * propL(i));
+    newLMosaicInd = randsample(conesRemaining, newLAmount)';
+    newMMosaicInd = conesRemaining(~ismember(conesRemaining, newLMosaicInd))';
 
     % If cone types should be present, complete the switch
     if ~isempty(newLMosaicInd)
