@@ -3,18 +3,20 @@ function buildMosaicMontage(pr, cnv, stage, varargin)
 %    Build render matrix if desired/needed
 %
 % Description:
-%    Run this function if you would like to rebuild a new mosaic and
+%    [UPDATE]. Run this function if you would like to rebuild a new mosaic and
 %    render matrix.  This also gets run if there is no cached file corresponding
 %    to the desired parameters. Once built, this file can be loaded from cache
 %    for quicker running.
 %
-% See also: aoStimRecon, aoStimReconRunMany
+% See also: aoStimRecon, aoStimReconRunMany, buildBaseMosaic,
+%           buildRenderStruct.
 
 % History:
 %   08/16/22  chr  Made it a callable function
 %   08/25/22  chr  Included portion for dichromacy
 %   08/26/22  dhb, chr  Convert to main file, edit cone mosaic options
 %   03/13/24  chr  Split from buildRenderStruct
+
 %% Set the stage and build base mosaic
 %
 % Unpack the variables that change dependent on whether building a forward

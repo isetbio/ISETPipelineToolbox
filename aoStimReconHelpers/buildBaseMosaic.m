@@ -6,30 +6,54 @@ function [theConeMosaic, theDisplay] = buildBaseMosaic(pr, cnv, st, useDisplay)
 %    Run this function prior to building a corresponding render structure
 %    or visualizing an image montage. 
 %
+%    This is called by (at least) buildRenderStruct and buildMosaicMontage,
+%    and we count on it doing the same thing if called with the same value
+%    of st.randSeed.  This runs reasonably quickly, so it is convenient
+%    just to generate on the fly rather than run, store, and read.
+%
+%    This routine has the wls hard coded as 400:1:700.  This is a good
+%    choice, but keep in mind that if you try to change it elsewhere,
+%    something will have to be done here.
+%
+% Inputs:
+%    pr
+%    cnv
+%    st
+%    useDisplay -           Boolean. Determines whether to construct a
+%                           display object from the passed parameters.  If false, that object is
+%                           returned as empty.
+%
+% Outputs:
+%
 % See also: aoStimRecon, aoStimReconRunMany, buildRenderStruct,
 % buildMosaicMontage
 
 % History:
 %   03/24/24  chr  Made it a callable function
-%% Build base mosaic using input parameters
+
+%% Set some pertinent variables
+wls = (400:1:700)';
+fieldSizeDegs = pr.fieldSizeMinutes / 60;
+
+%% Build display if asked to
 %
 % Get display
 if useDisplay
     theDisplayLoad = load(fullfile(pr.aoReconDir, 'displays', [pr.displayName 'Display.mat']));
     eval(['theDisplay = theDisplayLoad.' cnv.displayFieldName ';']);
+    theDisplay = displaySet(theDisplay,'wave',wls);
     if (cnv.overwriteDisplayGamma)
         gammaInput = linspace(0,1,2^pr.displayGammaBits)';
         gammaOutput = gammaInput.^pr.displayGammaGamma;
         theDisplay.gamma = gammaOutput(:,[1 1 1]);
     end
     clear theDisplayLoad;
+else
+    theDisplay = [];
 end
 
-% Set some pertinent variables
-wls = (400:1:700)';
-theDisplay = displaySet(theDisplay,'wave',wls);
-fieldSizeDegs = pr.fieldSizeMinutes / 60;
-
+%% Build base mosaic using input parameters
+%
 % Create and setup base cone mosaic
 %
 % For AO, we put in subjectID == 0 which causes the zcoeffs to be all zero
