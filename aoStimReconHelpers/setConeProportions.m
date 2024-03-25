@@ -134,7 +134,7 @@ for i = 1:length(regionWidths)
     mosaicConeInfo.targetPropsM(i) = 1 - propL(i) - propS(i);
     mosaicConeInfo.targetPropsS(i) = propS(i);
 
-    mosaicConeInfo.regionVariant(i) = 1; %%%%%%%%%%;
+    mosaicConeInfo.regionVariant(i) = regionVariant(i); 
     mosaicConeInfo.regionWidths(i) = regionWidths(i) * 60;
     mosaicConeInfo.numTotal(i) = length(regionCones);
 

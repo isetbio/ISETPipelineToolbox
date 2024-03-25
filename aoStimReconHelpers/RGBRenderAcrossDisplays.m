@@ -59,7 +59,7 @@ function [outputImageRGB,outputImagergb,outputImagergbNotTruncated] = RGBRenderA
 %                  corrected RGB
 %             dhb  Return gamma corrected RGB as main return.  Second
 %                  return is linear rgb.  (Original version returned linear
-%                  rgb but with a name tha suggested gamma corrected.)
+%                  rgb but with a name that suggested gamma corrected.)
       
 % Parse key value pairs
 p = inputParser;
