@@ -15,7 +15,6 @@ function buildMosaicMontage(pr, cnv, stage, varargin)
 %   08/25/22  chr  Included portion for dichromacy
 %   08/26/22  dhb, chr  Convert to main file, edit cone mosaic options
 %   03/13/24  chr  Split from buildRenderStruct
-
 %% Set the stage and build base mosaic
 %
 % Unpack the variables that change dependent on whether building a forward
@@ -27,10 +26,10 @@ st = unpackStage(pr, cnv, stage);
 [theConeMosaic, ~] = buildBaseMosaic(pr, cnv, st, useDisplay);
 
 %% Axes Naming
-% 
+%
 % Adjust how variables are presented to make montage prettier
-for w = 1:length(pr.focalRegionDomain)
-    switch pr.focalRegionDomain(w)
+for w = 1:length(pr.focalRegion)
+    switch pr.focalRegion(w)
         case "center"
             regionAxesNames(w) = "Center";
         case "nearSurround"
@@ -54,23 +53,23 @@ end
 %% Build mosaic montage based on edited mosaic
 %
 % Establish dimensions of the full montage
-allRows = length(pr.stimSizeDegsDomain) * length(pr.focalRegionDomain);
-allColms = length(pr.focalPropLListDomain);
+allRows = length(pr.stimSizeDegsList) * length(pr.focalRegion);
+allColms = length(pr.focalPropLList);
 viewBounds = false; %%%%%%%%%%%%%
 if pr.useCustomMosaic
-    for h = 1:length(pr.focalVariantDomain)
+    for h = 1:length(pr.focalVariant)
 
         theFig = figure;
         t = tiledlayout(allRows, allColms, 'TileSpacing','none');
 
 
-        for i = 1:length(pr.stimSizeDegsDomain)
-            for j = 1:length(pr.focalRegionDomain)
-                for k = 1:length(pr.focalPropLListDomain)
+        for i = 1:length(pr.stimSizeDegsList)
+            for j = 1:length(pr.focalRegion)
+                for k = 1:length(pr.focalPropLList)
 
-                    [theConeMosaic, mosaicConeInfo] = setConeProportions(pr.focalRegionDomain(j), ...
-                        pr.focalPropLListDomain(k), pr.focalVariantDomain(h), theConeMosaic, pr.eccXDegs, pr.eccYDegs, ...
-                        pr.stimSizeDegsDomain(i), pr.fieldSizeMinutes, pr.regionVariant, pr.propL, pr.propS);
+                    [theConeMosaic, mosaicConeInfo] = setConeProportions(pr.focalRegion(j), ...
+                        pr.focalPropLList(k), pr.focalVariant(h), theConeMosaic, pr.eccXDegs, pr.eccYDegs, ...
+                        pr.stimSizeDegsList(i), pr.fieldSizeMinutes, pr.regionVariant, pr.propL, pr.propS);
 
                     % Plot the mosaic in the montage
                     theAxes = nexttile;
@@ -98,21 +97,22 @@ if pr.useCustomMosaic
 
                     % Set plot figure information
                     if i == 1 && j == 1
-                        title([num2str(pr.focalPropLListDomain(k)) 'L'])
+                        title([num2str(pr.focalPropLList(k)) 'L'])
                     end
 
                     if k == 1
-                        ylabel({regionAxesNames(j); [num2str(pr.stimSizeDegsDomain(i)*60) ' Stim'] }, 'FontWeight', 'bold')
+                        ylabel({regionAxesNames(j); [num2str(pr.stimSizeDegsList(i)*60) ' Stim'] }, 'FontWeight', 'bold')
                     end
                 end
             end
         end
 
-        if pr.viewMosaicMontage
-            set(gcf, 'Position', [595 5 1361 972]);
-            title(t, [stageTitle ' Mosaic Montage, Variant ' num2str(pr.focalVariantDomain)], 'FontSize', 40)
-        end
+        % Spruce up the montage figure
+        set(gcf, 'Position', [595 5 1361 972]);
+        title(t, [stageTitle ' Mosaic Montage, Variant ' num2str(pr.focalVariant)], 'FontSize', 40)
     end
+else
+    disp('Not building customized mosaic montage');
 end
 
 end

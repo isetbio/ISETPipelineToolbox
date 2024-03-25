@@ -55,17 +55,17 @@ else
     %% Build render matrix based on edited mosaic
     % 
     % Establish dimensions of the full montage
-    allRows = length(pr.stimSizeDegsDomain) * length(pr.focalRegionDomain);
-    allColms = length(pr.focalPropLListDomain);
+    allRows = length(pr.stimSizeDegsList) * length(pr.focalRegion);
+    allColms = length(pr.focalPropLList);
 
-    for h = 1:length(pr.focalVariantDomain)
-        for i = 1:length(pr.stimSizeDegsDomain)
-            for j = 1:length(pr.focalRegionDomain)
-                for k = 1:length(pr.focalPropLListDomain)
+    for h = 1:length(pr.focalVariant)
+        for i = 1:length(pr.stimSizeDegsList)
+            for j = 1:length(pr.focalRegion)
+                for k = 1:length(pr.focalPropLList)
                     % Build the custom mosaics using setConeProportions
-                    [theConeMosaic, mosaicConeInfo] = setConeProportions(pr.focalRegionDomain(j), ...
-                        pr.focalPropLListDomain(k), pr.focalVariantDomain(h), theConeMosaic, pr.eccXDegs, pr.eccYDegs, ...
-                        pr.stimSizeDegsDomain(i), pr.fieldSizeMinutes, pr.regionVariant, pr.propL, pr.propS);
+                    [theConeMosaic, mosaicConeInfo] = setConeProportions(pr.focalRegion(j), ...
+                        pr.focalPropLList(k), pr.focalVariant(h), theConeMosaic, pr.eccXDegs, pr.eccYDegs, ...
+                        pr.stimSizeDegsList(i), pr.fieldSizeMinutes, pr.regionVariant, pr.propL, pr.propS);
 
                     % Build the render structure for the custom mosaic.
                     %

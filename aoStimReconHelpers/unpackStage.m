@@ -7,8 +7,8 @@ function st = unpackStage(pr, cnv, stage)
 % See also: buildRenderStruct, buildMosaicMontage, aoStimReconRunMany
 %
 % History:
-%   03/15/24
-
+%   03/15/24  chr  branched off into callable function
+%% Establish the struct and apply the stage
 st = struct; 
 
 switch stage
