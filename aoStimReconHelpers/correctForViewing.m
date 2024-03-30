@@ -37,6 +37,9 @@ function cfv = correctForViewing(inputImagergb, startDisplayName, ...
 % History:
 %   04/04/23  chr  Made callable function from t_renderMonoDisplayImage
 %   10/12/23  dhb  Call through RGBRenderAcrossDisplays
+%   03/29/24  chr  THIS FUNCTION IS NO LONGER ACTIVE, STILL HERE TO
+%                  ENSURE LOSING IT DOESN'T BREAK THINGS, BUT PLAN IS TO 
+%                  DELETE AT EARLIEST CONVENIENCE
 
 % Initialize the struct for holding cfv
 cfv = struct; 

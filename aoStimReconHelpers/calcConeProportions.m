@@ -13,6 +13,9 @@ function coneProp = calcConeProportions(pr, cnv, renderType, annWidthArc, visual
 
 % History:
 %   05/30/23  chr  Wrote as a callable function
+%   03/29/24  chr  THIS FUNCTION IS NO LONGER ACTIVE, STILL HERE TO
+%                  ENSURE LOSING IT DOESN'T BREAK THINGS, BUT PLAN IS TO 
+%                  DELETE AT EARLIEST CONVENIENCE
 
 %% Close existing figures
 close all;

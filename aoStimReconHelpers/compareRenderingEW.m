@@ -1,10 +1,9 @@
-function imageEW = compareRenderingEW(stimImageRGBFormer, reconImageRGBFormer, ...
-    stimImagergbLinear, reconImagergbLinear, startDisplayName, viewingDisplayName, ...
-    idxXRange, varargin)
+function imageInfo = compareRenderingEW(imagergbLinear, startDisplayName, ...
+    viewingDisplayName, idxXRange, varargin)
 % Facilitate image display correction and Equivalent Wavelength calculation
 %
 % imageEW = compareRenderingEW[stimImageRGBFormer, reconImageRGBFormer,
-% stimImagergbLinear, reconImagergbLinear, startDisplayName, viewingDisplayName,
+% inputImagergbLinear, reconImagergbLinear, startDisplayName, viewingDisplayName,
 % idxXRange, varagin]
 %
 % Description:
@@ -40,11 +39,12 @@ function imageEW = compareRenderingEW(stimImageRGBFormer, reconImageRGBFormer, .
 % History:
 %   01/21/24  chr  Set up this script for processing of wavelength values
 %   02/19/24  chr  Cleaning
+%   03/29/24  chr  Adjust function so serves more as a wrapper 
 
 % Parse key value pairs
 p = inputParser;
 p.addParameter('showFigs', false, @islogical);
-p.addParameter('inwardMove', true, @islogical)
+p.addParameter('useFullEW', true, @islogical)
 p.addParameter('linearInput', false, @islogical);
 p.addParameter('viewingDisplayScaleFactor',1,@isnumeric);
 p.addParameter('wls',(400:1:700)',@isnumeric); %%%%%
@@ -54,7 +54,7 @@ p.addParameter('scaleToMax',false,@islogical)
 parse(p, varargin{:});
 
 % Establish a struct for the EW output values to then be analyzed
-imageEW = struct;
+imageInfo = struct;
 aoReconDir = getpref('ISETImagePipeline','aoReconDir');
 displayGammaBits = 12;
 displayGammaGamma = 2;
@@ -105,7 +105,7 @@ if (viewingOverwriteDisplayGamma)
     viewingDisplay.gamma = gammaOutput(:,[1 1 1]);
 end
 
-% wls = (400:1:700)';
+% Set up some more stuff
 startDisplay = displaySet(startDisplay,'wave',p.Results.wls);
 viewingDisplay = displaySet(viewingDisplay,'wave',p.Results.wls);
 viewingDisplay = displaySet(viewingDisplay,'spd primaries',displayGet(viewingDisplay,'spd primaries')*viewingDisplayScaleFactor);
@@ -113,105 +113,60 @@ viewingDisplay = displaySet(viewingDisplay,'spd primaries',displayGet(viewingDis
 % Sanity check by redoing the display correction based on the updates,
 % utilizes the RenderAcrossDisplay functionality and ideally should be the
 % same as before
-stimImageRGBGamma = gammaCorrection(stimImagergbLinear,startDisplay);
-[stimImageRGBGammaDisplay,stimImagergbDisplayTruncated,stimImagergbDisplay] = ...
-    RGBRenderAcrossDisplays(stimImageRGBGamma, startDisplay, viewingDisplay, ...
+imageRGB = gammaCorrection(imagergbLinear,startDisplay);
+[imageRGBAcrossDisplays, ~ , ~] = ...
+    RGBRenderAcrossDisplays(imageRGB, startDisplay, viewingDisplay, ...
     'viewingDisplayScaleFactor',p.Results.viewingDisplayScaleFactor, ...
     'linearInput',p.Results.linearInput,'verbose',p.Results.verbose, ...
     'scaleToMax',p.Results.scaleToMax,'SRGB',p.Results.SRGB, ...
     'wls', p.Results.wls);
 
-reconImageRGBGamma = gammaCorrection(reconImagergbLinear,startDisplay);
-[reconImageRGBGammaDisplay,reconImagergbDisplayTruncated,reconImagergbDisplay] = ...
-    RGBRenderAcrossDisplays(reconImageRGBGamma, startDisplay, viewingDisplay, ...
-    'viewingDisplayScaleFactor',p.Results.viewingDisplayScaleFactor, ...
-    'linearInput',p.Results.linearInput,'verbose',p.Results.verbose, ...
-    'scaleToMax',p.Results.scaleToMax,'SRGB',p.Results.SRGB, ...
-    'wls', p.Results.wls);
-
-% If inwardMove set to true, establish a central patch for calculation
-% of the Equivalent Wavelength to avoid edge artifact impacting data
-if p.Results.inwardMove
-    if isodd(length(idxXRange))
-        centerPoint = ceil(length(idxXRange)/2);
-        centerSpread = floor(length(idxXRange) / 4);
-        idxXRangeNew = idxXRange(centerPoint - centerSpread: centerPoint + centerSpread);
-    else
-        centerPoint = ceil(length(idxXRange)/2);
-        centerSpread = floor(length(idxXRange) / 4);stimEWFormer
-        idxXRangeNew = idxXRange(centerPoint - centerSpread + 1: centerPoint + centerSpread);
-    end
+% Select for a region that is half as large as the stimulus presentation
+% region to be used when calculating EW, centered at the same location. The
+% purpose of this is to account for any potential edge artifacts especially
+% in recons by selecting for a central patch to calculate EW.
+if isodd(length(idxXRange))
+    centerPoint = ceil(length(idxXRange)/2);
+    centerSpread = floor(length(idxXRange) / 4);
+    idxXRangeCenter = idxXRange(centerPoint - centerSpread: centerPoint + centerSpread);
 else
-    idxXRangeNew = idxXRange;
+    centerPoint = ceil(length(idxXRange)/2);
+    centerSpread = floor(length(idxXRange) / 4);stimEWFormer
+    idxXRangeCenter = idxXRange(centerPoint - centerSpread + 1: centerPoint + centerSpread);
 end
 
-% Apply the new central patch to the stimulus and reconstruction
-stimImageRGBforEWOldVersion = (stimImageRGBFormer(idxXRangeNew, idxXRangeNew, :));
-reconImageRGBforEWOldVersion = (reconImageRGBFormer(idxXRangeNew, idxXRangeNew, :));
+% Exclude the background from EW calculations by selecting for the region
+% that overlaps with the full stimulus position. Then do the same for the
+% center region.
+RGBtoEWFull = imageRGB(idxXRange, idxXRange, :);
+RGBtoEWCenter = imageRGB(idxXRangeCenter, idxXRangeCenter, :);
 
-stimImageRGBforEWDisplay = (stimImageRGBGammaDisplay(idxXRangeNew, idxXRangeNew, :));
-reconImageRGBforEWDisplay = (reconImageRGBGammaDisplay(idxXRangeNew, idxXRangeNew, :));
+% Use the image regions established above to calculate the EW. Again, using
+% the RGB values that correspond to those input to the mono display, NOT
+% using the values that were returned after correcting to render across
+% displays (that's just for visualizing).
+[imageInfo.imageEWFull, ~] = ...
+    RGBToEquivWavelength(RGBtoEWFull, startDisplay);
+[imageInfo.imageEWCenter, ~] = ...
+    RGBToEquivWavelength(RGBtoEWCenter, startDisplay);
 
-stimImageRGBforEW = (stimImageRGBGamma(idxXRangeNew, idxXRangeNew, :));
-reconImageRGBforEW = (reconImageRGBGamma(idxXRangeNew, idxXRangeNew, :));
+imageInfo.meanEWFull = int64(mean(imageInfo.imageEWFull, 'all'));
+imageInfo.meanEWCenter = int64(mean(imageInfo.imageEWCenter, 'all'));
 
-% Calculate the EW for the old version of stim/recon, after display
-% correction but prior to overhaul
-[stimEWOldVersion] = ...
-    RGBToEquivWavelength(stimImageRGBforEWOldVersion, viewingDisplay);
-[reconEWOldVersion] = ...
-    RGBToEquivWavelength(reconImageRGBforEWOldVersion, viewingDisplay);
-
-% Calculate the EW for the current version of stim/recon, after display
-% correction
-[stimEWDisplay] = ...
-    RGBToEquivWavelength(stimImageRGBforEWDisplay, viewingDisplay);
-[reconEWDisplay] = ...
-    RGBToEquivWavelength(reconImageRGBforEWDisplay, viewingDisplay);
-
-% Calculate the EW for current version of stim/recon, prior to display
-% correction. NOTE! This is the value that should be used for reporting. EW
-% should be calculated prior to correction, images should be viewed after
-[imageEW.stimEW] = ...
-    RGBToEquivWavelength(stimImageRGBforEW, startDisplay);
-[imageEW.reconEW] = ...
-    RGBToEquivWavelength(reconImageRGBforEW, startDisplay);
-
-% Summary figure as a sanity check just to regain intuition about certain
-% aspects of the calculations.
+% Visualize the newly rendered image if desired
 if p.Results.showFigs
     figure()
-    subplot(3,2,1)
-    imshow(stimImageRGBFormer)
-    title(sprintf('Mono Stim EW Corrected 1: %d', ...
-        int64(mean(stimEWOldVersion, 'all'))));
+    imshow(imageRGBAcrossDisplays)
 
-    subplot(3,2,2)
-    imshow(reconImageRGBFormer)
-    title(sprintf('Mono Recon EW Corrected 1: %d', ...
-        int64(mean(reconEWOldVersion, 'all'))));
-
-    subplot(3,2,3)
-    imshow(stimImageRGBGammaDisplay)
-    title(sprintf('RenderAcrossDisplays Conv Stim: %d', ...
-        int64(mean(stimEWDisplay, 'all'))));
-
-    subplot(3,2,4)
-    imshow(reconImageRGBGammaDisplay)
-    title(sprintf('RenderAcrossDisplays Conv Recon: %d', ...
-        int64(mean(reconEWDisplay, 'all'))));
-
-    subplot(3,2,5)
-    imshow(stimImageRGBGamma)
-    title(sprintf('Mono Stim: %d', ...
-        int64(mean(imageEW.stimEW, 'all'))));
-
-    subplot(3,2,6)
-    imshow(reconImageRGBGamma)
-    title(sprintf('Mono Recon: %d', ...
-        int64(mean(imageEW.reconEW, 'all'))));
+    % Set the title to be the EW value determined (center or full)
+    if p.Results.useFullEW
+        title(sprintf('Equivalent Wavelength: %d', imageInfo.meanEWFull));
+    else
+        title(sprintf('Equivalent Wavelength: %d', imageInfo.meanEWCenter));
+    end
 end
 
-% Output a version of the images after rendering across Displays
-imageEW.stimImageRGB = stimImageRGBGammaDisplay;
-imageEW.reconImageRGB = reconImageRGBGammaDisplay;
+% Store a version of the RGB image that was rendered across displays
+imageInfo.imageRGBAcrossDisplays = imageRGBAcrossDisplays;
+
+end
