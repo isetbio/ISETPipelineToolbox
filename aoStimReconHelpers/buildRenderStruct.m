@@ -52,7 +52,7 @@ if ~pr.useCustomMosaic
     renderStructure.mosaicConeInfo = mosaicConeInfo;
 
     % Save it to the output location 
-    save(fullfile(cnv.renderDir, 'xRenderStructures', st.renderStructureName),'renderStructure','-v7.3');
+    save(fullfile(cnv.renderDir, 'xRenderStructures', st.renderStructDir),'renderStructure','-v7.3');
 else
     %% Build render matrix based on edited mosaic
     % 
@@ -96,7 +96,7 @@ else
                     renderStructure.mosaicConeInfo = mosaicConeInfo;
 
                     % Save it to the output location
-                    save(fullfile(cnv.renderDir, 'xRenderStructures', st.renderStructureName),'renderStructure','-v7.3');
+                    save(fullfile(cnv.renderDir, 'xRenderStructures', st.renderStructDir),'renderStructure','-v7.3');
                 end
             end
         end

@@ -21,7 +21,7 @@ switch stage
         st.eccVars = pr.forwardEccVars;
         st.subjectID = pr.forwardSubjectID;
         st.zernikeDataBase = pr.forwardZernikeDataBase;
-        st.renderStructureName = cnv.forwardRenderStructureName;
+        st.renderStructDir = cnv.forwardRenderStructDir;
     case "recon"
         st.pupilDiamMM = cnv.reconPupilDiamMM;
         st.aoRender = pr.reconAORender;
@@ -31,7 +31,7 @@ switch stage
         st.eccVars = pr.reconEccVars;
         st.subjectID = pr.reconSubjectID;
         st.zernikeDataBase = pr.reconZernikeDataBase;
-        st.renderStructureName = cnv.reconRenderStructureName;
+        st.renderStructDir = cnv.reconRenderStructDir;
     otherwise 
         error('Unrecognized stage')
 end
