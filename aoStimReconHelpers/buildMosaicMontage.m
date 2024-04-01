@@ -30,8 +30,8 @@ st = unpackStage(pr, cnv, stage);
 %% Axes Naming
 %
 % Adjust how variables are presented to make montage prettier
-for w = 1:length(pr.focalRegion)
-    switch pr.focalRegion(w)
+for w = 1:length(pr.focalRegionList)
+    switch pr.focalRegionList(w)
         case "center"
             regionAxesNames(w) = "Center";
         case "nearSurround"
@@ -55,22 +55,22 @@ end
 %% Build mosaic montage based on edited mosaic
 %
 % Establish dimensions of the full montage
-allRows = length(pr.stimSizeDegsList) * length(pr.focalRegion);
+allRows = length(pr.stimSizeDegsList) * length(pr.focalRegionList);
 allColms = length(pr.focalPropLList);
 viewBounds = false; %%%%%%%%%%%%%
 if pr.useCustomMosaic
-    for h = 1:length(pr.focalVariant)
+    for h = 1:length(pr.focalVariantList)
 
         theFig = figure;
         t = tiledlayout(allRows, allColms, 'TileSpacing','none');
 
 
         for i = 1:length(pr.stimSizeDegsList)
-            for j = 1:length(pr.focalRegion)
+            for j = 1:length(pr.focalRegionList)
                 for k = 1:length(pr.focalPropLList)
 
-                    [theConeMosaic, mosaicConeInfo] = setConeProportions(pr.focalRegion(j), ...
-                        pr.focalPropLList(k), pr.focalVariant(h), theConeMosaic, pr.eccXDegs, pr.eccYDegs, ...
+                    [theConeMosaic, mosaicConeInfo] = setConeProportions(pr.focalRegionList(j), ...
+                        pr.focalPropLList(k), pr.focalVariantList(h), theConeMosaic, pr.eccXDegs, pr.eccYDegs, ...
                         pr.stimSizeDegsList(i), pr.fieldSizeMinutes, pr.regionVariant, pr.propL, pr.propS);
 
                     % Plot the mosaic in the montage
@@ -111,7 +111,7 @@ if pr.useCustomMosaic
 
         % Spruce up the montage figure
         set(gcf, 'Position', [595 5 1361 972]);
-        title(t, [stageTitle ' Mosaic Montage, Variant ' num2str(pr.focalVariant)], 'FontSize', 40)
+        title(t, [stageTitle ' Mosaic Montage, Variant ' num2str(pr.focalVariantList(h))], 'FontSize', 40)
     end
 else
     disp('Not building customized mosaic montage');
