@@ -55,8 +55,8 @@ switch focalRegion
         propL = focalPropL;
         regionVariant = focalVariant;
     case 'global'
-        propL = focalPropL;
-        regionVariant = focalVariant;
+        propL = focalPropL * ones(1,3);
+        regionVariant = focalVariant * ones(1,3);
     otherwise
         error(['Unrecognized focal region entered'])
 end

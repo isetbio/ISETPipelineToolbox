@@ -3,6 +3,8 @@ function st = unpackStage(pr, cnv, stage)
 %    Unpacks the pr and cnv struct parameters specific to either the forward
 %    or recon conditions. Bypasses the need to send in a bunch of variables 
 %    at once, with the drawback that don't immediately know what gets used.
+%    Only applied to the builders, in other files manually distinguish
+%    forward from recon.
 %
 % See also: buildRenderStruct, buildMosaicMontage, aoStimReconRunMany
 %
@@ -21,7 +23,7 @@ switch stage
         st.eccVars = pr.forwardEccVars;
         st.subjectID = pr.forwardSubjectID;
         st.zernikeDataBase = pr.forwardZernikeDataBase;
-        st.renderStructDir = cnv.forwardRenderStructDir;
+        st.renderDirFull = cnv.forwardRenderDirFull;
     case "recon"
         st.pupilDiamMM = cnv.reconPupilDiamMM;
         st.aoRender = pr.reconAORender;
@@ -31,7 +33,7 @@ switch stage
         st.eccVars = pr.reconEccVars;
         st.subjectID = pr.reconSubjectID;
         st.zernikeDataBase = pr.reconZernikeDataBase;
-        st.renderStructDir = cnv.reconRenderStructDir;
+        st.renderDirFull = cnv.reconRenderDirFull;
     otherwise 
         error('Unrecognized stage')
 end
