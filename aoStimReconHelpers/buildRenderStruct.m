@@ -31,13 +31,13 @@ if ~pr.useCustomMosaic
     % Set filler mosaicConeInfo variable for now, should expand it to
     % actually return values as if mosaic was global
     mosaicConeInfo = [];
-
+    
     % Build the render structure for the base mosaic
     theConeMosaic.Display = theDisplay;
     renderMatrix = theConeMosaic.forwardRender([pr.nPixels pr.nPixels 3], ...
         true, true, 'useDoublePrecision', true);
     renderMatrix = double(renderMatrix);
-
+    
     % Push new info back into structure and save
     renderStructure.theDisplay = theDisplay;
     renderStructure.renderMatrix = renderMatrix;
@@ -50,57 +50,46 @@ if ~pr.useCustomMosaic
     renderStructure.AORender = st.aoRender;
     renderStructure.defocusDiopters = st.defocusDiopters;
     renderStructure.mosaicConeInfo = mosaicConeInfo;
-
-    % Save it to the output location 
+    
+    % Save it to the output location
     save(fullfile(st.renderDirFull, cnv.renderName),'renderStructure','-v7.3');
 else
     %% Build render matrix based on edited mosaic
-    % 
-    % Establish dimensions of the full montage
-    allRows = length(pr.stimSizeDegsList) * length(pr.focalRegionList);
-    allColms = length(pr.focalPropLList);
+    %   
+    % Build the custom mosaics using setConeProportions
+    [theConeMosaic, mosaicConeInfo] = setConeProportions(pr.focalRegion, ...
+        pr.focalPropL, pr.focalVariant, theConeMosaic, pr.eccXDegs, pr.eccYDegs, ...
+        pr.stimSizeDegs, pr.fieldSizeMinutes, pr.regionVariant, pr.propL, pr.propS);
+    
+    % Build the render structure for the custom mosaic.
+    %
+    % Note that the "forwardRender" method is a generic
+    % method that builds the render matrix for forward
+    % computations. This use of the word "forward" is
+    % separate from the distinction we make between
+    % "forward" and "recon" matrices.  A little unfortunate
+    % but we'll live with the potential confusion.
+    theConeMosaic.Display = theDisplay;
+    renderMatrix = theConeMosaic.forwardRender([pr.nPixels pr.nPixels 3], ...
+        true, true, 'useDoublePrecision', true);
+    renderMatrix = double(renderMatrix);
+    
+    % Push new info back into structure and save
+    renderStructure.theDisplay = theDisplay;
+    renderStructure.renderMatrix = renderMatrix;
+    renderStructure.theConeMosaic = theConeMosaic;
+    renderStructure.fieldSizeDegs = pr.fieldSizeMinutes / 60;
+    renderStructure.eccX = pr.eccXDegs;
+    renderStructure.eccY = pr.eccYDegs;
+    renderStructure.nPixels = pr.nPixels;
+    renderStructure.pupilDiamMM = st.pupilDiamMM;
+    renderStructure.AORender = st.aoRender;
+    renderStructure.defocusDiopters = st.defocusDiopters;
+    renderStructure.mosaicConeInfo = mosaicConeInfo;
+    
 
-    for h = 1:length(pr.focalVariantList)
-        for i = 1:length(pr.stimSizeDegsList)
-            for j = 1:length(pr.focalRegionList)
-                for k = 1:length(pr.focalPropLList)
-                    % Build the custom mosaics using setConeProportions
-                    [theConeMosaic, mosaicConeInfo] = setConeProportions(pr.focalRegionList(j), ...
-                        pr.focalPropLList(k), pr.focalVariantList(h), theConeMosaic, pr.eccXDegs, pr.eccYDegs, ...
-                        pr.stimSizeDegsList(i), pr.fieldSizeMinutes, pr.regionVariant, pr.propL, pr.propS);
-
-                    % Build the render structure for the custom mosaic.
-                    %
-                    % Note that the "forwardRender" method is a generic
-                    % method that builds the render matrix for forward
-                    % computations. This use of the word "forward" is
-                    % separate from the distinction we make between
-                    % "forward" and "recon" matrices.  A little unfortunate
-                    % but we'll live with the potential confusion.
-                    theConeMosaic.Display = theDisplay;
-                    renderMatrix = theConeMosaic.forwardRender([pr.nPixels pr.nPixels 3], ...
-                        true, true, 'useDoublePrecision', true);
-                    renderMatrix = double(renderMatrix);
-
-                    % Push new info back into structure and save
-                    renderStructure.theDisplay = theDisplay;
-                    renderStructure.renderMatrix = renderMatrix;
-                    renderStructure.theConeMosaic = theConeMosaic;
-                    renderStructure.fieldSizeDegs = pr.fieldSizeMinutes / 60;
-                    renderStructure.eccX = pr.eccXDegs;
-                    renderStructure.eccY = pr.eccYDegs;
-                    renderStructure.nPixels = pr.nPixels;
-                    renderStructure.pupilDiamMM = st.pupilDiamMM;
-                    renderStructure.AORender = st.aoRender;
-                    renderStructure.defocusDiopters = st.defocusDiopters;
-                    renderStructure.mosaicConeInfo = mosaicConeInfo;
-
-                    % Save it to the output location
-                    save(fullfile(st.renderDirFull, cnv.renderName),'renderStructure','-v7.3');
-                end
-            end
-        end
-    end
+    % Save it to the output location
+    save(fullfile(st.renderDirFull, cnv.renderName),'renderStructure','-v7.3');
 end
 end
 
