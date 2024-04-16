@@ -58,6 +58,11 @@ end
 allRows = length(pr.stimSizeDegsList) * length(pr.focalRegionList);
 allColms = length(pr.focalPropLList);
 viewBounds = false; %%%%%%%%%%%%%
+
+allConeMosaics = cell(allRows, allColms);
+allMosaicsConeInfo = cell(allRows, allColms);
+allRenderNames = cell(allRows, allColms);
+
 if pr.useCustomMosaic
     for h = 1:length(pr.focalVariantList)
 
@@ -72,6 +77,11 @@ if pr.useCustomMosaic
                     [theConeMosaic, mosaicConeInfo] = setConeProportions(pr.focalRegionList(j), ...
                         pr.focalPropLList(k), pr.focalVariantList(h), theConeMosaic, pr.eccXDegs, pr.eccYDegs, ...
                         pr.stimSizeDegsList(i), pr.fieldSizeMinutes, pr.regionVariant, pr.propL, pr.propS);
+
+                    rowPlace = j + (length(pr.stimSizeDegsList) * (i - 1));
+                    allConeMosaics{rowPlace,k} = theConeMosaic;
+                    allMosaicsConeInfo{rowPlace,k} = mosaicConeInfo;
+                    allRenderNames{rowPlace,k} = fullfile(st.renderDirFull, cnv.renderName);
 
                     % Plot the mosaic in the montage
                     theAxes = nexttile;
@@ -112,6 +122,31 @@ if pr.useCustomMosaic
         % Spruce up the montage figure
         set(gcf, 'Position', [595 5 1361 972]);
         title(t, [stageTitle ' Mosaic Montage, Variant ' num2str(pr.focalVariantList(h))], 'FontSize', 40)
+        
+        % Start creating the output file name
+        outputName = ['variant', int2str(pr.focalVariantList(h), '_version')];
+      
+        % Track the history of any montages already run and cached, then
+        % add one to the current output file. This approach avoids
+        % overwriting output results. This needs to be fixed to say +1 to
+        % existing version and not +1 to the counter, otherwise will crash
+        % down the line. 
+        versionHistory = dir(fullfile(st.montageDirFull, outputName));
+        currentVersion = 1;
+        for vh = 1:length(versionHistory)
+            storedNames = versionHistory(vh).name;
+            if contains(storedNames, outputName)
+                currentVersion = currentVersion + 1;
+            end
+        end
+        
+        saveas(gcf, fullfile(st.montageDirFull, ...
+            [outputName int2str(currentVersion) '.tiff']), 'tiff');
+
+        save(fullfile(st.montageDirFull, ...
+            [outputName int2str(currentVersion) '.mat']), ...
+            "allConeMosaics", "allMosaicsConeInfo", "allRenderNames");
+
     end
 else
     disp('Not building customized mosaic montage');
