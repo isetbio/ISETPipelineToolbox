@@ -103,6 +103,10 @@ for i = 1:length(regionWidths)
     % Convert the desired S percentage to a number of cones and
     % apply this number to the mosaic regions. Assign the random generator
     % to ensure consistency and ID unused remaining cones
+    %
+    %%% Note right here is where we would implement the logic to avoid
+    %%% cones being too close together, either some exclusion region or
+    %%% some concrete number threshold. 
     randState = rng(regionVariant(i));
     newSAmount = round(length(regionCones) * propS(i));
     newSMosaicInd = randsample(regionCones, newSAmount)';

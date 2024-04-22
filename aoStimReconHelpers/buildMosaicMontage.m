@@ -126,31 +126,12 @@ if pr.useCustomMosaic
             ['  ']}, ...
             'FontSize', 36)
         
-        % Start creating the output file name
-        outputName = ['variant', int2str(pr.focalVariantList(h)), '_version'];
-      
-        % Track the history of any montages already run and cached, then
-        % add one to the current output file. This approach avoids
-        % overwriting output results. Need to update again, make it such
-        % that there is a max feature and maybe a name tag associated with
-        % it. 
-        versionHistory = dir(fullfile(st.montageDirFull));
-        currentVersion = 1;
-        for vh = 1:length(versionHistory)
-            storedNames = versionHistory(vh).name;
-            if contains(storedNames, outputName)
-                startPoint = strfind(storedNames, 'version') + length('version'); 
-                endPoint = strfind(storedNames, '.') - 1;
-                storedVersion = str2double(storedNames(startPoint:endPoint));
-                currentVersion = storedVersion + 1;
-            end
-        end
-        
+        % Start creating the output file name and save
+        outputName = ['variant', int2str(pr.focalVariantList(h))];
         saveas(gcf, fullfile(st.montageDirFull, ...
-            [outputName int2str(currentVersion) '.tiff']), 'tiff');
-
+            [outputName '.tiff']), 'tiff');
         save(fullfile(st.montageDirFull, ...
-            [outputName int2str(currentVersion) '.mat']), ...
+            [outputName '.mat']), ...
             "allConeMosaics", "allMosaicsConeInfo", "allRenderNames");
 
     end

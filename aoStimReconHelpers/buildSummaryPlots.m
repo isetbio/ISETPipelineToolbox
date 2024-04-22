@@ -9,7 +9,8 @@ function buildSummaryPlots(pr, cnv, pp, numStim, numProp)
 % just keep the largest one (most recent).
 
 %% Retrieve the pertinent information cached from aoStimRecon
-load(fullfile(cnv.outputDirFull,'xRunOutput.mat'), "stimInfo", "reconInfo");
+load(fullfile(cnv.outputDirFull,'xRunOutput.mat'), "stimInfo", "reconInfo", ...
+    "forwardConeMosaic", "reconConeMosaic");
 
 %% Variant Summaries
 %
@@ -25,15 +26,18 @@ stimIndex(stimIndex == 0) = 9;
 % loading of the stored mosaic and info without the render struct, ideally
 % should be much faster. Should only need to use forward since the mosaic
 % is the same for both conditions. 
-testing = dir(cnv.forwardMontageDirFull);
-for i = 1:length(testing)
-    if strcmp(testing(i).name, '.mat')
-        load(fullfile(cnv.forwardMontageDirFull, testing(i).name), 'file')
-    else
-        error('No information stored')
-    end
-end
-if (~exist(fullfile(cnv.forwardMontageDirFull, cnv.renderName),'file'))
+% testing = dir(cnv.forwardMontageDirFull);
+% for i = 1:length(testing)
+%     if strcmp(testing(i).name, '.mat')
+%         load(fullfile(cnv.forwardMontageDirFull, testing(i).name), 'file')
+%     else
+%         error('No information stored')
+%     end
+% end
+
+if sum(contains(who, 'forwardConeMosaic'))
+    % Just use that value
+elseif (~exist(fullfile(cnv.forwardMontageDirFull, cnv.renderName),'file'))
     error('Forward render strucure not cached')
 else
     clear forwardRenderStructure;
