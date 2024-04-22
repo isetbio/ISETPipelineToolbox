@@ -23,8 +23,9 @@ stimIndex(stimIndex == 0) = 9;
 
 % Grab foward cone mosaic and render matrix NOTE: Replace this with the
 % loading of the stored mosaic and info without the render struct, ideally
-% should be much faster. 
-if (~exist(fullfile(cnv.forwardRenderDirFull, cnv.renderName),'file'))
+% should be much faster. Should only need to use forward since the mosaic
+% is the same for both conditions. 
+if (~exist(fullfile(cnv.forwardMontageDirFull, cnv.renderName),'file'))
     error('Forward render strucure not cached')
 else
     clear forwardRenderStructure;

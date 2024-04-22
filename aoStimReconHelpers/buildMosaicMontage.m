@@ -121,22 +121,28 @@ if pr.useCustomMosaic
 
         % Spruce up the montage figure
         set(gcf, 'Position', [595 5 1361 972]);
-        title(t, [stageTitle ' Mosaic Montage, Variant ' num2str(pr.focalVariantList(h))], 'FontSize', 40)
+        title(t, {[char(stageTitle) ' Mosaic Montage'] ...
+            ['Variant ' char(num2str(pr.focalVariantList(h)))] ...
+            ['  ']}, ...
+            'FontSize', 36)
         
         % Start creating the output file name
-        outputName = ['variant', int2str(pr.focalVariantList(h), '_version')];
+        outputName = ['variant', int2str(pr.focalVariantList(h)), '_version'];
       
         % Track the history of any montages already run and cached, then
         % add one to the current output file. This approach avoids
-        % overwriting output results. This needs to be fixed to say +1 to
-        % existing version and not +1 to the counter, otherwise will crash
-        % down the line. 
-        versionHistory = dir(fullfile(st.montageDirFull, outputName));
+        % overwriting output results. Need to update again, make it such
+        % that there is a max feature and maybe a name tag associated with
+        % it. 
+        versionHistory = dir(fullfile(st.montageDirFull));
         currentVersion = 1;
         for vh = 1:length(versionHistory)
             storedNames = versionHistory(vh).name;
             if contains(storedNames, outputName)
-                currentVersion = currentVersion + 1;
+                startPoint = strfind(storedNames, 'version') + length('version'); 
+                endPoint = strfind(storedNames, '.') - 1;
+                storedVersion = str2double(storedNames(startPoint:endPoint));
+                currentVersion = storedVersion + 1;
             end
         end
         
