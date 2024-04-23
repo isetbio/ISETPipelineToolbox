@@ -105,7 +105,7 @@ classdef ConeResponse < handle
             wvfPNoLca = wvfCompute(wvfP,'humanlca',false);
             
             % Optics object
-            oiDiffLmt = wvf2oi(wvfPNoLca);
+            oiDiffLmt = wvf2oi(wvfPNoLca,'humanlens',true);
             opticsNoLca = oiGet(oiDiffLmt, 'optics');
             opticsNoLca = opticsSet(opticsNoLca, 'model', 'shift invariant');
             opticsNoLca = opticsSet(opticsNoLca, 'name', 'human-wvf-nolca');
@@ -134,7 +134,7 @@ classdef ConeResponse < handle
             wvfPNoLca = wvfCompute(wvfP,'humanlca',false);
             
             % Optics object
-            psfDiffLmt = wvf2oi(wvfPNoLca);
+            psfDiffLmt = wvf2oi(wvfPNoLca,'humanlens',true);
             opticsNoLca = oiGet(psfDiffLmt, 'optics');
             opticsNoLca = opticsSet(opticsNoLca, 'model', 'shift invariant');
             opticsNoLca = opticsSet(opticsNoLca, 'name', 'human-wvf-nolca');

@@ -123,7 +123,7 @@ classdef ConeResponseCmosaic < ConeResponse
             stimulusScene = sceneSet(stimulusScene, 'fov', this.FovealDegree);
             
             % optics
-            theOI = oiCompute(stimulusScene, this.PSF);
+            theOI = oiCompute(this.PSF, stimulusScene);
             this.LastOI = theOI;
             
             % compute cone response
@@ -133,7 +133,7 @@ classdef ConeResponseCmosaic < ConeResponse
         end
         
         function allCone = computeWithScene(this, inputScene)
-            opticalImage = oiCompute(inputScene, this.PSF);
+            opticalImage = oiCompute(this.PSF, inputScene);
             
             % compute cone response
             this.LastOI = opticalImage;
