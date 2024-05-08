@@ -22,8 +22,7 @@ parse(p, varargin{:});
 
 %% Retrieve Recon Info
 %
-% Initiate directory names to descend levels for plotting. Also set the
-% start point to be some default system value, for macs = 4.
+% Initiate directory names to descend levels for plotting.
 generalDir = fullfile(pr.aoReconDir, pr.versEditor, cnv.generalConditions, ...
     cnv.outputDirFirst);
 generalSubDir = dir(generalDir);

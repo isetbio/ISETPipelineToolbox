@@ -110,7 +110,7 @@ for i = 1:length(regionWidths)
     % are spaced.%%%
     randomSLocations = false;
     linearDistancePerSConeFactor = 1;
-    linearDistanceIncrement = 0.05;
+    linearDistanceDecrement = 0.05;
     runCounter = 0;
 
     if (randomSLocations | ~isempty(innerCones))
@@ -135,11 +135,11 @@ for i = 1:length(regionWidths)
             
             % The only absolute sanity check here, if hit hard lower limit
             % on distance between S cones. 
-            if linearDistanceIncrement <= 0
+            if linearDistanceDecrement <= 0
                 error('Cannot scale interval any smaller, unable to satisfy S Cones');
             end
 
-            adjustedLinearFactor = linearDistancePerSConeFactor - (linearDistanceIncrement * runCounter);
+            adjustedLinearFactor = linearDistancePerSConeFactor - (linearDistanceDecrement * runCounter);
             linearDistancePerSCone = adjustedLinearFactor * sqrt(regionAreaPerSCone);
 
             % Choose S cones
