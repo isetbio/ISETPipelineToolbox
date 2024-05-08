@@ -37,7 +37,7 @@ xBounds(1,:) = [eccXDegs eccXDegs];
 yBounds(1,:) = [eccYDegs eccYDegs];
 
 %% Adjust focal region
-% Override default values with desired region proportion and variant 
+% Override default values with desired region proportion and variant
 switch focalRegion
     case 'center'
         propL(1) = focalPropL;
@@ -103,13 +103,114 @@ for i = 1:length(regionWidths)
     % Convert the desired S percentage to a number of cones and
     % apply this number to the mosaic regions. Assign the random generator
     % to ensure consistency and ID unused remaining cones
-    %
-    %%% Note right here is where we would implement the logic to avoid
-    %%% cones being too close together, either some exclusion region or
-    %%% some concrete number threshold. 
     randState = rng(regionVariant(i));
     newSAmount = round(length(regionCones) * propS(i));
-    newSMosaicInd = randsample(regionCones, newSAmount)';
+
+    % Set the S cones, either randomly or using a method that ensures they
+    % are spaced.%%%
+    randomSLocations = false;
+    linearDistancePerSConeFactor = 1;
+    linearDistanceIncrement = 0.05;
+    runCounter = 0;
+
+    if (randomSLocations | ~isempty(innerCones))
+        newSMosaicInd = randsample(regionCones, newSAmount)';
+    else
+        % We will enforce a minimum spacing between the S cones that we
+        % select.  The trick is to choose a spacing that is large enough so
+        % that the S cones are reasonably spaced, but not so large that it
+        % cannot be achieved.  This will depend both on the size of the
+        % region and the number of S cones.
+
+        % Get region size and set minimum distance.  As part of this, apply
+        % a scaling factor down from the theoretically obtained minimum
+        % distnace to account for practicalities that are hard to handle
+        % analytically.
+        xDelta = (xBounds(i+1,2)-xBounds(i+1,1));
+        yDelta = (yBounds(i+1,2)-yBounds(i+1,1));
+        regionArea = xDelta*yDelta;
+        regionAreaPerSCone = regionArea/newSAmount;
+
+        while runCounter >= 0
+            
+            % The only absolute sanity check here, if hit hard lower limit
+            % on distance between S cones. 
+            if linearDistanceIncrement <= 0
+                error('Cannot scale interval any smaller, unable to satisfy S Cones');
+            end
+
+            adjustedLinearFactor = linearDistancePerSConeFactor - (linearDistanceIncrement * runCounter);
+            linearDistancePerSCone = adjustedLinearFactor * sqrt(regionAreaPerSCone);
+
+            % Choose S cones
+            %
+            % Initialize by choosing an S cone at random.
+            SConePool = regionCones;
+            newSMosaicInd = randsample(SConePool,1);
+
+            % Get the remaining S cones
+            for ss = 1:newSAmount-1
+                % First remove from pool any cones that are not far enough away
+                % from the last one we picked.  This will also get rid of the
+                % one we just picked, since it's distance from itself is 0.  We
+                % only need to do this removal once for each S cone we pick,
+                % since all the remaining cones are guaranteed not to be too
+                % close to that one.
+                %
+                % Start by getting location of the S cone we just picked.
+                currSConeXLocation = theConeMosaic.Mosaic.coneRFpositionsDegs(newSMosaicInd(ss),1);
+                currSConeYLocation = theConeMosaic.Mosaic.coneRFpositionsDegs(newSMosaicInd(ss),2);
+
+                % Create a new pool to draw from, which is those in the current
+                % pool except for those too close to the one we just picked.
+                SConePoolNew = []; SConeNewIndex = 1;
+                for pp = 1:length(SConePool)
+                    % Get location of each cone in the pool, and distance to
+                    % the S cone whose neighbors we are excluding.
+                    poolSConeXLocation = theConeMosaic.Mosaic.coneRFpositionsDegs(SConePool(pp),1);
+                    poolSConeYLocation = theConeMosaic.Mosaic.coneRFpositionsDegs(SConePool(pp),2);
+                    checkLinearDistance = sqrt((currSConeXLocation-poolSConeXLocation)^2 + (currSConeYLocation-poolSConeYLocation)^2);
+
+                    % If the cone is far enough away, add it to the pool we're
+                    % building up.
+                    if (checkLinearDistance >= linearDistancePerSCone)
+                        SConePoolNew(SConeNewIndex) = SConePool(pp);
+                        SConeNewIndex = SConeNewIndex + 1;
+                    end
+                end
+
+                % Update the pool with the new one we just set up.     
+                sharedSCones = ismember(SConePool, SConePoolNew);
+                SConePool = SConePool(sharedSCones);
+
+                % Put some arbitrary integer that has no risk of being
+                % called as a placeholder. Will flag below, but this method
+                % gives the system a chance to course correct instead of
+                % crashing with an error. 
+                if (isempty(SConePool) || length(SConePool) == 1)
+                    SConePool = 1; 
+                end
+
+                % Pick the S cone randomly from our acceptable choices, and
+                % then return to the top of the loop to continue until done.
+                newSMosaicInd(ss+1) = randsample(SConePool,1);
+            end
+
+            % If recognize the arbitrary flag above, should also be the
+            % case that the number of selected S cones does not match the
+            % desired cone, since the arbitrary index is well outside
+            % center range. If so, run again, otherwise end the loop. 
+            targetRegionS = sum(ismember(newSMosaicInd, regionCones));
+            if SConePool == 1 & targetRegionS ~= newSAmount
+                runCounter = runCounter + 1; 
+            elseif targetRegionS == newSAmount
+                runCounter = -1;
+            end
+        end
+    end
+
+
+    % Figure out which cones can be L or M
     conesRemaining = regionCones(~ismember(regionCones, newSMosaicInd));
 
     % With the remaining cones, assign the desired L percentage, again
@@ -138,7 +239,7 @@ for i = 1:length(regionWidths)
     mosaicConeInfo.targetPropsM(i) = 1 - propL(i) - propS(i);
     mosaicConeInfo.targetPropsS(i) = propS(i);
 
-    mosaicConeInfo.regionVariant(i) = regionVariant(i); 
+    mosaicConeInfo.regionVariant(i) = regionVariant(i);
     mosaicConeInfo.regionWidths(i) = regionWidths(i) * 60;
     mosaicConeInfo.numTotal(i) = length(regionCones);
 
@@ -156,7 +257,7 @@ for i = 1:length(regionWidths)
 end
 
 % Save the boundary information as well
-mosaicConeInfo.xBounds = xBounds; 
+mosaicConeInfo.xBounds = xBounds;
 mosaicConeInfo.yBounds = yBounds;
 
 %% Visualize mosaic
@@ -167,4 +268,15 @@ if p.Results.viewMosaic
         rectangle('Position', [xBounds(w,1) yBounds(w,1) (xBounds(w,2) - xBounds(w,1)) (yBounds(w,2) - yBounds(w,1))], 'LineWidth', 3)
     end
 end
+
+% visualizeIndices = false;
+% if visualizeIndices
+%     theConeMosaic.visualizeMosaic()
+%     for i=1:length(theConeMosaic.Mosaic.coneTypes)
+%         txt = int2str(i);
+%         t = text((theConeMosaic.Mosaic.coneRFpositionsDegs(i,1)-0.005), theConeMosaic.Mosaic.coneRFpositionsDegs(i,2),txt);
+%         t.FontSize=11;
+%         hold on
+%     end
+% end
 end
