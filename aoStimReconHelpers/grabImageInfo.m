@@ -1,4 +1,4 @@
-function [stimSummary, reconSummary] = grabImageInfo(pr, cnv, rrf, numStim, varargin)
+function [stimSummary, reconSummary] = grabImageInfo(pr, cnv, numStim, varargin)
 % Grab image information for further processing
 %
 % Description:
@@ -19,6 +19,8 @@ p.addParameter('scaleToMax', false, @islogical);
 p.addParameter('wls', (400:1:700)', @isnumeric);
 parse(p, varargin{:});
 
+close all; 
+
 %% Retrieve Recon Info
 %
 % Initiate directory names to descend levels for plotting.
@@ -33,6 +35,10 @@ infoCounter = 1;
 % in starting position when going down the loop. Another approach to
 % consider would be to ID the subdirectories with names that match the
 % desired format (i.e. stimColor) but this seems to do the job.
+if isempty(generalSubDir)
+    error(['No output information stored at desired directory: ', generalDir])
+end
+
 subDirNames = extractfield(generalSubDir, 'name');
 subDirNamesFullString = cell2mat(subDirNames);
 if contains(subDirNamesFullString, '.DS_Store')
@@ -82,7 +88,7 @@ else
     end
 
     % Specify variables depending on the viewing display
-    switch (rrf.viewingDisplayName)
+    switch (pr.viewingDisplayName)
         case 'conventional'
             viewingDisplayFieldName = 'CRT12BitDisplay';
             viewingOverwriteDisplayGamma = false;
@@ -96,7 +102,7 @@ else
     % Load in the display information
     aoReconDir = getpref('ISETImagePipeline','aoReconDir');
     viewingDisplayLoad = load(fullfile(aoReconDir, ...
-        'displays', [rrf.viewingDisplayName 'Display.mat']));
+        'displays', [pr.viewingDisplayName 'Display.mat']));
     eval(['viewingDisplay = viewingDisplayLoad.' viewingDisplayFieldName ';']);
     clear viewingDisplayLoad
 

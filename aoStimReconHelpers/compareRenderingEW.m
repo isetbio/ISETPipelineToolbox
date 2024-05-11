@@ -166,7 +166,9 @@ if p.Results.showFigs
     end
 end
 
-% Store a version of the RGB image that was rendered across displays
+% Store a version of the RGB image that was rendered across displays, and
+% store the information for proper center
 imageInfo.imageRGBAcrossDisplays = imageRGBAcrossDisplays;
+imageInfo.idxXRangeCenter = idxXRangeCenter;
 
 end
