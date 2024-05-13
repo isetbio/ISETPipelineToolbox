@@ -169,6 +169,6 @@ end
 % Store a version of the RGB image that was rendered across displays, and
 % store the information for proper center
 imageInfo.imageRGBAcrossDisplays = imageRGBAcrossDisplays;
+imageInfo.idxXRange = idxXRange; 
 imageInfo.idxXRangeCenter = idxXRangeCenter;
-
 end

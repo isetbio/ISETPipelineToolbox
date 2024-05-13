@@ -58,12 +58,15 @@ if ~p.Results.figReconRows
             % Load the ouptut file to get the stim and recon images, store
             % this information for future use
             load(fullfile(generalDir, generalSubDir(i).name, ...
-                'xRunOutput.mat'), "stimInfo", "reconInfo");
+                'xRunOutput.mat'), "stimInfo", "reconInfo", ...
+                "idxXRange");
 
-            % Place the pertinent info into a cell for ease of access,
-            % important to note in the absence of field names that index
-            % one is the stimulus information and index two is the recon
-            % information! 
+            % Include information on just the stim location for figures.
+            % Operates under the assumption that stimuli are squares. 
+            stimInfo.idxXRange = idxXRange;
+            reconInfo.idxXRange = idxXRange;
+
+            % Place the pertinent info into a cell for ease of access
             stimSummary(infoCounter) = {stimInfo};
             reconSummary(infoCounter) = {reconInfo};
             infoCounter = infoCounter + 1;
@@ -140,7 +143,13 @@ else
             % Load the ouptut file to get the stim and recon images, store
             % this information for future use
             load(fullfile(generalDir, generalSubDir(i).name, ...
-                'xRunOutput.mat'), "stimInfo", "reconInfo");
+                'xRunOutput.mat'), "stimInfo", "reconInfo", ...
+                "idxXRange");
+            
+            % Include information on just the stim location for figures
+            % Operates under the assumption that stimuli are squares. 
+            stimInfo.idxXRange = idxXRange; 
+            reconInfo.idxXRange = idxXRange;
 
             % Place the pertinent info into a cell for ease of access
             stimSummary(infoCounter) = {stimInfo};

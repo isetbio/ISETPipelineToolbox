@@ -20,6 +20,8 @@ p.addParameter('viewMosaic', false, @islogical);
 p.addParameter('annulusWidthArc', 2, @isnumeric);
 p.addParameter('stimCenter', true, @islogical)
 p.addParameter('centerSizeDegs', [], @isnumeric);
+p.addParameter('randomSLocations', false, @islogical);
+p.addParameter('linearDistanceDecrement', 0.05, @isnumeric);
 parse(p, varargin{:});
 
 %% Initialize variables
@@ -108,12 +110,10 @@ for i = 1:length(regionWidths)
 
     % Set the S cones, either randomly or using a method that ensures they
     % are spaced.%%%
-    randomSLocations = false;
     linearDistancePerSConeFactor = 1;
-    linearDistanceDecrement = 0.05;
     runCounter = 0;
 
-    if (randomSLocations | ~isempty(innerCones))
+    if (p.Results.randomSLocations | ~isempty(innerCones))
         newSMosaicInd = randsample(regionCones, newSAmount)';
     else
         % We will enforce a minimum spacing between the S cones that we
@@ -135,11 +135,11 @@ for i = 1:length(regionWidths)
             
             % The only absolute sanity check here, if hit hard lower limit
             % on distance between S cones. 
-            if linearDistanceDecrement <= 0
+            if p.Results.linearDistanceDecrement <= 0
                 error('Cannot scale interval any smaller, unable to satisfy S Cones');
             end
 
-            adjustedLinearFactor = linearDistancePerSConeFactor - (linearDistanceDecrement * runCounter);
+            adjustedLinearFactor = linearDistancePerSConeFactor - (p.Results.linearDistanceDecrement * runCounter);
             linearDistancePerSCone = adjustedLinearFactor * sqrt(regionAreaPerSCone);
 
             % Choose S cones

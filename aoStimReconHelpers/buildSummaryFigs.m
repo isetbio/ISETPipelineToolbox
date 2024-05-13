@@ -18,7 +18,7 @@ p = inputParser;
 p.addParameter('figReconRows', false, @islogical);
 p.addParameter('scaleToMax', false, @islogical);
 p.addParameter('wls', (400:1:700)', @isnumeric);
-p.addParameter('zoomToCenter', false, @islogical);
+p.addParameter('zoomToStim', false, @islogical);
 parse(p, varargin{:});
 
 close all; 
