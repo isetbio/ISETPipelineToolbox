@@ -21,7 +21,7 @@ p.addParameter('wls', (400:1:700)', @isnumeric);
 p.addParameter('zoomToStim', false, @islogical);
 parse(p, varargin{:});
 
-close all; 
+close all;
 
 %% Retrieve Recon Info
 %
@@ -87,33 +87,51 @@ tileIndexCounter = 1;
 fullSummary = [stimSummary; fullReconSummary];
 for j = 1:size(fullSummary, 2)
     for i = 1:size(fullSummary, 1)
-
+        
         theAxes = nexttile(tileIndices(tileIndexCounter));
-
+        
         if p.Results.scaleToMax
             scaleString = "Scaled";
             meanLuminanceCdPerM2 = [];
             [~, ~, imageLinear] = sceneFromFile( ...
                 fullSummary{i,j}.imageRGBAcrossDisplays, 'rgb', ...
                 meanLuminanceCdPerM2, theConeMosaic.Display);
-
+            
             % Determine the scale actor based on entries in the first
             % row i.e.
             if i == 1
                 scaleFactor = 1/max(imageLinear(:));
-
+                
             end
-
+            
             imageLinearScaled = imageLinear * scaleFactor;
             imageLinearScaled(imageLinearScaled > 1) = 1;
             imageRGBScaled = gammaCorrection( ...
                 imageLinearScaled, viewingDisplay);
-            imshow(imageRGBScaled)
+            
+            if p.Results.zoomToStim
+                zoomString = "Stim";
+                imshow(imageRGBScaled(fullSummary{i,j}.idxXRange, ...
+                    fullSummary{i,j}.idxXRange,:))
+            else
+                zoomString = "Full";
+                imshow(imageRGBScaled)
+            end
+            
         else
             scaleString = "Unscaled";
-            imshow(fullSummary{i,j}.imageRGBAcrossDisplays)
+            if p.Results.zoomToStim
+                zoomString = "Stim";
+                imshow(fullSummary{i,j}.imageRGBAcrossDisplays ...
+                    (fullSummary{i,j}.idxXRange, ...
+                    fullSummary{i,j}.idxXRange,:))
+            else
+                zoomString = "Full";
+                imshow(fullSummary{i,j}.imageRGBAcrossDisplays)
+            end
+            
         end
-
+        
         if j == 1 & i == 1
             set(gca, 'xticklabel', [], 'yticklabel', []);
             ylabel('Stim', 'FontSize',20)
@@ -121,16 +139,16 @@ for j = 1:size(fullSummary, 2)
             set(gca, 'xticklabel', [], 'yticklabel', []);
             ylabel(sprintf('%0.2fL', pr.focalPropLList(i-1)), 'FontSize',15)
         end
-
+        
         tileIndexCounter = tileIndexCounter + 1;
     end
 end
 
 % Spruce up the figure and save if that's the goal
 set(gcf, 'Position', [1023 7 653 970]);
-sgtitle({sprintf('Summary Montage %s', ...
-    scaleString)}, 'FontSize', 25);
+sgtitle({sprintf('Summary Montage %s %s %dArcmin', ...
+    scaleString, zoomString, (60*pr.stimSizeDegs))}, 'FontSize', 25);
 saveas(gcf, fullfile(generalDir, ...
-    sprintf('summaryMontage%s.tiff', scaleString)),'tiff')
+    sprintf('summaryMontage%s%s.tiff', scaleString, zoomString)),'tiff')
 
 end
