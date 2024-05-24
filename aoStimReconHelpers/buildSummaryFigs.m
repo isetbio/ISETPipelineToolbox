@@ -110,7 +110,7 @@ for j = 1:size(fullSummary, 2)
                 imageLinearScaled, viewingDisplay);
             
             if p.Results.zoomToStim
-                zoomString = "Stim";
+                zoomString = "Zoom";
                 imshow(imageRGBScaled(fullSummary{i,j}.idxXRange, ...
                     fullSummary{i,j}.idxXRange,:))
             else
@@ -121,7 +121,7 @@ for j = 1:size(fullSummary, 2)
         else
             scaleString = "Unscaled";
             if p.Results.zoomToStim
-                zoomString = "Stim";
+                zoomString = "Zoom";
                 imshow(fullSummary{i,j}.imageRGBAcrossDisplays ...
                     (fullSummary{i,j}.idxXRange, ...
                     fullSummary{i,j}.idxXRange,:))
@@ -146,9 +146,9 @@ end
 
 % Spruce up the figure and save if that's the goal
 set(gcf, 'Position', [1023 7 653 970]);
-sgtitle({sprintf('Summary Montage %s %s %dArcmin', ...
+sgtitle({sprintf('Summary Montage %s %s %0.1fArcmin', ...
     scaleString, zoomString, (60*pr.stimSizeDegs))}, 'FontSize', 25);
-saveas(gcf, fullfile(generalDir, ...
+saveas(gcf, fullfile(generalDir, cnv.outputDirSecond, ...
     sprintf('summaryMontage%s%s.tiff', scaleString, zoomString)),'tiff')
 
 end

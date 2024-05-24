@@ -28,14 +28,10 @@ elseif classChoice == 0
     return
 end
 
-global allDone; global bookKeep;
+global allDone;
 allDone = input('All done? ');
-
 
 if allDone
     thisFig = get(gcf, "Number");
     close(figure(thisFig))
-    bookKeep(1) = {theConeMosaic.Mosaic.lConeIndices'};
-    bookKeep(2) = {theConeMosaic.Mosaic.mConeIndices'};
-    bookKeep(3) = {theConeMosaic.Mosaic.sConeIndices'};
 end
