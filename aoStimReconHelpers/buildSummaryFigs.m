@@ -81,7 +81,7 @@ viewingDisplay = displaySet(viewingDisplay,'spd primaries', ...
 
 %% Make the recon image montage
 
-testing = false;
+testing = true;
 
 if testing
     
