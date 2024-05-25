@@ -19,6 +19,7 @@ p.addParameter('figReconRows', false, @islogical);
 p.addParameter('scaleToMax', false, @islogical);
 p.addParameter('wls', (400:1:700)', @isnumeric);
 p.addParameter('zoomToStim', false, @islogical);
+p.addParameter('centermostEW', false, @islogical);
 parse(p, varargin{:});
 
 close all;
@@ -78,77 +79,138 @@ viewingDisplay = displaySet(viewingDisplay,'wave',p.Results.wls);
 viewingDisplay = displaySet(viewingDisplay,'spd primaries', ...
     displayGet(viewingDisplay,'spd primaries')*viewingDisplayScaleFactor);
 
-% Establish the tiledlayout figure and proper dimenensions
-theFig = figure();
-t = tiledlayout((numProp+1),numStim, 'TileSpacing','none');
-tileIndices = reshape(1:(numStim*(numProp+1)), numStim, (numProp+1))';
-tileIndexCounter = 1;
+%% Make the recon image montage
 
-fullSummary = [stimSummary; fullReconSummary];
-for j = 1:size(fullSummary, 2)
-    for i = 1:size(fullSummary, 1)
-        
-        theAxes = nexttile(tileIndices(tileIndexCounter));
-        
-        if p.Results.scaleToMax
-            scaleString = "Scaled";
-            meanLuminanceCdPerM2 = [];
-            [~, ~, imageLinear] = sceneFromFile( ...
-                fullSummary{i,j}.imageRGBAcrossDisplays, 'rgb', ...
-                meanLuminanceCdPerM2, theConeMosaic.Display);
+testing = false;
+
+if testing
+    
+    % Establish the tiledlayout figure and proper dimenensions
+    theFig = figure();
+    t = tiledlayout((numProp+1),numStim, 'TileSpacing','none');
+    tileIndices = reshape(1:(numStim*(numProp+1)), numStim, (numProp+1))';
+    tileIndexCounter = 1;
+    
+    fullSummary = [stimSummary; fullReconSummary];
+    for j = 1:size(fullSummary, 2)
+        for i = 1:size(fullSummary, 1)
             
-            % Determine the scale actor based on entries in the first
-            % row i.e.
-            if i == 1
-                scaleFactor = 1/max(imageLinear(:));
+            theAxes = nexttile(tileIndices(tileIndexCounter));
+            
+            if p.Results.scaleToMax
+                scaleString = "Scaled";
+                meanLuminanceCdPerM2 = [];
+                [~, ~, imageLinear] = sceneFromFile( ...
+                    fullSummary{i,j}.imageRGBAcrossDisplays, 'rgb', ...
+                    meanLuminanceCdPerM2, theConeMosaic.Display);
+                
+                % Determine the scale actor based on entries in the first
+                % row i.e.
+                if i == 1
+                    scaleFactor = 1/max(imageLinear(:));
+                    
+                end
+                
+                imageLinearScaled = imageLinear * scaleFactor;
+                imageLinearScaled(imageLinearScaled > 1) = 1;
+                imageRGBScaled = gammaCorrection( ...
+                    imageLinearScaled, viewingDisplay);
+                
+                if p.Results.zoomToStim
+                    zoomString = "Zoom";
+                    imshow(imageRGBScaled(fullSummary{i,j}.idxXRange, ...
+                        fullSummary{i,j}.idxXRange,:))
+                else
+                    zoomString = "Full";
+                    imshow(imageRGBScaled)
+                end
+                
+            else
+                scaleString = "Unscaled";
+                if p.Results.zoomToStim
+                    zoomString = "Zoom";
+                    imshow(fullSummary{i,j}.imageRGBAcrossDisplays ...
+                        (fullSummary{i,j}.idxXRange, ...
+                        fullSummary{i,j}.idxXRange,:))
+                else
+                    zoomString = "Full";
+                    imshow(fullSummary{i,j}.imageRGBAcrossDisplays)
+                end
                 
             end
             
-            imageLinearScaled = imageLinear * scaleFactor;
-            imageLinearScaled(imageLinearScaled > 1) = 1;
-            imageRGBScaled = gammaCorrection( ...
-                imageLinearScaled, viewingDisplay);
-            
-            if p.Results.zoomToStim
-                zoomString = "Zoom";
-                imshow(imageRGBScaled(fullSummary{i,j}.idxXRange, ...
-                    fullSummary{i,j}.idxXRange,:))
-            else
-                zoomString = "Full";
-                imshow(imageRGBScaled)
+            if j == 1 & i == 1
+                set(gca, 'xticklabel', [], 'yticklabel', []);
+                ylabel('Stim', 'FontSize',20)
+            elseif j ==1
+                set(gca, 'xticklabel', [], 'yticklabel', []);
+                ylabel(sprintf('%0.2fL', pr.focalPropLList(i-1)), 'FontSize',15)
             end
             
-        else
-            scaleString = "Unscaled";
-            if p.Results.zoomToStim
-                zoomString = "Zoom";
-                imshow(fullSummary{i,j}.imageRGBAcrossDisplays ...
-                    (fullSummary{i,j}.idxXRange, ...
-                    fullSummary{i,j}.idxXRange,:))
-            else
-                zoomString = "Full";
-                imshow(fullSummary{i,j}.imageRGBAcrossDisplays)
-            end
-            
+            tileIndexCounter = tileIndexCounter + 1;
         end
-        
-        if j == 1 & i == 1
-            set(gca, 'xticklabel', [], 'yticklabel', []);
-            ylabel('Stim', 'FontSize',20)
-        elseif j ==1
-            set(gca, 'xticklabel', [], 'yticklabel', []);
-            ylabel(sprintf('%0.2fL', pr.focalPropLList(i-1)), 'FontSize',15)
-        end
-        
-        tileIndexCounter = tileIndexCounter + 1;
     end
+    
+    % Spruce up the figure and save if that's the goal
+    set(gcf, 'Position', [1023 7 653 970]);
+    sgtitle({sprintf('Summary Montage %s %s %0.1fArcmin', ...
+        scaleString, zoomString, (60*pr.stimSizeDegs))}, 'FontSize', 25);
+    saveas(gcf, fullfile(generalDir, cnv.outputDirSecond, ...
+        sprintf('summaryMontage%s%s.tiff', scaleString, zoomString)),'tiff')
 end
 
-% Spruce up the figure and save if that's the goal
-set(gcf, 'Position', [1023 7 653 970]);
-sgtitle({sprintf('Summary Montage %s %s %0.1fArcmin', ...
-    scaleString, zoomString, (60*pr.stimSizeDegs))}, 'FontSize', 25);
-saveas(gcf, fullfile(generalDir, cnv.outputDirSecond, ...
-    sprintf('summaryMontage%s%s.tiff', scaleString, zoomString)),'tiff')
+%% Make the Summary plots
+
+john = true;
+
+if john
+    plotColors = [(0:1/(numProp-1):1); ...
+        1 - (0:1/(numProp-1):1); ...
+        zeros(1, numProp)]';
+    plotColorsScaled = plotColors ./ max(plotColors, [], 2);
+    
+    % Create the figure 2 legends based on input
+    legend2End = repmat(" %L", 1, numProp);
+    legend2Str = append(string(pr.focalPropLList*100), legend2End);
+    fig2Legend = num2cell(legend2Str);
+    
+    berryRecon = cell2mat(fullReconSummary);
+    berryStim = cell2mat(stimSummary);
+    theFig2 = figure();
+    
+    for i = 1:size(fullReconSummary, 1)
+        
+        % Include portion to say if centermost region or full stimulus
+        % region. Default is full. 
+        plot([berryStim.meanEWFull], [berryRecon(i,:).meanEWFull], '-o', ...
+            'Color', plotColorsScaled(i,:), 'LineWidth', 3); hold on;
+    end
+    
+    xlabel('Stim Wavelength', 'FontSize', 40);
+    ylabel('Recon Wavelength', 'FontSize', 40);
+    title(sprintf('Stim/Recon Comparison: %d arcmin', (pr.stimSizeDegs * 60)), 'FontSize', 26)
+    xlim([540 660])
+    ylim([540 660])
+    set(gcf, 'Position', [119   321   661   518]);
+    box off
+    axis square
+    
+    legend(fig2Legend, 'NumColumns',2, 'Location', 'northwest')
+    
+    % Save output as image and eps file for easier formatting in Adobe
+    % Illustrator
+    saveas(gcf, fullfile(generalDir, cnv.outputDirSecond,...
+        sprintf('stimVsReconPlot.tiff')),'tiff');
+    
+    saveas(gcf, fullfile(generalDir, cnv.outputDirSecond,...
+        sprintf('stimVsReconPlot.eps')),'epsc');
+    
+end
+
+jerry = true;
+
+if jerry
+end
+
 
 end
