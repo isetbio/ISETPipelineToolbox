@@ -81,41 +81,41 @@ viewingDisplay = displaySet(viewingDisplay,'spd primaries', ...
 
 %% Make the recon image montage
 
-testing = true;
+testing = false;
 
 if testing
-    
+
     % Establish the tiledlayout figure and proper dimenensions
     theFig = figure();
     t = tiledlayout((numProp+1),numStim, 'TileSpacing','none');
     tileIndices = reshape(1:(numStim*(numProp+1)), numStim, (numProp+1))';
     tileIndexCounter = 1;
-    
+
     fullSummary = [stimSummary; fullReconSummary];
     for j = 1:size(fullSummary, 2)
         for i = 1:size(fullSummary, 1)
-            
+
             theAxes = nexttile(tileIndices(tileIndexCounter));
-            
+
             if p.Results.scaleToMax
                 scaleString = "Scaled";
                 meanLuminanceCdPerM2 = [];
                 [~, ~, imageLinear] = sceneFromFile( ...
                     fullSummary{i,j}.imageRGBAcrossDisplays, 'rgb', ...
                     meanLuminanceCdPerM2, theConeMosaic.Display);
-                
+
                 % Determine the scale actor based on entries in the first
                 % row i.e.
                 if i == 1
                     scaleFactor = 1/max(imageLinear(:));
-                    
+
                 end
-                
+
                 imageLinearScaled = imageLinear * scaleFactor;
                 imageLinearScaled(imageLinearScaled > 1) = 1;
                 imageRGBScaled = gammaCorrection( ...
                     imageLinearScaled, viewingDisplay);
-                
+
                 if p.Results.zoomToStim
                     zoomString = "Zoom";
                     imshow(imageRGBScaled(fullSummary{i,j}.idxXRange, ...
@@ -124,7 +124,7 @@ if testing
                     zoomString = "Full";
                     imshow(imageRGBScaled)
                 end
-                
+
             else
                 scaleString = "Unscaled";
                 if p.Results.zoomToStim
@@ -136,9 +136,9 @@ if testing
                     zoomString = "Full";
                     imshow(fullSummary{i,j}.imageRGBAcrossDisplays)
                 end
-                
+
             end
-            
+
             if j == 1 & i == 1
                 set(gca, 'xticklabel', [], 'yticklabel', []);
                 ylabel('Stim', 'FontSize',20)
@@ -146,11 +146,11 @@ if testing
                 set(gca, 'xticklabel', [], 'yticklabel', []);
                 ylabel(sprintf('%0.2fL', pr.focalPropLList(i-1)), 'FontSize',15)
             end
-            
+
             tileIndexCounter = tileIndexCounter + 1;
         end
     end
-    
+
     % Spruce up the figure and save if that's the goal
     set(gcf, 'Position', [1023 7 653 970]);
     sgtitle({sprintf('Summary Montage %s %s %0.1fArcmin', ...
@@ -159,33 +159,35 @@ if testing
         sprintf('summaryMontage%s%s.tiff', scaleString, zoomString)),'tiff')
 end
 
-%% Make the Summary plots
+%% Make stim vs recon plot
 
-john = true;
+reconSummaryMat = cell2mat(fullReconSummary);
+stimSummaryMat = cell2mat(stimSummary);
+
+plotColors = [(0:1/(numProp-1):1); ...
+    1 - (0:1/(numProp-1):1); ...
+    zeros(1, numProp)]';
+plotColorsScaled = plotColors ./ max(plotColors, [], 2);
+
+% Create the figure 2 legends based on input
+legend2End = repmat(" %L", 1, numProp);
+legend2Str = append(string(pr.focalPropLList*100), legend2End);
+fig2Legend = num2cell(legend2Str);
+
+
+john = false;
 
 if john
-    plotColors = [(0:1/(numProp-1):1); ...
-        1 - (0:1/(numProp-1):1); ...
-        zeros(1, numProp)]';
-    plotColorsScaled = plotColors ./ max(plotColors, [], 2);
-    
-    % Create the figure 2 legends based on input
-    legend2End = repmat(" %L", 1, numProp);
-    legend2Str = append(string(pr.focalPropLList*100), legend2End);
-    fig2Legend = num2cell(legend2Str);
-    
-    berryRecon = cell2mat(fullReconSummary);
-    berryStim = cell2mat(stimSummary);
     theFig2 = figure();
-    
+
     for i = 1:size(fullReconSummary, 1)
-        
+
         % Include portion to say if centermost region or full stimulus
-        % region. Default is full. 
-        plot([berryStim.meanEWFull], [berryRecon(i,:).meanEWFull], '-o', ...
+        % region. Default is full.
+        plot([stimSummaryMat.meanEWFull], [reconSummaryMat(i,:).meanEWFull], '-o', ...
             'Color', plotColorsScaled(i,:), 'LineWidth', 3); hold on;
     end
-    
+
     xlabel('Stim Wavelength', 'FontSize', 40);
     ylabel('Recon Wavelength', 'FontSize', 40);
     title(sprintf('Stim/Recon Comparison: %d arcmin', (pr.stimSizeDegs * 60)), 'FontSize', 26)
@@ -194,23 +196,102 @@ if john
     set(gcf, 'Position', [119   321   661   518]);
     box off
     axis square
-    
+
     legend(fig2Legend, 'NumColumns',2, 'Location', 'northwest')
-    
+
     % Save output as image and eps file for easier formatting in Adobe
     % Illustrator
     saveas(gcf, fullfile(generalDir, cnv.outputDirSecond,...
         sprintf('stimVsReconPlot.tiff')),'tiff');
-    
+
     saveas(gcf, fullfile(generalDir, cnv.outputDirSecond,...
         sprintf('stimVsReconPlot.eps')),'epsc');
-    
+
 end
+
+%% Make shift in UY plot
 
 jerry = true;
 
+% Baseline variables
+uyEW = 580;
+stimForUYRecon = ones(1, numProp);
+
 if jerry
+    theFig3 = figure();
+
+    for i = 1:size(fullReconSummary, 1)
+
+        % Capture stimulus and recon EW information in one matrix and sort
+        % in ascending order
+        imageEW = [stimSummaryMat(1,:).meanEWFull; reconSummaryMat(i,:).meanEWFull];
+        imageEWSorted = sortrows(imageEW', 2)';
+
+        % While there are duplicate recon EW values
+        while length(unique(imageEWSorted(2,:))) ~= length(imageEWSorted(2,:))
+
+            % Initialize a holder variable
+            imageEWNew = [];
+
+            % Given the nature of the simulations, different stimuli can sometimes lead
+            % to reconstructions with the same wavelength, which conflicts with the
+            % interpolation algorithm. Start by locating when recon values are repeated
+            reconEWUnique = unique(imageEWSorted(2,:));
+            reconEWCount = nonzeros(histcounts(imageEWSorted(2,:)))';
+            reconEWMult = find(reconEWCount ~= 1);
+
+            % Carry over stim/recon information for unique reconEW values, converted to
+            % double for interpolation.
+            imageEWNew(1,:) = double(imageEWSorted(1,cumsum(reconEWCount)));
+            imageEWNew(2,:) = double(imageEWSorted(2,cumsum(reconEWCount)));
+
+            % For each instance when a single reconEW maps onto different stim EW, take
+            % the average value of the stim wavelengths and map that onto the single
+            % recon EW, overriding the placeholder set above.
+            %
+            % This approach to use the average may warrant future consideration. Other
+            % options are to use the highest/first stim instance of a wavelength.
+            for q = 1:length(reconEWMult)
+                reconEWMultInd = find(imageEWSorted(2,:) == (reconEWUnique(reconEWMult(q))));
+                stimEWAvg = mean(imageEWSorted(1,reconEWMultInd));
+                imageEWNew(1,reconEWMult(q)) = double(stimEWAvg);
+            end
+
+            % Set the new matrix as the sorted matrix to determine if the
+            % while loop is satisfied.
+            imageEWSorted = imageEWNew;
+
+        end
+
+        stimForUYRecon(i) = interp1(imageEWSorted(2,:), imageEWSorted(1,:), uyEW, 'spline');
+    end
+
+    % Logistics check, to keep interpolation within bounds we will remove
+    % any pairs that extend beyond possible stim EW range (540-680)
+    plotValsUY = [pr.focalPropLList;stimForUYRecon];
+    outOfRange = find(plotValsUY(2,:) < 540 | plotValsUY(2,:) > 680);
+    plotValsUY(:,outOfRange) = [];
+
+    plot(plotValsUY(1,:), plotValsUY(2,:), '-o', 'Color', ...
+        plotColorsScaled(i,:), 'Linewidth', 5);
+
+    xlabel('Proportion L', 'FontSize', 40);
+    ylabel('Stim Wavelength', 'FontSize', 40);
+    title(sprintf('Shift in UY: %d arcmin', (pr.stimSizeDegs * 60)), 'FontSize', 26)
+    xlim([0 1])
+    ylim([540 660])
+    set(gcf, 'Position', [119   321   661   518]);
+    box off
+    axis square
+
+    % Save output as image and eps file for easier formatting in Adobe
+    % Illustrator
+    saveas(gcf, fullfile(generalDir, cnv.outputDirSecond,...
+        sprintf('shiftUYPlot.tiff')),'tiff');
+
+    saveas(gcf, fullfile(generalDir, cnv.outputDirSecond,...
+        sprintf('shiftUYPlot.eps')),'epsc');
+
+
 end
-
-
 end
