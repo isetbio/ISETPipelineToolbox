@@ -234,16 +234,8 @@ for i = 1:length(regionWidths)
     % Update running list of which cones have been edited
     innerCones = [innerCones; regionCones];
 
-    % Store relevant info in a structure
+   % Store relevant info in a structure
     mosaicConeInfo.version = 1;
-
-    mosaicConeInfo.regionVariant(i) = regionVariant(i);
-    mosaicConeInfo.regionWidths(i) = regionWidths(i) * 60;
-    mosaicConeInfo.numTotal(i) = length(regionCones);
-
-    mosaicConeInfo.numL(i) = sum(ismember(regionCones, theConeMosaic.Mosaic.lConeIndices));
-    mosaicConeInfo.numM(i) = sum(ismember(regionCones, theConeMosaic.Mosaic.mConeIndices));
-    mosaicConeInfo.numS(i) = sum(ismember(regionCones, theConeMosaic.Mosaic.sConeIndices));
 
     mosaicConeInfo.targetPropsL(i) = propL(i);
     mosaicConeInfo.targetPropsM(i) = 1 - propL(i);
@@ -252,6 +244,14 @@ for i = 1:length(regionWidths)
     mosaicConeInfo.targetPropsLOfWholeMosaic(i) = propL(i)*(1-propS(i));
     mosaicConeInfo.targetPropsMOfWholeMosaic(i) = (1 - propL(i))*(1-propS(i));
     mosaicConeInfo.targetPropsSOfWholeMosaic(i) = propS(i);
+
+    mosaicConeInfo.regionVariant(i) = regionVariant(i);
+    mosaicConeInfo.regionWidths(i) = regionWidths(i) * 60;
+    mosaicConeInfo.numTotal(i) = length(regionCones);
+
+    mosaicConeInfo.numL(i) = sum(ismember(regionCones, theConeMosaic.Mosaic.lConeIndices));
+    mosaicConeInfo.numM(i) = sum(ismember(regionCones, theConeMosaic.Mosaic.mConeIndices));
+    mosaicConeInfo.numS(i) = sum(ismember(regionCones, theConeMosaic.Mosaic.sConeIndices));
 
     mosaicConeInfo.achievedPropsL(i) = mosaicConeInfo.numL(i) / (mosaicConeInfo.numL(i) + mosaicConeInfo.numM(i));
     mosaicConeInfo.achievedPropsM(i) = mosaicConeInfo.numM(i) / (mosaicConeInfo.numL(i) + mosaicConeInfo.numM(i));
