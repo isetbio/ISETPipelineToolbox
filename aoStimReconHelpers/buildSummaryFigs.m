@@ -16,10 +16,18 @@ function imageInfo = buildSummaryFigs(pr, cnv, numStim, numProp, ...
 
 p = inputParser;
 p.addParameter('figReconRows', false, @islogical);
-p.addParameter('scaleToMax', false, @islogical);
 p.addParameter('wls', (400:1:700)', @isnumeric);
+p.addParameter('allMontages', true, @islogical);
+p.addParameter('scaleToMax', false, @islogical);
 p.addParameter('zoomToStim', false, @islogical);
 p.addParameter('centermostEW', false, @islogical);
+p.addParameter('wavelengthUY', 580, @isnumeric);
+p.addParameter('plotMontages', true, @islogical);
+p.addParameter('plotStimvRecon', true, @islogical);
+p.addParameter('plotShiftUY', true, @islogical);
+p.addParameter('plotPropvRecon', true, @islogical);
+
+
 parse(p, varargin{:});
 
 close all;
@@ -46,6 +54,16 @@ else
         pr.nPixels, cnv.forwardPupilDiamMM, pr.forwardAORender, pr.forwardDefocusDiopters);
     theConeMosaic = forwardRenderStructure.theConeMosaic;
 end
+
+% Temporary patch to account for a previous mistake in how the cone
+% proportion information was being stored. Doubles back to save the correct
+% information, replace it in the render structure, and save a jpeg for
+% ready access.
+updatedMosaicConeInfo = propPatch(forwardRenderStructure.mosaicConeInfo);
+forwardRenderStructure.mosaicConeInfo = updatedMosaicConeInfo;
+renderStructure = forwardRenderStructure;
+save(fullfile(cnv.forwardRenderDirFull, cnv.renderName),'renderStructure','-v7.3')
+propInfoFile(cnv, renderStructure.mosaicConeInfo);
 
 % Specify variables depending on the viewing display
 switch (pr.viewingDisplayName)
@@ -79,88 +97,104 @@ viewingDisplay = displaySet(viewingDisplay,'wave',p.Results.wls);
 viewingDisplay = displaySet(viewingDisplay,'spd primaries', ...
     displayGet(viewingDisplay,'spd primaries')*viewingDisplayScaleFactor);
 
-%% Make the recon image montage
+%% Make the Summary Montages for the reconstructions
 
-testing = false;
+if p.Results.plotMontages
 
-if testing
-
-    % Establish the tiledlayout figure and proper dimenensions
-    theFig = figure();
-    t = tiledlayout((numProp+1),numStim, 'TileSpacing','none');
-    tileIndices = reshape(1:(numStim*(numProp+1)), numStim, (numProp+1))';
-    tileIndexCounter = 1;
-
-    fullSummary = [stimSummary; fullReconSummary];
-    for j = 1:size(fullSummary, 2)
-        for i = 1:size(fullSummary, 1)
-
-            theAxes = nexttile(tileIndices(tileIndexCounter));
-
-            if p.Results.scaleToMax
-                scaleString = "Scaled";
-                meanLuminanceCdPerM2 = [];
-                [~, ~, imageLinear] = sceneFromFile( ...
-                    fullSummary{i,j}.imageRGBAcrossDisplays, 'rgb', ...
-                    meanLuminanceCdPerM2, theConeMosaic.Display);
-
-                % Determine the scale actor based on entries in the first
-                % row i.e.
-                if i == 1
-                    scaleFactor = 1/max(imageLinear(:));
-
-                end
-
-                imageLinearScaled = imageLinear * scaleFactor;
-                imageLinearScaled(imageLinearScaled > 1) = 1;
-                imageRGBScaled = gammaCorrection( ...
-                    imageLinearScaled, viewingDisplay);
-
-                if p.Results.zoomToStim
-                    zoomString = "Zoom";
-                    imshow(imageRGBScaled(fullSummary{i,j}.idxXRange, ...
-                        fullSummary{i,j}.idxXRange,:))
-                else
-                    zoomString = "Full";
-                    imshow(imageRGBScaled)
-                end
-
-            else
-                scaleString = "Unscaled";
-                if p.Results.zoomToStim
-                    zoomString = "Zoom";
-                    imshow(fullSummary{i,j}.imageRGBAcrossDisplays ...
-                        (fullSummary{i,j}.idxXRange, ...
-                        fullSummary{i,j}.idxXRange,:))
-                else
-                    zoomString = "Full";
-                    imshow(fullSummary{i,j}.imageRGBAcrossDisplays)
-                end
-
-            end
-
-            if j == 1 & i == 1
-                set(gca, 'xticklabel', [], 'yticklabel', []);
-                ylabel('Stim', 'FontSize',20)
-            elseif j ==1
-                set(gca, 'xticklabel', [], 'yticklabel', []);
-                ylabel(sprintf('%0.2fL', pr.focalPropLList(i-1)), 'FontSize',15)
-            end
-
-            tileIndexCounter = tileIndexCounter + 1;
-        end
+    % An updated patch that allows cycling through the following code to
+    % produce each of the desired montage possibilities. If allMontages false,
+    % will produce the figures corresponding to the explicitly set scale and
+    % zoom conditions. If those are not set, the default values are
+    % unscaled and unzoomed
+    if p.Results.allMontages
+        allCombos = [true true false false; true false true false];
+    else
+        allCombos = [p.Results.scaleToMax; p.Results.zoomToStim];
     end
 
-    % Spruce up the figure and save if that's the goal
-    set(gcf, 'Position', [1023 7 653 970]);
-    sgtitle({sprintf('Summary Montage %s %s %0.1fArcmin', ...
-        scaleString, zoomString, (60*pr.stimSizeDegs))}, 'FontSize', 25);
-    saveas(gcf, fullfile(generalDir, cnv.outputDirSecond, ...
-        sprintf('summaryMontage%s%s.tiff', scaleString, zoomString)),'tiff')
+    % Then for each of the desired iterations
+    for q = 1:length(allCombos)
+
+        scaleToMax = allCombos(1,q);
+        zoomToStim = allCombos(2,q);
+
+        % Establish the tiledlayout figure and proper dimenensions
+        theFig = figure();
+        t = tiledlayout((numProp+1),numStim, 'TileSpacing','none');
+        tileIndices = reshape(1:(numStim*(numProp+1)), numStim, (numProp+1))';
+        tileIndexCounter = 1;
+
+        fullSummary = [stimSummary; fullReconSummary];
+        for j = 1:size(fullSummary, 2)
+            for i = 1:size(fullSummary, 1)
+
+                theAxes = nexttile(tileIndices(tileIndexCounter));
+
+                if scaleToMax
+                    scaleString = "Scaled";
+                    meanLuminanceCdPerM2 = [];
+                    [~, ~, imageLinear] = sceneFromFile( ...
+                        fullSummary{i,j}.imageRGBAcrossDisplays, 'rgb', ...
+                        meanLuminanceCdPerM2, theConeMosaic.Display);
+
+                    % Determine the scale actor based on entries in the first
+                    % row i.e.
+                    if i == 1
+                        scaleFactor = 1/max(imageLinear(:));
+                    end
+
+                    imageLinearScaled = imageLinear * scaleFactor;
+                    imageLinearScaled(imageLinearScaled > 1) = 1;
+                    imageRGBScaled = gammaCorrection( ...
+                        imageLinearScaled, viewingDisplay);
+
+                    if zoomToStim
+                        zoomString = "Zoom";
+                        imshow(imageRGBScaled(fullSummary{i,j}.idxXRange, ...
+                            fullSummary{i,j}.idxXRange,:))
+                    else
+                        zoomString = "Full";
+                        imshow(imageRGBScaled)
+                    end
+
+                else
+                    scaleString = "Unscaled";
+                    if zoomToStim
+                        zoomString = "Zoom";
+                        imshow(fullSummary{i,j}.imageRGBAcrossDisplays ...
+                            (fullSummary{i,j}.idxXRange, ...
+                            fullSummary{i,j}.idxXRange,:))
+                    else
+                        zoomString = "Full";
+                        imshow(fullSummary{i,j}.imageRGBAcrossDisplays)
+                    end
+
+                end
+
+                if j == 1 & i == 1
+                    set(gca, 'xticklabel', [], 'yticklabel', []);
+                    ylabel('Stim', 'FontSize',20)
+                elseif j ==1
+                    set(gca, 'xticklabel', [], 'yticklabel', []);
+                    ylabel(sprintf('%0.2fL', pr.focalPropLList(i-1)), 'FontSize',15)
+                end
+
+                tileIndexCounter = tileIndexCounter + 1;
+            end
+        end
+
+        % Spruce up the figure and save if that's the goal
+        set(gcf, 'Position', [1023 7 653 970]);
+        sgtitle({sprintf('Summary Montage %s %s %0.1fArcmin', ...
+            scaleString, zoomString, (60*pr.stimSizeDegs))}, 'FontSize', 25);
+        saveas(gcf, fullfile(cnv.outputDirSummaryFigs, ...
+            sprintf('summaryMontage%s%s.tiff', scaleString, zoomString)),'tiff')
+    end
 end
 
-%% Make stim vs recon plot
-
+%% Make Stim vs Recon Plot over each of the proportions
+%
+% Initialize some holder variables, plot colors, and legends
 reconSummaryMat = cell2mat(fullReconSummary);
 stimSummaryMat = cell2mat(stimSummary);
 
@@ -174,10 +208,7 @@ legend2End = repmat(" %L", 1, numProp);
 legend2Str = append(string(pr.focalPropLList*100), legend2End);
 fig2Legend = num2cell(legend2Str);
 
-
-john = false;
-
-if john
+if p.Results.plotStimvRecon
     theFig2 = figure();
 
     for i = 1:size(fullReconSummary, 1)
@@ -201,97 +232,138 @@ if john
 
     % Save output as image and eps file for easier formatting in Adobe
     % Illustrator
-    saveas(gcf, fullfile(generalDir, cnv.outputDirSecond,...
+    saveas(gcf, fullfile(cnv.outputDirSummaryFigs,...
         sprintf('stimVsReconPlot.tiff')),'tiff');
-
-    saveas(gcf, fullfile(generalDir, cnv.outputDirSecond,...
+    saveas(gcf, fullfile(cnv.outputDirSummaryFigs,...
         sprintf('stimVsReconPlot.eps')),'epsc');
-
 end
 
-%% Make shift in UY plot
-
-jerry = true;
-
+%% Make Shift in UY plot for each desired wavelength
+%
 % Baseline variables
-uyEW = 580;
 stimForUYRecon = ones(1, numProp);
 
-if jerry
-    theFig3 = figure();
+if p.Results.plotShiftUY
 
-    for i = 1:size(fullReconSummary, 1)
+    for q = 1:length(p.Results.wavelengthUY)
+        wavelengthUY = p.Results.wavelengthUY(q);
 
-        % Capture stimulus and recon EW information in one matrix and sort
-        % in ascending order
-        imageEW = [stimSummaryMat(1,:).meanEWFull; reconSummaryMat(i,:).meanEWFull];
-        imageEWSorted = sortrows(imageEW', 2)';
+        theFig3 = figure();
 
-        % While there are duplicate recon EW values
-        while length(unique(imageEWSorted(2,:))) ~= length(imageEWSorted(2,:))
+        for i = 1:size(fullReconSummary, 1)
 
-            % Initialize a holder variable
-            imageEWNew = [];
+            % Capture stimulus and recon EW information in one matrix and sort
+            % in ascending order
+            imageEW = [stimSummaryMat(1,:).meanEWFull; reconSummaryMat(i,:).meanEWFull];
+            imageEWSorted = sortrows(imageEW', 2)';
 
-            % Given the nature of the simulations, different stimuli can sometimes lead
-            % to reconstructions with the same wavelength, which conflicts with the
-            % interpolation algorithm. Start by locating when recon values are repeated
-            reconEWUnique = unique(imageEWSorted(2,:));
-            reconEWCount = nonzeros(histcounts(imageEWSorted(2,:)))';
-            reconEWMult = find(reconEWCount ~= 1);
+            % While there are duplicate recon EW values
+            while length(unique(imageEWSorted(2,:))) ~= length(imageEWSorted(2,:))
 
-            % Carry over stim/recon information for unique reconEW values, converted to
-            % double for interpolation.
-            imageEWNew(1,:) = double(imageEWSorted(1,cumsum(reconEWCount)));
-            imageEWNew(2,:) = double(imageEWSorted(2,cumsum(reconEWCount)));
+                % Initialize a holder variable
+                imageEWNew = [];
 
-            % For each instance when a single reconEW maps onto different stim EW, take
-            % the average value of the stim wavelengths and map that onto the single
-            % recon EW, overriding the placeholder set above.
-            %
-            % This approach to use the average may warrant future consideration. Other
-            % options are to use the highest/first stim instance of a wavelength.
-            for q = 1:length(reconEWMult)
-                reconEWMultInd = find(imageEWSorted(2,:) == (reconEWUnique(reconEWMult(q))));
-                stimEWAvg = mean(imageEWSorted(1,reconEWMultInd));
-                imageEWNew(1,reconEWMult(q)) = double(stimEWAvg);
+                % Given the nature of the simulations, different stimuli can sometimes lead
+                % to reconstructions with the same wavelength, which conflicts with the
+                % interpolation algorithm. Start by locating when recon values are repeated
+                reconEWUnique = unique(imageEWSorted(2,:));
+                reconEWCount = nonzeros(histcounts(imageEWSorted(2,:)))';
+                reconEWMult = find(reconEWCount ~= 1);
+
+                % Carry over stim/recon information for unique reconEW values, converted to
+                % double for interpolation.
+                imageEWNew(1,:) = double(imageEWSorted(1,cumsum(reconEWCount)));
+                imageEWNew(2,:) = double(imageEWSorted(2,cumsum(reconEWCount)));
+
+                % For each instance when a single reconEW maps onto different stim EW, take
+                % the average value of the stim wavelengths and map that onto the single
+                % recon EW, overriding the placeholder set above.
+                %
+                % This approach to use the average may warrant future consideration. Other
+                % options are to use the highest/first stim instance of a wavelength.
+                for q = 1:length(reconEWMult)
+                    reconEWMultInd = find(imageEWSorted(2,:) == (reconEWUnique(reconEWMult(q))));
+                    stimEWAvg = mean(imageEWSorted(1,reconEWMultInd));
+                    imageEWNew(1,reconEWMult(q)) = double(stimEWAvg);
+                end
+
+                % Set the new matrix as the sorted matrix to determine if the
+                % while loop is satisfied.
+                imageEWSorted = double(imageEWNew);
+
             end
 
-            % Set the new matrix as the sorted matrix to determine if the
-            % while loop is satisfied.
-            imageEWSorted = imageEWNew;
-
+            stimForUYRecon(i) = interp1(double(imageEWSorted(2,:)), ...
+                double(imageEWSorted(1,:)), wavelengthUY, 'spline');
         end
 
-        stimForUYRecon(i) = interp1(imageEWSorted(2,:), imageEWSorted(1,:), uyEW, 'spline');
+        % Logistics check, to keep interpolation within bounds we will remove
+        % any pairs that extend beyond possible stim EW range (540-680)
+        plotValsUY = [pr.focalPropLList;stimForUYRecon];
+        outOfRange = find(plotValsUY(2,:) < 540 | plotValsUY(2,:) > 680);
+        plotValsUY(:,outOfRange) = [];
+
+        plot(plotValsUY(1,:), plotValsUY(2,:), '-o', 'Color', ...
+            plotColorsScaled(i,:), 'Linewidth', 5);
+
+        xlabel('Proportion L', 'FontSize', 40);
+        ylabel('Stim Wavelength', 'FontSize', 40);
+        title(sprintf('Shift in UY: %d nm %d arcmin', wavelengthUY,  ...
+            (pr.stimSizeDegs * 60)), 'FontSize', 26)
+        xlim([0 1])
+        ylim([540 660])
+        set(gcf, 'Position', [119   321   661   518]);
+        box off
+        axis square
+
+        % Save output as image and eps file for easier formatting in Adobe
+        % Illustrator
+        saveas(gcf, fullfile(cnv.outputDirSummaryFigs,...
+            sprintf('shiftUYPlot%d.tiff', wavelengthUY)),'tiff');
+        saveas(gcf, fullfile(cnv.outputDirSummaryFigs,...
+            sprintf('shiftUYPlot%d.eps', wavelengthUY)),'epsc');
+    end
+end
+
+%% Make Prop vs Recon Plot over each of the stimuli
+%
+% Initialize a new set of colors
+plotColors = [(0:1/(numStim-1):1); ...
+    1 - (0:1/(numStim-1):1); ...
+    zeros(1, numStim)]';
+plotColorsScaled = plotColors ./ max(plotColors, [], 2);
+
+% Create the figure 3 legends based on input
+legend3End = repmat(" nm", 1, numStim);
+legend3Str = append(string([stimSummaryMat(1,:).meanEWFull]), legend3End);
+fig3Legend = num2cell(legend3Str);
+
+if p.Results.plotPropvRecon
+    theFig4 = figure();
+
+    for i = 1:size(fullReconSummary, 2)
+        % Include portion to say if centermost region or full stimulus
+        % region. Default is full.
+        plot(pr.focalPropLList, [reconSummaryMat(:,i).meanEWFull], '-o', ...
+            'Color', plotColorsScaled(i,:), 'LineWidth', 3); hold on;
     end
 
-    % Logistics check, to keep interpolation within bounds we will remove
-    % any pairs that extend beyond possible stim EW range (540-680)
-    plotValsUY = [pr.focalPropLList;stimForUYRecon];
-    outOfRange = find(plotValsUY(2,:) < 540 | plotValsUY(2,:) > 680);
-    plotValsUY(:,outOfRange) = [];
-
-    plot(plotValsUY(1,:), plotValsUY(2,:), '-o', 'Color', ...
-        plotColorsScaled(i,:), 'Linewidth', 5);
-
     xlabel('Proportion L', 'FontSize', 40);
-    ylabel('Stim Wavelength', 'FontSize', 40);
-    title(sprintf('Shift in UY: %d arcmin', (pr.stimSizeDegs * 60)), 'FontSize', 26)
+    ylabel('Recon Wavelength', 'FontSize', 40);
+    title(sprintf('Prop/Recon Comparison: %d arcmin', (pr.stimSizeDegs * 60)), 'FontSize', 26)
     xlim([0 1])
-    ylim([540 660])
+    ylim([540 680])
     set(gcf, 'Position', [119   321   661   518]);
     box off
     axis square
 
+    legend(fig3Legend, 'NumColumns',2, 'Location', 'northwest')
+
     % Save output as image and eps file for easier formatting in Adobe
     % Illustrator
-    saveas(gcf, fullfile(generalDir, cnv.outputDirSecond,...
-        sprintf('shiftUYPlot.tiff')),'tiff');
-
-    saveas(gcf, fullfile(generalDir, cnv.outputDirSecond,...
-        sprintf('shiftUYPlot.eps')),'epsc');
-
-
+    saveas(gcf, fullfile(cnv.outputDirSummaryFigs,...
+        sprintf('propVsReconPlot.tiff')),'tiff');
+    saveas(gcf, fullfile(cnv.outputDirSummaryFigs,...
+        sprintf('propVsReconPlot.eps')),'epsc');
 end
 end

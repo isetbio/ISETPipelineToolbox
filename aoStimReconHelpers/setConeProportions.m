@@ -132,9 +132,9 @@ for i = 1:length(regionWidths)
         regionAreaPerSCone = regionArea/newSAmount;
 
         while runCounter >= 0
-            
+
             % The only absolute sanity check here, if hit hard lower limit
-            % on distance between S cones. 
+            % on distance between S cones.
             if p.Results.linearDistanceDecrement <= 0
                 error('Cannot scale interval any smaller, unable to satisfy S Cones');
             end
@@ -179,16 +179,16 @@ for i = 1:length(regionWidths)
                     end
                 end
 
-                % Update the pool with the new one we just set up.     
+                % Update the pool with the new one we just set up.
                 sharedSCones = ismember(SConePool, SConePoolNew);
                 SConePool = SConePool(sharedSCones);
 
                 % Put some arbitrary integer that has no risk of being
                 % called as a placeholder. Will flag below, but this method
                 % gives the system a chance to course correct instead of
-                % crashing with an error. 
+                % crashing with an error.
                 if (isempty(SConePool) || length(SConePool) == 1)
-                    SConePool = 1; 
+                    SConePool = 1;
                 end
 
                 % Pick the S cone randomly from our acceptable choices, and
@@ -199,10 +199,10 @@ for i = 1:length(regionWidths)
             % If recognize the arbitrary flag above, should also be the
             % case that the number of selected S cones does not match the
             % desired cone, since the arbitrary index is well outside
-            % center range. If so, run again, otherwise end the loop. 
+            % center range. If so, run again, otherwise end the loop.
             targetRegionS = sum(ismember(newSMosaicInd, regionCones));
             if SConePool == 1 & targetRegionS ~= newSAmount
-                runCounter = runCounter + 1; 
+                runCounter = runCounter + 1;
             elseif targetRegionS == newSAmount
                 runCounter = -1;
             end
@@ -235,9 +235,7 @@ for i = 1:length(regionWidths)
     innerCones = [innerCones; regionCones];
 
     % Store relevant info in a structure
-    mosaicConeInfo.targetPropsL(i) = propL(i);
-    mosaicConeInfo.targetPropsM(i) = 1 - propL(i) - propS(i);
-    mosaicConeInfo.targetPropsS(i) = propS(i);
+    mosaicConeInfo.version = 1;
 
     mosaicConeInfo.regionVariant(i) = regionVariant(i);
     mosaicConeInfo.regionWidths(i) = regionWidths(i) * 60;
@@ -247,14 +245,30 @@ for i = 1:length(regionWidths)
     mosaicConeInfo.numM(i) = sum(ismember(regionCones, theConeMosaic.Mosaic.mConeIndices));
     mosaicConeInfo.numS(i) = sum(ismember(regionCones, theConeMosaic.Mosaic.sConeIndices));
 
-    mosaicConeInfo.achievedPropsL(i) = mosaicConeInfo.numL(i) / mosaicConeInfo.numTotal(i);
-    mosaicConeInfo.achievedPropsM(i) = mosaicConeInfo.numM(i) / mosaicConeInfo.numTotal(i);
+    mosaicConeInfo.targetPropsL(i) = propL(i);
+    mosaicConeInfo.targetPropsM(i) = 1 - propL(i);
+    mosaicConeInfo.targetPropsS(i) = propS(i);
+
+    mosaicConeInfo.targetPropsLOfWholeMosaic(i) = propL(i)*(1-propS(i));
+    mosaicConeInfo.targetPropsMOfWholeMosaic(i) = (1 - propL(i))*(1-propS(i));
+    mosaicConeInfo.targetPropsSOfWholeMosaic(i) = propS(i);
+
+    mosaicConeInfo.achievedPropsL(i) = mosaicConeInfo.numL(i) / (mosaicConeInfo.numL(i) + mosaicConeInfo.numM(i));
+    mosaicConeInfo.achievedPropsM(i) = mosaicConeInfo.numM(i) / (mosaicConeInfo.numL(i) + mosaicConeInfo.numM(i));
     mosaicConeInfo.achievedPropsS(i) = mosaicConeInfo.numS(i) / mosaicConeInfo.numTotal(i);
+
+    mosaicConeInfo.achievedPropsLOfWholeMosaic(i) = mosaicConeInfo.numL(i) / mosaicConeInfo.numTotal(i);
+    mosaicConeInfo.achievedPropsMOfWholeMosaic(i) = mosaicConeInfo.numM(i) / mosaicConeInfo.numTotal(i);
+    mosaicConeInfo.achievedPropsSOfWholeMosaic(i) = mosaicConeInfo.numS(i) / mosaicConeInfo.numTotal(i);
 
     eval(['mosaicConeInfo.indL.region' num2str(i) ' = newLMosaicInd;']);
     eval(['mosaicConeInfo.indM.region' num2str(i) ' = newMMosaicInd;']);
     eval(['mosaicConeInfo.indS.region' num2str(i) ' = newSMosaicInd;']);
 end
+
+% Call a side function to print all the high value mosaic info in an
+% accessible text file
+propTxtFile(cnv, mosaicConeInfo);
 
 % Save the boundary information as well
 mosaicConeInfo.xBounds = xBounds;
