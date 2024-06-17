@@ -27,7 +27,6 @@ p.addParameter('plotStimvRecon', true, @islogical);
 p.addParameter('plotShiftUY', true, @islogical);
 p.addParameter('plotPropvRecon', true, @islogical);
 
-
 parse(p, varargin{:});
 
 close all;
@@ -59,6 +58,12 @@ end
 % proportion information was being stored. Doubles back to save the correct
 % information, replace it in the render structure, and save a jpeg for
 % ready access.
+%
+% Placing the patch here is insufficient because the whole point of loading
+% out here is to do it once for one of the proportions and operate under
+% the assumptions that the core underlying optics (which are all we care
+% about) are held constant across the other mosaics. So essentially this
+% patch only hits one of the render matrices. 
 updatedMosaicConeInfo = propPatch(forwardRenderStructure.mosaicConeInfo);
 forwardRenderStructure.mosaicConeInfo = updatedMosaicConeInfo;
 renderStructure = forwardRenderStructure;

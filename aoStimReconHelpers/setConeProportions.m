@@ -266,10 +266,6 @@ for i = 1:length(regionWidths)
     eval(['mosaicConeInfo.indS.region' num2str(i) ' = newSMosaicInd;']);
 end
 
-% Call a side function to print all the high value mosaic info in an
-% accessible text file
-propTxtFile(cnv, mosaicConeInfo);
-
 % Save the boundary information as well
 mosaicConeInfo.xBounds = xBounds;
 mosaicConeInfo.yBounds = yBounds;
