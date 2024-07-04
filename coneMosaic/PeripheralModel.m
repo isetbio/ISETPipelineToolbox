@@ -162,7 +162,7 @@ classdef PeripheralModel
                 'noLCA',p.Results.noLCA);
             psfObj = oiEnsemble{1};
             psfData = psfEnsemble{1};
-            if (focalLengthMeters ~= psfObj.optics.focalLength)
+            if (abs(focalLengthMeters - psfObj.optics.focalLength) > 1e-5)
                 error('Did not correctly extact focal length when creating cMosaic');
             end
         end
