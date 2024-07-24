@@ -226,7 +226,7 @@ if p.Results.plotStimvRecon
 
     xlabel('Stim Wavelength', 'FontSize', 40);
     ylabel('Recon Wavelength', 'FontSize', 40);
-    title(sprintf('Stim/Recon Comparison: %d arcmin', (pr.stimSizeDegs * 60)), 'FontSize', 26)
+    title(sprintf('Stim/Recon Comparison: %0.1f arcmin', (pr.stimSizeDegs * 60)), 'FontSize', 26)
     xlim([540 660])
     ylim([540 660])
     set(gcf, 'Position', [119   321   661   518]);
@@ -313,7 +313,7 @@ if p.Results.plotShiftUY
 
         xlabel('Proportion L', 'FontSize', 40);
         ylabel('Stim Wavelength', 'FontSize', 40);
-        title(sprintf('Shift in UY: %d nm %d arcmin', wavelengthUY,  ...
+        title(sprintf('Shift in UY: %d nm %0.1f arcmin', wavelengthUY,  ...
             (pr.stimSizeDegs * 60)), 'FontSize', 26)
         xlim([0 1])
         ylim([540 660])
@@ -355,7 +355,7 @@ if p.Results.plotPropvRecon
 
     xlabel('Proportion L', 'FontSize', 40);
     ylabel('Recon Wavelength', 'FontSize', 40);
-    title(sprintf('Prop/Recon Comparison: %d arcmin', (pr.stimSizeDegs * 60)), 'FontSize', 26)
+    title(sprintf('Prop/Recon Comparison: %0.1f arcmin', (pr.stimSizeDegs * 60)), 'FontSize', 26)
     xlim([0 1])
     ylim([540 680])
     set(gcf, 'Position', [119   321   661   518]);
