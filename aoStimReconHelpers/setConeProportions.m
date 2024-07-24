@@ -21,11 +21,12 @@ p.addParameter('annulusWidthArc', 2, @isnumeric);
 p.addParameter('stimCenter', true, @islogical)
 p.addParameter('centerSizeDegs', [], @isnumeric);
 p.addParameter('randomSLocations', false, @islogical);
+p.addParameter('firstSConeNearCenter',true,@islogical);
+p.addParameter('nearCenterFactor',2.5,@isnumeric);
 p.addParameter('linearDistanceDecrement', 0.05, @isnumeric);
 parse(p, varargin{:});
 
 %% Initialize variables
-% Initialize the structure to hold the information
 mosaicConeInfo = struct;
 
 % Initialize helpful variables
@@ -64,17 +65,20 @@ switch focalRegion
 end
 
 %% Set the boundaries
+%
 % Establish boundaries for each focal region unless making global changes
 switch focalRegion
     case 'global'
         fieldSizeDegs = fieldSizeMinutes/60;
         regionWidths = fieldSizeDegs/2;
+        nearCenterWidth = [];
     otherwise
         if p.Results.stimCenter
             centerWidth = stimSizeDegs/2;
         else
             centerWidth = p.Results.centerSizeDegs/2;
         end
+        nearCenterWidth = centerWidth/p.Results.nearCenterFactor;
 
         nearSurroundWidth = p.Results.annulusWidthArc/60;
         fieldSizeDegs = fieldSizeMinutes/60;
@@ -99,6 +103,21 @@ for i = 1:length(regionWidths)
         theConeMosaic.Mosaic.coneRFpositionsDegs(:,1) < xBounds(i+1,2) & ...
         theConeMosaic.Mosaic.coneRFpositionsDegs(:,2) < yBounds(i+1,2));
 
+    % Special case half center cones
+    if (i == 1 & ~isempty(nearCenterWidth))
+        xNearCenterBounds = [xBounds(i,1)-nearCenterWidth, xBounds(i,2)+nearCenterWidth];
+        yNearCenterBounds = [yBounds(i,1)-nearCenterWidth, yBounds(i,2)+nearCenterWidth];
+
+        % Find all the cones centered in the bounded square region
+        regionConesNearCenter = find(...
+            theConeMosaic.Mosaic.coneRFpositionsDegs(:,1) > xNearCenterBounds(1) & ...
+            theConeMosaic.Mosaic.coneRFpositionsDegs(:,2) > yNearCenterBounds(1) & ...
+            theConeMosaic.Mosaic.coneRFpositionsDegs(:,1) < xNearCenterBounds(2) & ...
+            theConeMosaic.Mosaic.coneRFpositionsDegs(:,2) < yNearCenterBounds(2));
+    else
+        regionConesNearCenter = [];
+    end
+
     % Select for cones that do not also occupy a previous region
     regionCones = regionCones(~ismember(regionCones, innerCones));
 
@@ -109,8 +128,8 @@ for i = 1:length(regionWidths)
     newSAmount = round(length(regionCones) * propS(i));
 
     % Set the S cones, either randomly or using a method that ensures they
-    % are spaced.%%%
-    linearDistancePerSConeFactor = 1;
+    % are spaced.
+    linearDistancePerSConeFactor = 0.8;
     runCounter = 0;
 
     if (p.Results.randomSLocations | ~isempty(innerCones))
@@ -132,7 +151,6 @@ for i = 1:length(regionWidths)
         regionAreaPerSCone = regionArea/newSAmount;
 
         while runCounter >= 0
-
             % The only absolute sanity check here, if hit hard lower limit
             % on distance between S cones.
             if p.Results.linearDistanceDecrement <= 0
@@ -144,9 +162,20 @@ for i = 1:length(regionWidths)
 
             % Choose S cones
             %
-            % Initialize by choosing an S cone at random.
+            % Initialize by choosing an S cone at random, either enforced
+            % near the center or not
             SConePool = regionCones;
-            newSMosaicInd = randsample(SConePool,1);
+            if (i == 1 & p.Results.firstSConeNearCenter & ~isempty(nearCenterWidth) & ~isempty(regionConesNearCenter))
+                % Routine randsample handles a scalar argument differently
+                % from a list of length 1, so we special case that.
+                if (length(regionConesNearCenter) == 1)
+                    newSMosaicInd = regionConesNearCenter;
+                else
+                    newSMosaicInd = randsample(regionConesNearCenter,1);
+                end
+            else
+                newSMosaicInd = randsample(SConePool,1);
+            end
 
             % Get the remaining S cones
             for ss = 1:newSAmount-1
@@ -208,7 +237,6 @@ for i = 1:length(regionWidths)
             end
         end
     end
-
 
     % Figure out which cones can be L or M
     conesRemaining = regionCones(~ismember(regionCones, newSMosaicInd));
@@ -279,14 +307,4 @@ if p.Results.viewMosaic
     end
 end
 
-% visualizeIndices = false;
-% if visualizeIndices
-%     theConeMosaic.visualizeMosaic()
-%     for i=1:length(theConeMosaic.Mosaic.coneTypes)
-%         txt = int2str(i);
-%         t = text((theConeMosaic.Mosaic.coneRFpositionsDegs(i,1)-0.005), theConeMosaic.Mosaic.coneRFpositionsDegs(i,2),txt);
-%         t.FontSize=11;
-%         hold on
-%     end
-% end
 end

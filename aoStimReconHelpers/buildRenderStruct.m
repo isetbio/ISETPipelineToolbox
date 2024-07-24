@@ -56,10 +56,13 @@ if ~pr.useCustomMosaic
 else
     %% Build render matrix based on edited mosaic
     %   
-    % Build the custom mosaics using setConeProportions
+    % Build the custom mosaics using setConeProportions.  We add the
+    % expansion parameter here so that the cone proportions are set within
+    % the expanded region.
     [theConeMosaic, mosaicConeInfo] = setConeProportions(pr.focalRegion, ...
         pr.focalPropL, pr.focalVariant, theConeMosaic, pr.eccXDegs, pr.eccYDegs, ...
-        pr.stimSizeDegs, pr.fieldSizeMinutes, pr.regionVariant, pr.propL, pr.propS);
+        pr.stimSizeDegs+pr.forwardOpticalBlurStimSizeExpansionDegs, ...
+        pr.fieldSizeMinutes, pr.regionVariant, pr.propL, pr.propS);
     
     % Build the render structure for the custom mosaic.
     %

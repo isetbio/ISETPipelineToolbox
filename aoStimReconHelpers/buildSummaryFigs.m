@@ -247,7 +247,6 @@ end
 %
 % Baseline variables
 stimForUYRecon = ones(1, numProp);
-
 if p.Results.plotShiftUY
 
     for q = 1:length(p.Results.wavelengthUY)
@@ -258,48 +257,55 @@ if p.Results.plotShiftUY
         for i = 1:size(fullReconSummary, 1)
 
             % Capture stimulus and recon EW information in one matrix and sort
-            % in ascending order
-            imageEW = [stimSummaryMat(1,:).meanEWFull; reconSummaryMat(i,:).meanEWFull];
+            % in ascending order.  Then make sure we have a one-to-one
+            % mapping between recon and stim EW by averaging across cases
+            % where there are multiple matching recon EW values.
+            imageEW = double([stimSummaryMat(1,:).meanEWFull; reconSummaryMat(i,:).meanEWFull]);
             imageEWSorted = sortrows(imageEW', 2)';
-
-            % While there are duplicate recon EW values
-            while length(unique(imageEWSorted(2,:))) ~= length(imageEWSorted(2,:))
-
-                % Initialize a holder variable
-                imageEWNew = [];
-
-                % Given the nature of the simulations, different stimuli can sometimes lead
-                % to reconstructions with the same wavelength, which conflicts with the
-                % interpolation algorithm. Start by locating when recon values are repeated
-                reconEWUnique = unique(imageEWSorted(2,:));
-                reconEWCount = nonzeros(histcounts(imageEWSorted(2,:)))';
-                reconEWMult = find(reconEWCount ~= 1);
-
-                % Carry over stim/recon information for unique reconEW values, converted to
-                % double for interpolation.
-                imageEWNew(1,:) = double(imageEWSorted(1,cumsum(reconEWCount)));
-                imageEWNew(2,:) = double(imageEWSorted(2,cumsum(reconEWCount)));
-
-                % For each instance when a single reconEW maps onto different stim EW, take
-                % the average value of the stim wavelengths and map that onto the single
-                % recon EW, overriding the placeholder set above.
-                %
-                % This approach to use the average may warrant future consideration. Other
-                % options are to use the highest/first stim instance of a wavelength.
-                for q = 1:length(reconEWMult)
-                    reconEWMultInd = find(imageEWSorted(2,:) == (reconEWUnique(reconEWMult(q))));
-                    stimEWAvg = mean(imageEWSorted(1,reconEWMultInd));
-                    imageEWNew(1,reconEWMult(q)) = double(stimEWAvg);
-                end
-
-                % Set the new matrix as the sorted matrix to determine if the
-                % while loop is satisfied.
-                imageEWSorted = double(imageEWNew);
-
+            uniqueEWRecon = unique(imageEWSorted(2,:));
+            uniqueEWStim = NaN*ones(size(uniqueEWRecon));
+            for uu = 1:length(uniqueEWRecon)
+                indexTemp = imageEWSorted(2,:) == uniqueEWRecon(uu);
+                uniqueEWStim(uu) = mean(imageEWSorted(1,indexTemp));
             end
 
-            stimForUYRecon(i) = interp1(double(imageEWSorted(2,:)), ...
-                double(imageEWSorted(1,:)), wavelengthUY, 'spline');
+            % While there are duplicate recon EW values
+            % while length(unique(imageEWSorted(2,:))) ~= length(imageEWSorted(2,:))
+            % 
+            %     % Initialize a holder variable
+            %     imageEWNew = [];
+            % 
+            %     % Given the nature of the simulations, different stimuli can sometimes lead
+            %     % to reconstructions with the same wavelength, which conflicts with the
+            %     % interpolation algorithm. Start by locating when recon values are repeated
+            %     reconEWUnique = unique(imageEWSorted(2,:));
+            %     reconEWCount = nonzeros(histcounts(imageEWSorted(2,:)))';
+            %     reconEWMult = find(reconEWCount ~= 1);
+            % 
+            %     % Carry over stim/recon information for unique reconEW values, converted to
+            %     % double for interpolation.
+            %     imageEWNew(1,:) = double(imageEWSorted(1,cumsum(reconEWCount)));
+            %     imageEWNew(2,:) = double(imageEWSorted(2,cumsum(reconEWCount)));
+            % 
+            %     % For each instance when a single reconEW maps onto different stim EW, take
+            %     % the average value of the stim wavelengths and map that onto the single
+            %     % recon EW, overriding the placeholder set above.
+            %     %
+            %     % This approach to use the average may warrant future consideration. Other
+            %     % options are to use the highest/first stim instance of a wavelength.
+            %     for q = 1:length(reconEWMult)
+            %         reconEWMultInd = find(imageEWSorted(2,:) == (reconEWUnique(reconEWMult(q))));
+            %         stimEWAvg = mean(imageEWSorted(1,reconEWMultInd));
+            %         imageEWNew(1,reconEWMult(q)) = double(stimEWAvg);
+            %     end
+            % 
+            %     % Set the new matrix as the sorted matrix to determine if the
+            %     % while loop is satisfied.
+            %     imageEWSorted = double(imageEWNew);
+            % 
+            % end
+
+            stimForUYRecon(i) = interp1(uniqueEWRecon,uniqueEWStim,wavelengthUY,'linear');
         end
 
         % Logistics check, to keep interpolation within bounds we will remove
