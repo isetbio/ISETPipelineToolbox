@@ -68,7 +68,6 @@ updatedMosaicConeInfo = propPatch(forwardRenderStructure.mosaicConeInfo);
 forwardRenderStructure.mosaicConeInfo = updatedMosaicConeInfo;
 renderStructure = forwardRenderStructure;
 save(fullfile(cnv.forwardRenderDirFull, cnv.renderName),'renderStructure','-v7.3')
-propInfoFile(cnv, renderStructure.mosaicConeInfo);
 
 % Specify variables depending on the viewing display
 switch (pr.viewingDisplayName)
@@ -197,6 +196,27 @@ if p.Results.plotMontages
     end
 end
 
+% Thoughts to add figure that shows the reconstruction montage for
+% just the stimulus region where each pixel is given the mean EW value
+% converted back into RGB. NOTE: This montage would not reflect the actual
+% reconstruction procedure, which should include non-uniformities based on
+% cone type as is currently. This is a loose approximation to better
+% compare against the trends seen in the quanitification plots. 
+% 
+% Start w/ copy-paste of above portion to cycle through desired info cell,
+% and for each chunk pull out the .meanEWFull stored in the struct. Would
+% then need to convert that EW to RGB, maybe by a cycling procedure where
+% begin with some combination of colors and adjust until minimize
+% distinction between color and the given EW. 
+% 
+% Then take those values and put them into a matrix corresponding to the
+% size of the stimulus region (technically can be any arbitrary size but
+% this helps w/ consistency) and plot as if that was the original recon
+% ouput. Should probably also scaleToMax here. Once again, note that this
+% should NOT be taken to mean the reconstruction procedure returns uniform
+% field reconstructions, this is an explictly set artifact. 
+
+
 %% Make Stim vs Recon Plot over each of the proportions
 %
 % Initialize some holder variables, plot colors, and legends
@@ -269,42 +289,7 @@ if p.Results.plotShiftUY
                 uniqueEWStim(uu) = mean(imageEWSorted(1,indexTemp));
             end
 
-            % While there are duplicate recon EW values
-            % while length(unique(imageEWSorted(2,:))) ~= length(imageEWSorted(2,:))
-            % 
-            %     % Initialize a holder variable
-            %     imageEWNew = [];
-            % 
-            %     % Given the nature of the simulations, different stimuli can sometimes lead
-            %     % to reconstructions with the same wavelength, which conflicts with the
-            %     % interpolation algorithm. Start by locating when recon values are repeated
-            %     reconEWUnique = unique(imageEWSorted(2,:));
-            %     reconEWCount = nonzeros(histcounts(imageEWSorted(2,:)))';
-            %     reconEWMult = find(reconEWCount ~= 1);
-            % 
-            %     % Carry over stim/recon information for unique reconEW values, converted to
-            %     % double for interpolation.
-            %     imageEWNew(1,:) = double(imageEWSorted(1,cumsum(reconEWCount)));
-            %     imageEWNew(2,:) = double(imageEWSorted(2,cumsum(reconEWCount)));
-            % 
-            %     % For each instance when a single reconEW maps onto different stim EW, take
-            %     % the average value of the stim wavelengths and map that onto the single
-            %     % recon EW, overriding the placeholder set above.
-            %     %
-            %     % This approach to use the average may warrant future consideration. Other
-            %     % options are to use the highest/first stim instance of a wavelength.
-            %     for q = 1:length(reconEWMult)
-            %         reconEWMultInd = find(imageEWSorted(2,:) == (reconEWUnique(reconEWMult(q))));
-            %         stimEWAvg = mean(imageEWSorted(1,reconEWMultInd));
-            %         imageEWNew(1,reconEWMult(q)) = double(stimEWAvg);
-            %     end
-            % 
-            %     % Set the new matrix as the sorted matrix to determine if the
-            %     % while loop is satisfied.
-            %     imageEWSorted = double(imageEWNew);
-            % 
-            % end
-
+            % Perform the actual interpolation
             stimForUYRecon(i) = interp1(uniqueEWRecon,uniqueEWStim,wavelengthUY,'linear');
         end
 
