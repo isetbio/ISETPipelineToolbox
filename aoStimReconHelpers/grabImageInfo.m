@@ -24,7 +24,7 @@ close all;
 
 %% Retrieve Recon Info
 %
-% Initiate directory names to descend levels for plotting.
+% Initiate directory names to descend levels for plotting.!!!!!!!!!!!!!!!!
 generalDir = fullfile(pr.aoReconDir, pr.versEditor, cnv.generalConditions, ...
     cnv.outputDirFirst, cnv.outputDirSecond, cnv.outputDirThird);
 generalSubDir = dir(generalDir);

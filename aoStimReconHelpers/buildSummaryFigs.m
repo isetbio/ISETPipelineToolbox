@@ -33,7 +33,8 @@ close all;
 
 %% Retrieve Recon Info
 %
-% Initiate directory names to descend levels for plotting.
+% Initiate directory names to descend levels for
+% plotting.!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 generalDir = fullfile(pr.aoReconDir, pr.versEditor, cnv.generalConditions, ...
     cnv.outputDirFirst);
 generalSubDir = dir(generalDir);
@@ -191,7 +192,7 @@ if p.Results.plotMontages
         set(gcf, 'Position', [1023 7 653 970]);
         sgtitle({sprintf('Summary Montage %s %s %0.1fArcmin', ...
             scaleString, zoomString, (60*pr.stimSizeDegs))}, 'FontSize', 25);
-        saveas(gcf, fullfile(cnv.outputDirSummaryFigs, ...
+        saveas(gcf, fullfile(cnv.outputSubdirSummaryFigs, ...
             sprintf('summaryMontage%s%s.tiff', scaleString, zoomString)),'tiff')
     end
 end
@@ -257,9 +258,9 @@ if p.Results.plotStimvRecon
 
     % Save output as image and eps file for easier formatting in Adobe
     % Illustrator
-    saveas(gcf, fullfile(cnv.outputDirSummaryFigs,...
+    saveas(gcf, fullfile(cnv.outputSubdirSummaryFigs,...
         sprintf('stimVsReconPlot.tiff')),'tiff');
-    saveas(gcf, fullfile(cnv.outputDirSummaryFigs,...
+    saveas(gcf, fullfile(cnv.outputSubdirSummaryFigs,...
         sprintf('stimVsReconPlot.eps')),'epsc');
 end
 
@@ -314,9 +315,9 @@ if p.Results.plotShiftUY
 
         % Save output as image and eps file for easier formatting in Adobe
         % Illustrator
-        saveas(gcf, fullfile(cnv.outputDirSummaryFigs,...
+        saveas(gcf, fullfile(cnv.outputSubdirSummaryFigs,...
             sprintf('shiftUYPlot%d.tiff', wavelengthUY)),'tiff');
-        saveas(gcf, fullfile(cnv.outputDirSummaryFigs,...
+        saveas(gcf, fullfile(cnv.outputSubdirSummaryFigs,...
             sprintf('shiftUYPlot%d.eps', wavelengthUY)),'epsc');
     end
 end
@@ -357,9 +358,9 @@ if p.Results.plotPropvRecon
 
     % Save output as image and eps file for easier formatting in Adobe
     % Illustrator
-    saveas(gcf, fullfile(cnv.outputDirSummaryFigs,...
+    saveas(gcf, fullfile(cnv.outputSubdirSummaryFigs,...
         sprintf('propVsReconPlot.tiff')),'tiff');
-    saveas(gcf, fullfile(cnv.outputDirSummaryFigs,...
+    saveas(gcf, fullfile(cnv.outputSubdirSummaryFigs,...
         sprintf('propVsReconPlot.eps')),'epsc');
 end
 end
