@@ -28,15 +28,10 @@ p.addParameter('plotShiftUY', true, @islogical);
 p.addParameter('plotPropvRecon', true, @islogical);
 parse(p, varargin{:});
 
+%% Close any open figures
 close all;
 
-%% Retrieve Recon Info
-%
-% Initiate directory names to descend levels for
-% plotting.!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-generalDir = fullfile(pr.aoReconDir, pr.versEditor, cnv.generalConditions, ...
-    cnv.outputDirFirst);
-generalSubDir = dir(generalDir);
+%% Allocate space
 imageInfo = cell(1,numStim);
 
 % Load in the pertinent cone mosaic, note that by this procedure we
@@ -49,11 +44,18 @@ else
     clear forwardRenderStructure;
     load(fullfile(cnv.forwardRenderDirFull, cnv.renderName),'renderStructure');
     forwardRenderStructure = renderStructure; clear renderStructure;
+
+    % At this point, this checks for consistency of what we read and what
+    % we thought we read.
     grabRenderStruct(forwardRenderStructure, pr.eccXDegs, pr.eccYDegs, cnv.fieldSizeDegs, ...
         pr.nPixels, cnv.forwardPupilDiamMM, pr.forwardAORender, pr.forwardDefocusDiopters);
+
+    % Get cone mosaic out of stored render structure.
     theConeMosaic = forwardRenderStructure.theConeMosaic;
 end
 
+% CONSIDER DELETING SINCE EVERYTHING WE ARE USING NOW HAS BEEN UPDATED.
+%
 % Temporary patch to account for a previous mistake in how the cone
 % proportion information was being stored. Doubles back to save the correct
 % information, replace it in the render structure, and save a jpeg for
@@ -102,7 +104,6 @@ viewingDisplay = displaySet(viewingDisplay,'spd primaries', ...
     displayGet(viewingDisplay,'spd primaries')*viewingDisplayScaleFactor);
 
 %% Make the Summary Montages for the reconstructions
-
 if p.Results.plotMontages
 
     % An updated patch that allows cycling through the following code to
