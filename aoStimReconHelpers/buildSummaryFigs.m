@@ -26,7 +26,6 @@ p.addParameter('plotMontages', true, @islogical);
 p.addParameter('plotStimvRecon', true, @islogical);
 p.addParameter('plotShiftUY', true, @islogical);
 p.addParameter('plotPropvRecon', true, @islogical);
-
 parse(p, varargin{:});
 
 close all;
