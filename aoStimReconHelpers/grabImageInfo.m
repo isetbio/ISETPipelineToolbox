@@ -20,6 +20,7 @@ p.addParameter('wls', (400:1:700)', @isnumeric);
 p.addParameter('zoomToStim', false, @islogical);
 parse(p, varargin{:});
 
+%% Close any open figures
 close all;
 
 %% Retrieve Recon Info
