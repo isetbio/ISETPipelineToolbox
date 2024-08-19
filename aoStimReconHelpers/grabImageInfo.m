@@ -20,14 +20,13 @@ p.addParameter('wls', (400:1:700)', @isnumeric);
 p.addParameter('zoomToStim', false, @islogical);
 parse(p, varargin{:});
 
+%% Close any open figures
 close all;
 
 %% Retrieve Recon Info
 %
 % Initiate directory names to descend levels for plotting.
-generalDir = fullfile(pr.aoReconDir, pr.versEditor, cnv.generalConditions, ...
-    cnv.outputDirFirst, cnv.outputDirSecond, cnv.outputDirThird);
-generalSubDir = dir(generalDir);
+outputSubdirStimColors = dir(cnv.outputSubdirImageInfo);
 stimSummary = cell(1,numStim);
 reconSummary = cell(1,numStim);
 infoCounter = 1;
@@ -36,11 +35,11 @@ infoCounter = 1;
 % in starting position when going down the loop. Another approach to
 % consider would be to ID the subdirectories with names that match the
 % desired format (i.e. stimColor) but this seems to do the job.
-if isempty(generalSubDir)
-    error(['No output information stored at desired directory: ', generalDir])
+if isempty(outputSubdirStimColors)
+    error(['No output information stored at desired directory: ', cnv.outputSubdirImageInfo])
 end
 
-subDirNames = extractfield(generalSubDir, 'name');
+subDirNames = extractfield(outputSubdirStimColors, 'name');
 subDirNamesFullString = cell2mat(subDirNames);
 if contains(subDirNamesFullString, '.DS_Store')
     startDirIndex = 4;
@@ -53,12 +52,12 @@ end
 if ~p.Results.figReconRows
     
     % For each of the contained subdirectories
-    for i = startDirIndex:length(generalSubDir)
-        if generalSubDir(i).isdir
+    for i = startDirIndex:length(outputSubdirStimColors)
+        if outputSubdirStimColors(i).isdir
             
             % Load the ouptut file to get the stim and recon images, store
             % this information for future use
-            load(fullfile(generalDir, generalSubDir(i).name, ...
+            load(fullfile(cnv.outputSubdirImageInfo, outputSubdirStimColors(i).name, ...
                 'xRunOutput.mat'), "stimInfo", "reconInfo", ...
                 "idxXRange");
             
@@ -138,12 +137,12 @@ else
     yBounds(2,:) = [yBounds(1)-centerWidth, yBounds(2)+centerWidth];
     
     % For each of the contained subdirectories
-    for i = startDirIndex:length(generalSubDir)
-        if generalSubDir(i).isdir
+    for i = startDirIndex:length(outputSubdirStimColors)
+        if outputSubdirStimColors(i).isdir
             
             % Load the ouptut file to get the stim and recon images, store
             % this information for future use
-            load(fullfile(generalDir, generalSubDir(i).name, ...
+            load(fullfile(cnv.outputSubdirImageInfo, outputSubdirStimColors(i).name, ...
                 'xRunOutput.mat'), "stimInfo", "reconInfo", ...
                 "idxXRange");
             
@@ -270,7 +269,7 @@ else
         sgtitle({sprintf('Recons %0.2fL %s %s %0.1fArcmin', ...
             pr.focalPropL, scaleString, zoomString, (60*pr.stimSizeDegs))}, ...
             'FontSize', 30);
-        saveas(gcf, fullfile(generalDir, ...
+        saveas(gcf, fullfile(cnv.outputSubdirImageInfo, ...
             sprintf('summaryFig%s%s.tiff', scaleString, zoomString)),'tiff')
     end
 end

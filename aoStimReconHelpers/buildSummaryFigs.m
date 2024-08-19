@@ -26,17 +26,12 @@ p.addParameter('plotMontages', true, @islogical);
 p.addParameter('plotStimvRecon', true, @islogical);
 p.addParameter('plotShiftUY', true, @islogical);
 p.addParameter('plotPropvRecon', true, @islogical);
-
 parse(p, varargin{:});
 
+%% Close any open figures
 close all;
 
-%% Retrieve Recon Info
-%
-% Initiate directory names to descend levels for plotting.
-generalDir = fullfile(pr.aoReconDir, pr.versEditor, cnv.generalConditions, ...
-    cnv.outputDirFirst);
-generalSubDir = dir(generalDir);
+%% Allocate space
 imageInfo = cell(1,numStim);
 
 % Load in the pertinent cone mosaic, note that by this procedure we
@@ -49,11 +44,18 @@ else
     clear forwardRenderStructure;
     load(fullfile(cnv.forwardRenderDirFull, cnv.renderName),'renderStructure');
     forwardRenderStructure = renderStructure; clear renderStructure;
+
+    % At this point, this checks for consistency of what we read and what
+    % we thought we read.
     grabRenderStruct(forwardRenderStructure, pr.eccXDegs, pr.eccYDegs, cnv.fieldSizeDegs, ...
         pr.nPixels, cnv.forwardPupilDiamMM, pr.forwardAORender, pr.forwardDefocusDiopters);
+
+    % Get cone mosaic out of stored render structure.
     theConeMosaic = forwardRenderStructure.theConeMosaic;
 end
 
+% CONSIDER DELETING SINCE EVERYTHING WE ARE USING NOW HAS BEEN UPDATED.
+%
 % Temporary patch to account for a previous mistake in how the cone
 % proportion information was being stored. Doubles back to save the correct
 % information, replace it in the render structure, and save a jpeg for
@@ -68,7 +70,6 @@ updatedMosaicConeInfo = propPatch(forwardRenderStructure.mosaicConeInfo);
 forwardRenderStructure.mosaicConeInfo = updatedMosaicConeInfo;
 renderStructure = forwardRenderStructure;
 save(fullfile(cnv.forwardRenderDirFull, cnv.renderName),'renderStructure','-v7.3')
-propInfoFile(cnv, renderStructure.mosaicConeInfo);
 
 % Specify variables depending on the viewing display
 switch (pr.viewingDisplayName)
@@ -103,7 +104,6 @@ viewingDisplay = displaySet(viewingDisplay,'spd primaries', ...
     displayGet(viewingDisplay,'spd primaries')*viewingDisplayScaleFactor);
 
 %% Make the Summary Montages for the reconstructions
-
 if p.Results.plotMontages
 
     % An updated patch that allows cycling through the following code to
@@ -192,10 +192,31 @@ if p.Results.plotMontages
         set(gcf, 'Position', [1023 7 653 970]);
         sgtitle({sprintf('Summary Montage %s %s %0.1fArcmin', ...
             scaleString, zoomString, (60*pr.stimSizeDegs))}, 'FontSize', 25);
-        saveas(gcf, fullfile(cnv.outputDirSummaryFigs, ...
+        saveas(gcf, fullfile(cnv.outputSubdirSummaryFigs, ...
             sprintf('summaryMontage%s%s.tiff', scaleString, zoomString)),'tiff')
     end
 end
+
+% Thoughts to add figure that shows the reconstruction montage for
+% just the stimulus region where each pixel is given the mean EW value
+% converted back into RGB. NOTE: This montage would not reflect the actual
+% reconstruction procedure, which should include non-uniformities based on
+% cone type as is currently. This is a loose approximation to better
+% compare against the trends seen in the quanitification plots. 
+% 
+% Start w/ copy-paste of above portion to cycle through desired info cell,
+% and for each chunk pull out the .meanEWFull stored in the struct. Would
+% then need to convert that EW to RGB, maybe by a cycling procedure where
+% begin with some combination of colors and adjust until minimize
+% distinction between color and the given EW. 
+% 
+% Then take those values and put them into a matrix corresponding to the
+% size of the stimulus region (technically can be any arbitrary size but
+% this helps w/ consistency) and plot as if that was the original recon
+% ouput. Should probably also scaleToMax here. Once again, note that this
+% should NOT be taken to mean the reconstruction procedure returns uniform
+% field reconstructions, this is an explictly set artifact. 
+
 
 %% Make Stim vs Recon Plot over each of the proportions
 %
@@ -226,7 +247,7 @@ if p.Results.plotStimvRecon
 
     xlabel('Stim Wavelength', 'FontSize', 40);
     ylabel('Recon Wavelength', 'FontSize', 40);
-    title(sprintf('Stim/Recon Comparison: %d arcmin', (pr.stimSizeDegs * 60)), 'FontSize', 26)
+    title(sprintf('Stim/Recon Comparison: %0.1f arcmin', (pr.stimSizeDegs * 60)), 'FontSize', 26)
     xlim([540 660])
     ylim([540 660])
     set(gcf, 'Position', [119   321   661   518]);
@@ -237,9 +258,9 @@ if p.Results.plotStimvRecon
 
     % Save output as image and eps file for easier formatting in Adobe
     % Illustrator
-    saveas(gcf, fullfile(cnv.outputDirSummaryFigs,...
+    saveas(gcf, fullfile(cnv.outputSubdirSummaryFigs,...
         sprintf('stimVsReconPlot.tiff')),'tiff');
-    saveas(gcf, fullfile(cnv.outputDirSummaryFigs,...
+    saveas(gcf, fullfile(cnv.outputSubdirSummaryFigs,...
         sprintf('stimVsReconPlot.eps')),'epsc');
 end
 
@@ -247,7 +268,6 @@ end
 %
 % Baseline variables
 stimForUYRecon = ones(1, numProp);
-
 if p.Results.plotShiftUY
 
     for q = 1:length(p.Results.wavelengthUY)
@@ -258,48 +278,20 @@ if p.Results.plotShiftUY
         for i = 1:size(fullReconSummary, 1)
 
             % Capture stimulus and recon EW information in one matrix and sort
-            % in ascending order
-            imageEW = [stimSummaryMat(1,:).meanEWFull; reconSummaryMat(i,:).meanEWFull];
+            % in ascending order.  Then make sure we have a one-to-one
+            % mapping between recon and stim EW by averaging across cases
+            % where there are multiple matching recon EW values.
+            imageEW = double([stimSummaryMat(1,:).meanEWFull; reconSummaryMat(i,:).meanEWFull]);
             imageEWSorted = sortrows(imageEW', 2)';
-
-            % While there are duplicate recon EW values
-            while length(unique(imageEWSorted(2,:))) ~= length(imageEWSorted(2,:))
-
-                % Initialize a holder variable
-                imageEWNew = [];
-
-                % Given the nature of the simulations, different stimuli can sometimes lead
-                % to reconstructions with the same wavelength, which conflicts with the
-                % interpolation algorithm. Start by locating when recon values are repeated
-                reconEWUnique = unique(imageEWSorted(2,:));
-                reconEWCount = nonzeros(histcounts(imageEWSorted(2,:)))';
-                reconEWMult = find(reconEWCount ~= 1);
-
-                % Carry over stim/recon information for unique reconEW values, converted to
-                % double for interpolation.
-                imageEWNew(1,:) = double(imageEWSorted(1,cumsum(reconEWCount)));
-                imageEWNew(2,:) = double(imageEWSorted(2,cumsum(reconEWCount)));
-
-                % For each instance when a single reconEW maps onto different stim EW, take
-                % the average value of the stim wavelengths and map that onto the single
-                % recon EW, overriding the placeholder set above.
-                %
-                % This approach to use the average may warrant future consideration. Other
-                % options are to use the highest/first stim instance of a wavelength.
-                for q = 1:length(reconEWMult)
-                    reconEWMultInd = find(imageEWSorted(2,:) == (reconEWUnique(reconEWMult(q))));
-                    stimEWAvg = mean(imageEWSorted(1,reconEWMultInd));
-                    imageEWNew(1,reconEWMult(q)) = double(stimEWAvg);
-                end
-
-                % Set the new matrix as the sorted matrix to determine if the
-                % while loop is satisfied.
-                imageEWSorted = double(imageEWNew);
-
+            uniqueEWRecon = unique(imageEWSorted(2,:));
+            uniqueEWStim = NaN*ones(size(uniqueEWRecon));
+            for uu = 1:length(uniqueEWRecon)
+                indexTemp = imageEWSorted(2,:) == uniqueEWRecon(uu);
+                uniqueEWStim(uu) = mean(imageEWSorted(1,indexTemp));
             end
 
-            stimForUYRecon(i) = interp1(double(imageEWSorted(2,:)), ...
-                double(imageEWSorted(1,:)), wavelengthUY, 'spline');
+            % Perform the actual interpolation
+            stimForUYRecon(i) = interp1(uniqueEWRecon,uniqueEWStim,wavelengthUY,'linear');
         end
 
         % Logistics check, to keep interpolation within bounds we will remove
@@ -313,7 +305,7 @@ if p.Results.plotShiftUY
 
         xlabel('Proportion L', 'FontSize', 40);
         ylabel('Stim Wavelength', 'FontSize', 40);
-        title(sprintf('Shift in UY: %d nm %d arcmin', wavelengthUY,  ...
+        title(sprintf('Shift in UY: %d nm %0.1f arcmin', wavelengthUY,  ...
             (pr.stimSizeDegs * 60)), 'FontSize', 26)
         xlim([0 1])
         ylim([540 660])
@@ -323,9 +315,9 @@ if p.Results.plotShiftUY
 
         % Save output as image and eps file for easier formatting in Adobe
         % Illustrator
-        saveas(gcf, fullfile(cnv.outputDirSummaryFigs,...
+        saveas(gcf, fullfile(cnv.outputSubdirSummaryFigs,...
             sprintf('shiftUYPlot%d.tiff', wavelengthUY)),'tiff');
-        saveas(gcf, fullfile(cnv.outputDirSummaryFigs,...
+        saveas(gcf, fullfile(cnv.outputSubdirSummaryFigs,...
             sprintf('shiftUYPlot%d.eps', wavelengthUY)),'epsc');
     end
 end
@@ -355,7 +347,7 @@ if p.Results.plotPropvRecon
 
     xlabel('Proportion L', 'FontSize', 40);
     ylabel('Recon Wavelength', 'FontSize', 40);
-    title(sprintf('Prop/Recon Comparison: %d arcmin', (pr.stimSizeDegs * 60)), 'FontSize', 26)
+    title(sprintf('Prop/Recon Comparison: %0.1f arcmin', (pr.stimSizeDegs * 60)), 'FontSize', 26)
     xlim([0 1])
     ylim([540 680])
     set(gcf, 'Position', [119   321   661   518]);
@@ -366,9 +358,9 @@ if p.Results.plotPropvRecon
 
     % Save output as image and eps file for easier formatting in Adobe
     % Illustrator
-    saveas(gcf, fullfile(cnv.outputDirSummaryFigs,...
+    saveas(gcf, fullfile(cnv.outputSubdirSummaryFigs,...
         sprintf('propVsReconPlot.tiff')),'tiff');
-    saveas(gcf, fullfile(cnv.outputDirSummaryFigs,...
+    saveas(gcf, fullfile(cnv.outputSubdirSummaryFigs,...
         sprintf('propVsReconPlot.eps')),'epsc');
 end
 end

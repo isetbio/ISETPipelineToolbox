@@ -131,7 +131,7 @@ if isodd(length(idxXRange))
     idxXRangeCenter = idxXRange(centerPoint - centerSpread: centerPoint + centerSpread);
 else
     centerPoint = ceil(length(idxXRange)/2);
-    centerSpread = floor(length(idxXRange) / 4);stimEWFormer
+    centerSpread = floor(length(idxXRange) / 4); %stimEWFormer
     idxXRangeCenter = idxXRange(centerPoint - centerSpread + 1: centerPoint + centerSpread);
 end
 

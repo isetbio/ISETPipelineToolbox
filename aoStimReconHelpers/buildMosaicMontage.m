@@ -76,7 +76,8 @@ if pr.useCustomMosaic
 
                     [theConeMosaic, mosaicConeInfo] = setConeProportions(pr.focalRegionList(j), ...
                         pr.focalPropLList(k), pr.focalVariantList(h), theConeMosaic, pr.eccXDegs, pr.eccYDegs, ...
-                        pr.stimSizeDegsList(i), pr.fieldSizeMinutes, pr.regionVariant, pr.propL, pr.propS);
+                        pr.stimSizeDegsList(i), pr.fieldSizeMinutes, pr.regionVariant, pr.propL, pr.propS, ...
+                        pr.annulusWidthArc);
 
                     rowPlace = j + (length(pr.stimSizeDegsList) * (i - 1));
                     allConeMosaics{rowPlace,k} = theConeMosaic;
