@@ -207,27 +207,6 @@ classdef ConeResponseCmosaic < ConeResponse
                 axis square;
             end
         end
-        
-        % Render matrix version where each rgb channel of monitor
-        % representation has been scaled by the corresponding entry
-        % of scaleVector. Used to tweak monitor scaling without needing
-        % to recompute all of the nice render matrices we may already have.
-        function renderMtx = scaleRenderMtx(this, renderMtx, scaleVector, varargin)
-
-            [m,n] = size(renderMtx);
-            nPrimaries = length(scaleVector);
-            nPixels = n/nPrimaries;
-            if (nPixels ~= floor(nPixels))
-                error('Logic error recreating number of pixels from render matrix');
-            end
-
-            for jj = 1:nPixels
-                for pp = 1:nPrimaries
-                   renderMtx(:,jj+(pp-1)*nPixels) = renderMtx(:,jj+(pp-1)*nPixels)*scaleFactor(pp)
-                end
-            end
-
-        end
     end
 end
 
