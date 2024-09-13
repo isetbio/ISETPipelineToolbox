@@ -91,7 +91,6 @@ else
     renderStructure.defocusDiopters = st.defocusDiopters;
     renderStructure.mosaicConeInfo = mosaicConeInfo;
 
-
     % Save it to the output location
     save(fullfile(st.renderDirFull, cnv.renderName),'renderStructure','-v7.3');
 
