@@ -6,17 +6,7 @@ function theDisplay = ScaleDisplayPrimaries(theDisplay, scaleVector, varargin)
 %
 % See also ScaleRenderMatrix
 
-[~,nCols] = size(renderMtx);
-nPrimaries = length(scaleVector);
-nPixels = nCols/nPrimaries;
-if (nPixels ~= floor(nPixels))
-    error('Logic error recreating number of pixels from render matrix');
-end
-
-for jj = 1:nPixels
-    for pp = 1:nPrimaries
-        renderMtx(:,jj+(pp-1)*nPixels) = renderMtx(:,jj+(pp-1)*nPixels)*scaleFactor(pp);
-    end
-end
+forwardPrimaries = displayGet(theDisplay,'spd primaries')*diag(scaleVector);
+theDisplay = displaySet(theDisplay,'spd primaries',forwardPrimaries);
 
 end

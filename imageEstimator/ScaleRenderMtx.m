@@ -3,6 +3,8 @@ function renderMtx = ScaleRenderMtx(renderMtx, scaleVector, varargin)
 % representation has been scaled by the corresponding entry
 % of scaleVector. Used to tweak monitor scaling without needing
 % to recompute all of the nice render matrices we may already have.
+%
+% See also ScaleDisplayPrimaries
 
 [~,nCols] = size(renderMtx);
 nPrimaries = length(scaleVector);
