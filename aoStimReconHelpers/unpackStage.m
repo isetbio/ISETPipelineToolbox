@@ -25,7 +25,7 @@ switch stage
         st.subjectID = pr.forwardSubjectID;
         st.zernikeDataBase = pr.forwardZernikeDataBase;
         st.renderDirFull = cnv.forwardRenderDirFull;
-        st.montageDirFull = cnv.forwardMontageDirFull;
+%         st.montageDirFull = cnv.forwardMontageDirFull;
     case "recon"
         st.pupilDiamMM = cnv.reconPupilDiamMM;
         st.aoRender = pr.reconAORender;
@@ -36,7 +36,7 @@ switch stage
         st.subjectID = pr.reconSubjectID;
         st.zernikeDataBase = pr.reconZernikeDataBase;
         st.renderDirFull = cnv.reconRenderDirFull;
-        st.montageDirFull = cnv.reconMontageDirFull;
+%         st.montageDirFull = cnv.reconMontageDirFull;
     otherwise
         error('Unrecognized stage')
 end
