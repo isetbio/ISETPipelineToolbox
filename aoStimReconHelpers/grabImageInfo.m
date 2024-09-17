@@ -23,7 +23,7 @@ parse(p, varargin{:});
 %% Close any open figures
 close all;
 
-%% Retrieve Recon Info
+%% Retrieve recon info
 %
 % Initiate directory names to descend levels for plotting.
 outputSubdirStimColors = dir(cnv.outputSubdirImageInfo);
