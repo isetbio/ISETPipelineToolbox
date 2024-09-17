@@ -26,7 +26,8 @@ close all;
 %% Retrieve recon info
 %
 % Initiate directory names to descend levels for plotting.
-outputSubdirStimColors = dir(cnv.outputSubdirImageInfo);
+tempOutputDir = fileparts(cnv.outputDirFull);
+outputSubdirStimColors = dir(tempOutputDir);
 stimSummary = cell(1,numStim);
 reconSummary = cell(1,numStim);
 infoCounter = 1;
@@ -57,7 +58,7 @@ if ~p.Results.figReconRows
             
             % Load the ouptut file to get the stim and recon images, store
             % this information for future use
-            load(fullfile(cnv.outputSubdirImageInfo, outputSubdirStimColors(i).name, ...
+            load(fullfile(tempOutputDir, outputSubdirStimColors(i).name, ...
                 'xRunOutput.mat'), "stimInfo", "reconInfo", ...
                 "idxXRange");
             
