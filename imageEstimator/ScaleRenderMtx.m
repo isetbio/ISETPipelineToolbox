@@ -15,7 +15,7 @@ end
 
 for jj = 1:nPixels
     for pp = 1:nPrimaries
-        renderMtx(:,jj+(pp-1)*nPixels) = renderMtx(:,jj+(pp-1)*nPixels)*scaleFactor(pp);
+        renderMtx(:,jj+(pp-1)*nPixels) = renderMtx(:,jj+(pp-1)*nPixels)*scaleVector(pp);
     end
 end
 
