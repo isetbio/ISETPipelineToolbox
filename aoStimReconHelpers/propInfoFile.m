@@ -29,7 +29,6 @@ if (~exist(filename,'file'))
             pr.nPixels, cnv.forwardPupilDiamMM, pr.forwardAORender, pr.forwardDefocusDiopters);
     end
 
-
     % Reassign variable name for convenience
     mosaicConeInfo = forwardRenderStructure.mosaicConeInfo;
 
