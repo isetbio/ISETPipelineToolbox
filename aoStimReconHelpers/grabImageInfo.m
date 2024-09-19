@@ -26,7 +26,16 @@ close all;
 %% Retrieve recon info
 %
 % Initiate directory names to descend levels for plotting.
+%
+% Here the directory we want to start in is one level up from
+% what came in in cnv.outDirFull.  We use fileparts to move
+% back up the tree one step.  This is not the cleanest of
+% solutions, but does seem to work at present.  Might need
+% some generalization.
 tempOutputDir = fileparts(cnv.outputDirFull);
+
+% Do a dir() call to get the directories with all of the
+% stimulus conditions in it.
 outputSubdirStimColors = dir(tempOutputDir);
 stimSummary = cell(1,numStim);
 reconSummary = cell(1,numStim);
@@ -40,6 +49,11 @@ if isempty(outputSubdirStimColors)
     error(['No output information stored at desired directory: ', cnv.outputSubdirImageInfo])
 end
 
+% We have to skip ".", "..", and maybe ".DS_Store".
+%
+% One could imagine needing to do some additional filtering
+% here, if some other directories get written in at the
+% stimulus variation level.
 subDirNames = extractfield(outputSubdirStimColors, 'name');
 subDirNamesFullString = cell2mat(subDirNames);
 if contains(subDirNamesFullString, '.DS_Store')
