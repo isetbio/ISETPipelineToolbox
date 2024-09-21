@@ -54,6 +54,7 @@ else
     theConeMosaic = forwardRenderStructure.theConeMosaic;
 end
 
+%% Commented this out since we think everything is now correct.
 % CONSIDER DELETING SINCE EVERYTHING WE ARE USING NOW HAS BEEN UPDATED.
 %
 % Temporary patch to account for a previous mistake in how the cone
@@ -66,10 +67,10 @@ end
 % the assumptions that the core underlying optics (which are all we care
 % about) are held constant across the other mosaics. So essentially this
 % patch only hits one of the render matrices. 
-updatedMosaicConeInfo = propPatch(forwardRenderStructure.mosaicConeInfo);
-forwardRenderStructure.mosaicConeInfo = updatedMosaicConeInfo;
-renderStructure = forwardRenderStructure;
-save(fullfile(cnv.forwardRenderDirFull, cnv.renderName),'renderStructure','-v7.3')
+% updatedMosaicConeInfo = propPatch(forwardRenderStructure.mosaicConeInfo);
+% forwardRenderStructure.mosaicConeInfo = updatedMosaicConeInfo;
+% renderStructure = forwardRenderStructure;
+% save(fullfile(cnv.forwardRenderDirFull, cnv.renderName),'renderStructure','-v7.3')
 
 % Specify variables depending on the viewing display
 switch (pr.viewingDisplayName)
@@ -132,9 +133,7 @@ if p.Results.plotMontages
         fullSummary = [stimSummary; fullReconSummary];
         for j = 1:size(fullSummary, 2)
             for i = 1:size(fullSummary, 1)
-
                 theAxes = nexttile(tileIndices(tileIndexCounter));
-
                 if scaleToMax
                     scaleString = "Scaled";
                     meanLuminanceCdPerM2 = [];
@@ -161,7 +160,6 @@ if p.Results.plotMontages
                         zoomString = "Full";
                         imshow(imageRGBScaled)
                     end
-
                 else
                     scaleString = "Unscaled";
                     if zoomToStim
@@ -173,7 +171,6 @@ if p.Results.plotMontages
                         zoomString = "Full";
                         imshow(fullSummary{i,j}.imageRGBAcrossDisplays)
                     end
-
                 end
 
                 if j == 1 & i == 1
