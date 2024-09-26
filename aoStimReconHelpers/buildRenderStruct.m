@@ -27,6 +27,11 @@ st = unpackStage(pr, cnv, stage);
 [theConeMosaic, theDisplay] = buildBaseMosaic(pr, cnv, st, useDisplay);
 
 %% Build render matrix from base mosaic
+%
+% This first branch is when you are simply going to use the mosaic
+% that comes back from the call just above, and not go into different
+% regions and adjust cone proportions.  This may be useful when you are
+% just doing vanilla reconstructions, for example.
 if ~pr.useCustomMosaic
     % Set filler mosaicConeInfo variable for now, should expand it to
     % actually return values as if mosaic was global
