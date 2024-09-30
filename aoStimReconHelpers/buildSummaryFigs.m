@@ -39,7 +39,7 @@ imageInfo = cell(1,numStim);
 % assumption that these two are similar in all meaningful ways. Need to
 % reexamine this routine if that assumption fails.
 if (~exist(fullfile(cnv.forwardRenderDirFull, cnv.renderName),'file'))
-    error('Forward render strucure not cached')
+    error('Forward render structure not cached')
 else
     clear forwardRenderStructure;
     load(fullfile(cnv.forwardRenderDirFull, cnv.renderName),'renderStructure');
