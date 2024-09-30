@@ -189,6 +189,9 @@ if p.Results.plotMontages
         set(gcf, 'Position', [1023 7 653 970]);
         sgtitle({sprintf('Summary Montage %s %s %0.1fArcmin', ...
             scaleString, zoomString, (60*pr.stimSizeDegs))}, 'FontSize', 25);
+        if (~exist(cnv.outputSubdirSummaryFigs,'dir'))
+            mkdir(cnv.outputSubdirSummaryFigs);
+        end
         saveas(gcf, fullfile(cnv.outputSubdirSummaryFigs, ...
             sprintf('summaryMontage%s%s.tiff', scaleString, zoomString)),'tiff')
     end
