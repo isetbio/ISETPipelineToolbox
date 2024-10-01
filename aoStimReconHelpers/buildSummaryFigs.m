@@ -319,6 +319,8 @@ if p.Results.plotShiftUY
             sprintf('shiftUYPlot%d.tiff', wavelengthUY)),'tiff');
         saveas(gcf, fullfile(cnv.outputSubdirSummaryFigs,...
             sprintf('shiftUYPlot%d.eps', wavelengthUY)),'epsc');
+        save(fullfile(cnv.outputSubdirSummaryFigs,...
+            sprintf('shiftUY%d.txt', wavelengthUY)),'plotValsUY','-ascii');
     end
 end
 
