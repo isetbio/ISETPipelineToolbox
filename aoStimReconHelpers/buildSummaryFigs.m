@@ -291,8 +291,15 @@ if p.Results.plotShiftUY
                 uniqueEWStim(uu) = mean(imageEWSorted(1,indexTemp));
             end
 
-            % Perform the actual interpolation
-            stimForUYRecon(i) = interp1(uniqueEWRecon,uniqueEWStim,wavelengthUY,'linear');
+            % Perform the actual interpolation.  Need to handle cases where
+            % interp1 would crash for lack of enough data.
+            if (length(uniqueEWRecon) == 1 & abs(uniqueEWRecon - wavelengthUY) < 1)
+                stimForUYRecon(i) = uniqueEWStim(1);
+            elseif (length(uniqueEWRecon) == 1)
+                stimForUYRecon(i) = NaN;
+            else
+                stimForUYRecon(i) = interp1(uniqueEWRecon,uniqueEWStim,wavelengthUY,'linear');
+            end
         end
 
         % Logistics check, to keep interpolation within bounds we will remove
