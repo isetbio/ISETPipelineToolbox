@@ -268,6 +268,7 @@ end
 %
 % Baseline variables
 stimForUYRecon = ones(1, numProp);
+saveUYData = [];
 if p.Results.plotShiftUY
 
     for q = 1:length(p.Results.wavelengthUY)
@@ -313,15 +314,19 @@ if p.Results.plotShiftUY
         box off
         axis square
 
+        % Collect up data to save
+        saveUYData = [saveUYData ; 60*pr.stimSizeDegs*ones(size(plotValsUY(1,:))) ; wavelengthUY*ones(size(plotValsUY(1,:))); plotValsUY(1,:) ; plotValsUY(2,:)];
+
         % Save output as image and eps file for easier formatting in Adobe
         % Illustrator
         saveas(gcf, fullfile(cnv.outputSubdirSummaryFigs,...
             sprintf('shiftUYPlot%d.tiff', wavelengthUY)),'tiff');
         saveas(gcf, fullfile(cnv.outputSubdirSummaryFigs,...
             sprintf('shiftUYPlot%d.eps', wavelengthUY)),'epsc');
-        save(fullfile(cnv.outputSubdirSummaryFigs,...
-            sprintf('shiftUY%d.txt', wavelengthUY)),'plotValsUY','-ascii');
+       
     end
+
+    save(fullfile(cnv.outputSubdirSummaryFigs,'shiftUY.txt'),'saveUYData','-ascii');
 end
 
 %% Make Prop vs Recon Plot over each of the stimuli
